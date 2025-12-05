@@ -1,7 +1,8 @@
 .idea/
 
 # dependencies
-/node_modules
+site-web/node_modules/
+site-web/.next/
 /.pnp
 .pnp.*
 .yarn/*
@@ -14,7 +15,6 @@
 /coverage
 
 # next.js
-/.next/
 /out/
 
 # production
