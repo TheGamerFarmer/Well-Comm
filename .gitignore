@@ -1,8 +1,8 @@
 .idea/
 
 # dependencies
-site-web/node_modules/
-site-web/.next/
+node_modules/
+.next/
 /.pnp
 .pnp.*
 .yarn/*
