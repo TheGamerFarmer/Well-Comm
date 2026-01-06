@@ -1,13 +1,14 @@
 package fr.wellcomm.wellcomm.entities;
 
+import fr.wellcomm.wellcomm.domain.Agenda;
+import fr.wellcomm.wellcomm.domain.Historique;
+import fr.wellcomm.wellcomm.domain.Resume;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -31,29 +32,14 @@ public class Dossier {
     @Transient
     private Historique historique;
     @Transient
-    private  Agenda agenda;
+    private Agenda agenda;
     @Transient
     private Resume resume;
 
     public Dossier(String nom) {
         this.nom = nom;
-    }
-
-    public void creerFil(String titre, Categorie categorie) {
-        Fil fil = new Fil(titre, new Date(), categorie);
-        fils.add(fil);
-    }
-
-    public void archiverFil(Fil fil) {
-        fils.remove(fil);
-        historique.historique.add(fil);
-    }
-
-    public void addCompteParDossier(CompteParDossier compte) {
-        comptesParDossier.add(compte);
-    }
-
-    public void supprimerCompteParDossier(CompteParDossier compte) {
-        comptesParDossier.remove(compte);
+        this.historique = new Historique();
+        this.agenda = new Agenda();
+        this.resume = new Resume();
     }
 }

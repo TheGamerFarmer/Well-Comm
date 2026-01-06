@@ -1,5 +1,6 @@
-package fr.wellcomm.wellcomm.entities;
+package fr.wellcomm.wellcomm.domain;
 
+import fr.wellcomm.wellcomm.entities.Evenement;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

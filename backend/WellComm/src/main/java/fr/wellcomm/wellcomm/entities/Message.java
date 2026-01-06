@@ -40,7 +40,4 @@ public class Message {
         this.fil = fil;
     }
 
-    public void modifierContenu(String contenu) {
-        this.contenu = contenu;
-    }
 }

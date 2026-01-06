@@ -1,4 +1,4 @@
-package fr.wellcomm.wellcomm.entities;
+package fr.wellcomm.wellcomm.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

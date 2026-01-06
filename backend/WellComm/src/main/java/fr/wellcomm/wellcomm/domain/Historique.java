@@ -1,9 +1,9 @@
-package fr.wellcomm.wellcomm.entities;
+package fr.wellcomm.wellcomm.domain;
 
+import fr.wellcomm.wellcomm.entities.Fil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
@@ -12,6 +12,10 @@ import java.util.ArrayList;
 @NoArgsConstructor
 public class Historique {
     ArrayList<Fil> historique = new ArrayList<>();
+
+    public void addFil(Fil fil) {
+        historique.add(fil);
+    }
 
     public void supprimerFil(Fil fil){
         historique.remove(fil);
