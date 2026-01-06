@@ -1,4 +1,4 @@
-package fr.wellcomm.wellcomm.entites;
+package fr.wellcomm.wellcomm.entities;
 
 import lombok.Getter;
 import lombok.Setter;
