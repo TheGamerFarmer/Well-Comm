@@ -2,12 +2,14 @@ package fr.wellcomm.wellcomm.entites;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "Message")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +19,6 @@ public class Message {
 
     public Message(String contenu) {
         this.contenu = contenu;
-    }
-    public Message() {
-
     }
 
     public void modifierContenu(String contenu) {

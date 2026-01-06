@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.entites;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
 @Table(name = "Fil")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Fil {
 
     @Id
@@ -24,8 +26,6 @@ public class Fil {
     private Categorie categorie;
     @OneToMany
     private List<Message> messages = new ArrayList<>();
-
-    public Fil() {}
 
     public Fil(String titre, Date datedecreation, Categorie categorie) {
         this.titre = titre;
