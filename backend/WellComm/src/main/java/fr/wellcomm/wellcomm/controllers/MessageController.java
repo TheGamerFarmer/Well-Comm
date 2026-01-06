@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
-import fr.wellcomm.wellcomm.entites.Message;
+import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import org.springframework.web.bind.annotation.RestController;
 

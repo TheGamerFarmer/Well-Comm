@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.repositories;
 
-import fr.wellcomm.wellcomm.entites.Evenement;
+import fr.wellcomm.wellcomm.entities.Evenement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -26,7 +26,7 @@ public class LoginController {
         String userName = credentials.get("userName");
         String password = credentials.get("password");
 
-        Utilisateur user = userRepository.findByuserName(userName);
+        Utilisateur user = userRepository.findById(userName).orElse(null);
 
         if (user == null) {
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
@@ -37,7 +37,7 @@ public class LoginController {
 
             Session session = new Session();
             session.setToken(token);
-            session.setUserName(user.getUserName());
+            session.setUser(user);
             session.setDateExpiration(LocalDateTime.now().plusHours(24));
 
             sessionRepository.save(session);
