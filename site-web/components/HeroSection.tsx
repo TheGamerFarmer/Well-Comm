@@ -1,6 +1,7 @@
 // mon-site-web/components/HeroSection.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import {Button} from "@/components/ButtonMain";
 
 export default function HeroSection() {
     return (
@@ -28,15 +29,10 @@ export default function HeroSection() {
                     WellComm est un assistant indispensable pour les seniors et leurs aidants.
                 </p>
 
-                <Link
-                    href="/inscription"
-                    className="w-[186px] h-[51px] flex flex-row justify-center items-center gap-[10px] py-4 ph-6 rounded-[100px] shadow-[0 4px 0 0 #0551ab] bg-[#f87c7c]
-
-                    text-white font-bold py-2 px-4 md:py-4 md:px-10
-                     shadow-[0px_4px_0px_0px_#0551ab] md:shadow-[0px_6px_0px_0px_#0551ab] text-[12px] sm:text-sm md:text-base transition-all duration-300 hover:translate-y-[2px]"
-                >
+                <Button variant={"start1"}>
                     Commencer
-                </Link>
+                </Button>
+
             </div>
            </div>
 

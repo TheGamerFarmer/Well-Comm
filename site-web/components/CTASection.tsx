@@ -1,6 +1,7 @@
 // components/CTASection.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import {Button} from "@/components/ButtonMain";
 
 export default function CTASection() {
     return (
@@ -24,12 +25,11 @@ export default function CTASection() {
                         Pour vous faciliter la vie au quotidien. Inscrivez-vous et recevez des conseils,
                         des rappels et du soutien.
                     </p>
-                    <Link
-                        href="/inscription"
-                        className="bg-[#ff5f5f] hover:bg-[#ff4d4d] text-white font-bold py-3 px-10 rounded-full shadow-[0px_4px_0px_0px_#c93e3e]"
-                    >
+
+                    <Button variant={"start1"}>
                         Commencer
-                    </Link>
+                    </Button>
+
                 </div>
 
                 {/* IMAGE D'ACCOMPAGNEMENT */}
