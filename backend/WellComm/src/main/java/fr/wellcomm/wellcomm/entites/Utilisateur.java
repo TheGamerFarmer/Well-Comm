@@ -5,29 +5,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.*;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Utilisateur")
+@Table(name = "utilisateur")
 @Getter
 @Setter
-@RestController
-@RequestMapping("api/login")
+@NoArgsConstructor
 public class Utilisateur {
-    private String nom = "Raphael";
-    private String prenom = "Matheret";
-
     @Id
-    private String email = "raphael";
-    private String password = "test";
-
-    @GetMapping("/email")
-    public String email() {
-        return email;
-    }
-
-    @GetMapping("/{email}/{password}")
-    public boolean tryConnection(@PathVariable String email, @PathVariable String password) {
-        return this.email.equals(email) && this.password.equals(password);
-    }
+    private String email; // La clé primaire
+    private String nom;
+    private String prenom;
+    private String password;
 }
