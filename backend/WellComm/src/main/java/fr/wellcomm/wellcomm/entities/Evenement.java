@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
 @Table(name = "Evenement")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Evenement {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -27,9 +29,5 @@ public class Evenement {
         this.date = date;
         this.horairedebut = horairedebut;
         this.horairefin = horairefin;
-    }
-
-    public Evenement() {
-
     }
 }
