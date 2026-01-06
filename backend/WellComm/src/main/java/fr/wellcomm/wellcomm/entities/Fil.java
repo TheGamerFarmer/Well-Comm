@@ -40,4 +40,13 @@ public class Fil {
     public void supprimerMessage(Message message) {
         messages.remove(message);
     }
+
+    @Transient
+    public Message getDernierMessage() {
+        if (messages == null || messages.isEmpty()) {
+            return null;
+        }
+        // On récupère le message envoyé
+        return messages.get(messages.size() - 1);
+    }
 }
