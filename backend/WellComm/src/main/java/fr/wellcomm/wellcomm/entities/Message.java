@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,11 +27,17 @@ public class Message {
     private String auteurNom;
     private String auteurRole;
 
+    @ManyToOne
+    @JoinColumn(name = "fil_id") // C'est ici que le filId sera créé en base de données
+    @JsonIgnore // Indispensable pour éviter la boucle infinie JSON
+    private Fil fil;
+
     public Message(String contenu, String auteurNom, String auteurRole) {
         this.contenu = contenu;
         this.auteurNom = auteurNom;
         this.auteurRole = auteurRole;
         this.dateEnvoi = new Date();
+        this.fil = fil;
     }
 
     public void modifierContenu(String contenu) {

@@ -24,7 +24,7 @@ public class Fil {
     private String titre;
     private Date datedecreation;
     private Categorie categorie;
-    @OneToMany
+    @OneToMany(mappedBy = "fil", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
     public Fil(String titre, Date datedecreation, Categorie categorie) {
