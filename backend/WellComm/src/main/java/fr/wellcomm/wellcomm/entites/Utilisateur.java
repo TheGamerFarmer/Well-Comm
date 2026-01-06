@@ -1,10 +1,14 @@
 package fr.wellcomm.wellcomm.entites;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.*;
 
+@Entity
+@Table(name = "Utilisateur")
 @Getter
 @Setter
 @RestController
