@@ -5,12 +5,12 @@ import fr.wellcomm.wellcomm.entities.Utilisateur;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.UtilisateurRepository;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -21,10 +21,24 @@ public class LoginController {
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Getter
+    @Setter
+    public static class LoginRequest {
+        private String userName;
+        private String password;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class LoginResponse {
+        private String token;
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String userName = credentials.get("userName");
-        String password = credentials.get("password");
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        String userName = loginRequest.getUserName();
+        String password = loginRequest.getPassword();
 
         Utilisateur user = userRepository.findById(userName).orElse(null);
 
@@ -35,14 +49,11 @@ public class LoginController {
         if (passwordEncoder.matches(password, user.getPassword())) {
             String token = UUID.randomUUID().toString();
 
-            Session session = new Session();
-            session.setToken(token);
-            session.setUser(user);
-            session.setDateExpiration(LocalDateTime.now().plusHours(24));
+            sessionRepository.save(new Session(token,
+                    user,
+                    LocalDateTime.now().plusHours(24)));
 
-            sessionRepository.save(session);
-
-            return ResponseEntity.ok(Map.of("token", token));
+            return ResponseEntity.ok(new LoginResponse(token));
         }
 
         return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");

@@ -25,8 +25,10 @@ public class TokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = request.getHeader("Tocken");
-        if (token != null) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+
             sessionRepository.findById(token).ifPresent(session -> {
                 if (session.getDateExpiration().isAfter(LocalDateTime.now())) {
 
