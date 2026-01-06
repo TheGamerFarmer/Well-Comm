@@ -11,7 +11,7 @@ const benefits = [
 export default function BenefitsSection() {
     return (
         <section className="py-20 bg-white">
-            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12 md:gap-16">
+            <div className="max-w-400 mx-auto px-8 flex flex-col md:flex-row items-center gap-12 md:gap-16">
 
                 {/* TEXTE */}
                 <div className="w-full md:w-1/2">
@@ -37,12 +37,12 @@ export default function BenefitsSection() {
                 <div className="w-full md:w-1/2 flex items-start gap-4 md:gap-6">
 
                     {/* Image 1 (Gauche) : Arrondie en Haut-Droit et Bas-Gauche */}
-                    <div className="relative w-1/2 h-[420px] md:h-[480px] mt-10">
+                    <div className="relative w-1/2 h-[420px] md:h-[480px]">
                         <Image
                             src="/images/Frame 20.png"
                             alt="Seniors heureux"
                             fill
-                            className="object-cover shadow-lg rounded-tr-none rounded-bl-none rounded-tl-[4rem] rounded-br-[4rem]"
+                            className="object-contain"
                         />
                     </div>
 
@@ -52,7 +52,7 @@ export default function BenefitsSection() {
                             src="/images/Mask group.png"
                             alt="Dame avec fleurs"
                             fill
-                            className="object-cover shadow-lg rounded-tl-[4rem] rounded-br-[4rem] rounded-tr-none rounded-bl-none"
+                            className="object-contain"
                         />
                     </div>
                 </div>

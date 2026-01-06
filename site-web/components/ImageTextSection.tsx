@@ -4,24 +4,23 @@ import Image from 'next/image';
 export default function ImageTextSection() {
     return (
         <section className="py-16 md:py-24 bg-white">
-            <div className="container mx-auto px-6 md:px-12 lg:px-24">
+            <div className="container mx-auto  ">
                 <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
 
                     {/* 1. Bloc Image à gauche */}
-                    <div className="w-full md:w-1/2">
-                        <div className="relative h-[350px] md:h-[500px] w-full">
+                    <div className="w-full">
+                        <div className="relative w-[650px] h-[570px]">
                             <Image
                                 src="/images/woman_laptop.png"
                                 alt="Femme senior utilisant un ordinateur portable"
                                 fill
-                                className="object-cover rounded-[2rem] shadow-xl"
                                 priority
                             />
                         </div>
                     </div>
 
                     {/* 2. Bloc Texte à droite (Plus de contenu, pas de bouton) */}
-                    <div className="w-full md:w-1/2 text-gray-700">
+                    <div className="w-full text-gray-700">
                         <h2 className="text-3xl md:text-4xl font-bold text-[#1e40af] mb-6">
                             Qu'est-ce que WellComm?
                         </h2>

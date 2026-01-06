@@ -14,9 +14,7 @@ export default function Home() {
 
             <main className="w-full">
                 <HeroSection />
-
                 <ImageTextSection />
-
                 <FeaturesGrid />
                 <BenefitsSection />
                 <CTASection />

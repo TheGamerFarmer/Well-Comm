@@ -4,13 +4,21 @@ import Link from 'next/link';
 
 export default function CTASection() {
     return (
-        <section className="py-12 px-6">
-            <div className="max-w-6xl mx-auto relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-[#1e40af] to-[#1abc9c] min-h-[350px] flex flex-col md:flex-row items-center text-white">
+        <section className="py-12 px-6 bg-white">
+            <div className="container mx-auto relative overflow-hidden rounded-[2.5rem] min-h-[350px] flex flex-col md:flex-row items-center text-white">
+
+                <Image
+                    src="/images/background.png"
+                    alt="Couple de seniors"
+                    fill
+                    className="object-cover object-center"
+                    priority
+                />
 
                 {/* TEXTE */}
                 <div className="p-8 md:p-16 z-20 w-full md:w-1/2">
                     <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                        WellComme vous aidera !
+                        WellComm vous aidera!
                     </h2>
                     <p className="text-blue-50 mb-10 text-lg opacity-90">
                         Pour vous faciliter la vie au quotidien. Inscrivez-vous et recevez des conseils,
