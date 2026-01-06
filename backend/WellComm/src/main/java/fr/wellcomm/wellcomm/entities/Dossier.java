@@ -28,7 +28,12 @@ public class Dossier {
     //Relation vers CompteParDossier (Un dossier a plusieurs comptesParDossier)
     @OneToMany
     private List<CompteParDossier> comptesParDossier = new ArrayList<>();
-    //private Historique historique;
+    @Transient
+    private Historique historique;
+    @Transient
+    private  Agenda agenda;
+    @Transient
+    private Resume resume;
 
     public Dossier(String nom) {
         this.nom = nom;
@@ -39,10 +44,10 @@ public class Dossier {
         fils.add(fil);
     }
 
-    /*public void archiverFil(Fil fil) {
-        fil.remove(fil);
-        historique.historique.add(Fil);
-    }*/
+    public void archiverFil(Fil fil) {
+        fils.remove(fil);
+        historique.historique.add(fil);
+    }
 
     public void addCompteParDossier(CompteParDossier compte) {
         comptesParDossier.add(compte);
