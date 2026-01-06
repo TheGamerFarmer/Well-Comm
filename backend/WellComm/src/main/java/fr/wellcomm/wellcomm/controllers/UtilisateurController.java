@@ -17,11 +17,9 @@ public class UtilisateurController {
         this.repository = repository;
     }
 
-    @GetMapping("/email/{email}")
-    public String getEmail(@PathVariable String email) {
-        return repository.findById(email)
-                .map(Utilisateur::getEmail)
-                .orElse("Utilisateur non trouvé");
+    @GetMapping("/email/{userName}")
+    public String getEmail(@PathVariable String userName) {
+        return repository.findByuserName(userName).getUserName();
     }
 
     @GetMapping("/{email}/{password}")
