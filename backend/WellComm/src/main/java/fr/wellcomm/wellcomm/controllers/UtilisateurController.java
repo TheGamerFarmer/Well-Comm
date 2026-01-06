@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
-import fr.wellcomm.wellcomm.entites.Utilisateur;
+import fr.wellcomm.wellcomm.entities.Utilisateur;
 import fr.wellcomm.wellcomm.repositories.UtilisateurRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +19,7 @@ public class UtilisateurController {
 
     @GetMapping("/email/{userName}")
     public String getEmail(@PathVariable String userName) {
-        return repository.findByuserName(userName).getUserName();
+        return repository.findById(userName).map(Utilisateur::getUserName).orElse("");
     }
 
     @GetMapping("/{email}/{password}")

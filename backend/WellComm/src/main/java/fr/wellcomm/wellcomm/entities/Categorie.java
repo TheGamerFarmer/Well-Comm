@@ -1,4 +1,4 @@
-package fr.wellcomm.wellcomm.entites;
+package fr.wellcomm.wellcomm.entities;
 
 public enum Categorie {
     Sante,
