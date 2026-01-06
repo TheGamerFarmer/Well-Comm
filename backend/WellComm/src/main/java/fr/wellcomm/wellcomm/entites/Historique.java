@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.entites;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 @Setter
 public class Historique {
     ArrayList<Fil> historique = new ArrayList<>();
+
+    public Historique() {}
 
     public void supprimerFil(Fil fil){
         historique.remove(fil);

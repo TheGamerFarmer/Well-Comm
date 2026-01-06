@@ -11,7 +11,18 @@ import lombok.Setter;
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id = 0;
+    private long id;
 
-    private String contenu = "";
+    private String contenu;
+
+    public Message(String contenu) {
+        this.contenu = contenu;
+    }
+    public Message() {
+
+    }
+
+    public void modifierContenu(String contenu) {
+        this.contenu = contenu;
+    }
 }

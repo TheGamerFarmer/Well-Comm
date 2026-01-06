@@ -10,11 +10,16 @@ import java.util.Date;
 @Setter
 public class Agenda {
     ArrayList<Evenement> agenda = new ArrayList<>();
-/*
+
+    public Agenda() {}
+
     public void addEvenement(String titre, String lieu, Date date, Date horairedebut, Date horairefin){
         Evenement evenement = new Evenement(titre, lieu, date, horairedebut, horairefin);
         agenda.add(evenement);
     }
 
- */
+    public void supprimerEvenement(Evenement evenement){
+        agenda.remove(evenement);
+    }
+
 }

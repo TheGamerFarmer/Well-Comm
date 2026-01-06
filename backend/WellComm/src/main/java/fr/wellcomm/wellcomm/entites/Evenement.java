@@ -13,11 +13,23 @@ import java.util.Date;
 public class Evenement {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private long id = 0;
+    private long id;
 
-    private String titre = "";
-    private String lieu = "";
-    private Date date = new Date();
-    private Date horairedebut = new Date();
-    private Date horairefin = new Date();
+    private String titre;
+    private String lieu;
+    private Date date;
+    private Date horairedebut;
+    private Date horairefin;
+
+    public Evenement(String titre, String lieu, Date date, Date horairedebut, Date horairefin) {
+        this.titre = titre;
+        this.lieu = lieu;
+        this.date = date;
+        this.horairedebut = horairedebut;
+        this.horairefin = horairefin;
+    }
+
+    public Evenement() {
+
+    }
 }

@@ -9,4 +9,6 @@ import java.util.ArrayList;
 @Setter
 public class Resume {
     private ArrayList<String> resume = new ArrayList<>();
+
+    public Resume() {}
 }
