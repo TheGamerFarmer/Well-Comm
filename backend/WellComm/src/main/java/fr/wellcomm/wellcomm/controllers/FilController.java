@@ -4,8 +4,16 @@ import fr.wellcomm.wellcomm.entities.Fil;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.repositories.FilRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class FilController {
@@ -19,33 +27,83 @@ public class FilController {
         this.messageRepository = messageRepository;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class MessageResponse {
+        private Long id;
+        private String contenu;
+        private Date dateEnvoi;
+        private String auteurNom;
+        private String auteurRole;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class FilDetailResponse {
+        private Long id;
+        private String titre;
+        private String categorie;
+        private List<MessageResponse> messages;
+    }
+
+    @Getter
+    @Setter
+    public static class MessageRequest {
+        private String contenu;
+        private String auteurRole; // Optionnel si géré par le backend
+    }
+
     // 1. Récupérer tout un fil avec ses messages
     @GetMapping("/{filId}")
     @PreAuthorize("#userName == authentication.name")
-    public Fil getFilComplet(@PathVariable String userName, @PathVariable Long filId) {
-        return repository.findById(filId)
+    public ResponseEntity<FilDetailResponse> getFilComplet(@PathVariable String userName, @PathVariable Long filId) {
+        Fil fil = repository.findById(filId)
                 .orElseThrow(() -> new RuntimeException("Fil non trouvé"));
+
+        List<MessageResponse> messages = fil.getMessages().stream()
+                .map(m -> new MessageResponse(m.getId(), m.getContenu(), m.getDateEnvoi(), m.getAuteurNom(), m.getAuteurRole()))
+                .collect(Collectors.toList());
+
+        FilDetailResponse response = new FilDetailResponse(
+                fil.getId(),
+                fil.getTitre(),
+                fil.getCategorie().toString(),
+                messages
+        );
+
+        return ResponseEntity.ok(response);
     }
 
-    // 2. Envoyer un nouveau message dans le fil
+    // 2. Envoyer un nouveau message (Action bouton envoyer)
     @PostMapping("/{filId}/messages")
     @PreAuthorize("#userName == authentication.name")
-    public Message ajouterMessage(
+    public ResponseEntity<MessageResponse> ajouterMessage(
             @PathVariable String userName,
             @PathVariable Long filId,
-            @RequestBody Message nouveauMessage) {
+            @RequestBody MessageRequest request) {
 
-        Fil fil = repository.findById(filId).get();
+        Fil fil = repository.findById(filId)
+                .orElseThrow(() -> new RuntimeException("Fil non trouvé"));
 
-        // On prépare le message (on pourrait récupérer le rôle de l'user connecté ici)
-        nouveauMessage.setDateEnvoi(new java.util.Date());
-        nouveauMessage.setAuteurNom(userName);
+        // Création et sauvegarde du message
+        Message message = new Message();
+        message.setContenu(request.getContenu());
+        message.setAuteurNom(userName);
+        message.setAuteurRole(request.getAuteurRole() != null ? request.getAuteurRole() : "Utilisateur");
+        message.setDateEnvoi(new Date());
+        message.setFil(fil);
 
-        // Sauvegarde
-        Message messageSauve = messageRepository.save(nouveauMessage);
-        fil.envoyerMessage(messageSauve);
-        repository.save(fil);
+        Message messageSauve = messageRepository.save(message);
 
-        return messageSauve;
+        // Retourne le message formaté pour le frontend
+        return ResponseEntity.ok(new MessageResponse(
+                messageSauve.getId(),
+                messageSauve.getContenu(),
+                messageSauve.getDateEnvoi(),
+                messageSauve.getAuteurNom(),
+                messageSauve.getAuteurRole()
+        ));
     }
 }
