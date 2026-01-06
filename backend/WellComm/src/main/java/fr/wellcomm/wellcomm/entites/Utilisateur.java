@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Utilisateur {
     @Id
-    private String email; // La clé primaire
+    private String userName; // La clé primaire
     private String nom;
     private String prenom;
     private String password;
