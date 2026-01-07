@@ -30,11 +30,12 @@ public class AccountService {
     }
 
     public void addRecordAccount(Account account, RecordAccount recordAccount) {
+        recordAccount.setAccount(account);
         account.getRecordAccounts().add(recordAccount);
         accountRepository.save(account);
     }
 
-    public void removeRecordAccount(Account account, RecordAccount recordAccount) {
+    public void deleteRecordAccount(Account account, RecordAccount recordAccount) {
         account.getRecordAccounts().remove(recordAccount);
         accountRepository.save(account);
     }

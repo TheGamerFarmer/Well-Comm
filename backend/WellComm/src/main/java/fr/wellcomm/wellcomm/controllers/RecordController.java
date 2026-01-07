@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
 
 @RestController
-@RequestMapping("/api/record/{userName}")
+@RequestMapping("/api/records/{userName}")
 @AllArgsConstructor
 public class RecordController {
     private final RecordService recordService;
@@ -61,13 +61,21 @@ public class RecordController {
         return ResponseEntity.ok(dossiers);
     }
 
-    @GetMapping("/{dossierId}/channel/{category}")
+    @GetMapping("/create/{name}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
+                                               @PathVariable String name) {
+        Record newRecord = recordService.createRecord(name);
+        return ResponseEntity.ok(newRecord);
+    }
+
+    @GetMapping("/{recordId}/channel/{category}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
-            @PathVariable Long dossierId,
+            @PathVariable Long recordId,
             @PathVariable Category category) {
 
-        List<FilResponse> response = recordService.getChannelsOfCategory(dossierId, category).stream()
+        List<FilResponse> response = recordService.getChannelsOfCategory(recordId, category).stream()
                 .map(f -> {
                     Message lastMsg = channelService.getLastMessage(f);
                     return new FilResponse(
@@ -107,5 +115,21 @@ public class RecordController {
                 lastMsg != null ? lastMsg.getContent() : "",
                 lastMsg != null ? lastMsg.getAuthorName() : ""
         ));
+    }
+
+    @GetMapping("/{recordId}/{channelId}/archive")
+    @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
+    public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
+            @PathVariable long recordId,
+            @PathVariable long channelId) {
+
+        Record record = recordService.getRecord(recordId);
+        if (record == null) {
+            return ResponseEntity.badRequest().body("Record not found");
+        }
+
+
+        recordService.archiveChannel(record, channelId);
+        return ResponseEntity.ok().build();
     }
 }

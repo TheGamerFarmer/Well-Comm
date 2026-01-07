@@ -7,6 +7,8 @@ import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,13 +32,6 @@ public class LoginController {
         private String password;
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class LoginResponse {
-        private String token;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         String userName = loginRequest.getUserName();
@@ -55,7 +50,17 @@ public class LoginController {
                     account,
                     LocalDateTime.now().plusHours(24)));
 
-            return ResponseEntity.ok(new LoginResponse(token));
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(86400)
+                    .sameSite("Strict")
+                    .build();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .build();
         }
 
         return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");

@@ -18,8 +18,8 @@ import java.util.List;
 public class Account {
     @Id
     private String userName;
-    private String lastName;
     private String firstName;
+    private String lastName;
     private String password;
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecordAccount> recordAccounts = new ArrayList<>();
