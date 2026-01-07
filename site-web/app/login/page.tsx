@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import sha256 from 'crypto-js/sha256';
+import {Button} from "@/components/ButtonMain";
 
 export default function LoginPage() {
     const [userName, setUserName] = useState("");
@@ -56,9 +57,9 @@ export default function LoginPage() {
             <input onChange={(e) => setPassword(e.target.value)}
                    className="h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black" type="password" id="t_Mdp" name="t_Mdp"/>
 
-            <input className=" rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4" type="submit" value="Se connecter"/><br/>
+            <input className=" rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="Se connecter"/><br/>
 
-            <Link href="/register" className=" m-auto flex items-center space-x-2 font-montserrat text-base text-left text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
+            <Link href="/register" className=" m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
         </form>
     )
 }
