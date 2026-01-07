@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import sha256 from 'crypto-js/sha256';
-import {Button} from "@/components/ButtonMain";
 
 export default function LoginPage() {
     const [userName, setUserName] = useState("");
