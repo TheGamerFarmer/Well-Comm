@@ -24,19 +24,19 @@ public class RegistrationController {
     public static class RegisterRequest {
         private String userName;
         private String password;
-        private String name;
         private String firstName;
+        private String lastName;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         if (accountRepository.existsById(request.getUserName())) {
-            return ResponseEntity.status(409).body("Utilisateur déjà existant");
+            return ResponseEntity.status(409).body("Account already exists");
         }
 
         accountRepository.save(new Account(request.getUserName(),
-                request.getName(),
                 request.getFirstName(),
+                request.getLastName(),
                 passwordEncoder.encode(request.getPassword())));
 
         return ResponseEntity.status(201).build();
