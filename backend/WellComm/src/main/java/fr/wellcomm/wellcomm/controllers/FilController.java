@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequestMapping("/api/{userName}/fils")
 @RestController
 public class FilController {
 
