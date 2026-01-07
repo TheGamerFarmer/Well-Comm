@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "open_channels")
+@Table(name = "opened_channels")
 @Getter
 @Setter
 @NoArgsConstructor
