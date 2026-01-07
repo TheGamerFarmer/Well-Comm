@@ -58,7 +58,7 @@ export default function LoginPage() {
 
             <input className=" rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="Se connecter"/><br/>
 
-            <Link href="/register" className=" m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
+            <Link href="/register" className="cursor-pointer m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
         </form>
     )
 }

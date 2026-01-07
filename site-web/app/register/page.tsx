@@ -73,7 +73,7 @@ export default function RegisterPage() {
                        className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black"/>
 
                 {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
-                <input className="w-full rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="S'inscrire"/><br/>
+                <input className="cursor-pointer w-full rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="S'inscrire"/><br/>
 
                 <Link href="/login" className="self-center mt-4 font-montserrat text-base text-[#20baa7] font-bold">J'ai déjà un compte</Link>
 
