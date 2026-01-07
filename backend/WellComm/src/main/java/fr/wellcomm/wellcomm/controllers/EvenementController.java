@@ -1,15 +1,11 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.repositories.EvenementRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@AllArgsConstructor
 public class EvenementController {
-
     private final EvenementRepository repository;
-
-    // Injection du repository via le constructeur
-    public EvenementController(EvenementRepository repository) {
-        this.repository = repository;
-    }
 }

@@ -1,7 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.entities.Categorie;
-import fr.wellcomm.wellcomm.entities.Dossier;
 import fr.wellcomm.wellcomm.entities.Fil;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.repositories.DossierRepository;
@@ -12,24 +11,16 @@ import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/{userName}")
+@AllArgsConstructor
 public class DossierController {
-
     private final DossierRepository repository;
     private final FilRepository filRepository;
-
-
-    // Injection du repository via le constructeur
-    public DossierController(DossierRepository repository, FilRepository filRepository) {
-        this.repository = repository;
-        this.filRepository = filRepository;
-    }
 
     @Getter
     @Setter
@@ -50,9 +41,6 @@ public class DossierController {
         private String dernierMessageContenu;
         private String dernierMessageAuteur;
     }
-
-
-
 
     @GetMapping("/dossiers")
     @PreAuthorize("#userName == authentication.name")
