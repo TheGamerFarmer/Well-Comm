@@ -3,22 +3,31 @@ package fr.wellcomm.wellcomm.services;
 import fr.wellcomm.wellcomm.entities.CompteParDossier;
 import fr.wellcomm.wellcomm.entities.Dossier;
 import fr.wellcomm.wellcomm.entities.Utilisateur;
+import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.UtilisateurRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
+    private final SessionRepository sessionRepository;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository) {
-        this.utilisateurRepository = utilisateurRepository;
-    }
-
-    private Utilisateur getUtilisateur(String username) {
+    public Utilisateur getUtilisateur(String username) {
         return utilisateurRepository.findById(username)
                 .orElseThrow(() -> new IllegalArgumentException("Dossier introuvable"));
+    }
+
+    public void deleteUtilisateur(String username) {
+        sessionRepository.deleteByUser(getUtilisateur(username));
+        utilisateurRepository.deleteById(username);
+    }
+
+    public void saveUser(Utilisateur utilisateur) {
+        utilisateurRepository.save(utilisateur);
     }
 
     public void ajouterDossier(String utilisateurUsername, Dossier dossier) {
