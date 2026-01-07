@@ -20,6 +20,6 @@ public class Session {
     private String token;
     @ManyToOne
     @JoinColumn(name = "user_name", nullable = false)
-    private Utilisateur user;
-    private LocalDateTime dateExpiration;
+    private Account account;
+    private LocalDateTime expirationDate;
 }

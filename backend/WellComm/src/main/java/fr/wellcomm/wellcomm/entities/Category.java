@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.entities;
 
-public enum Categorie {
+public enum Category {
     Sante,
     Alimentation,
     Hygiene,
