@@ -21,4 +21,12 @@ public class MessageService {
         message.setContent(content);
         messageRepository.save(message);
     }
+
+    public void deleteMessage(Message message) {
+        messageRepository.delete(message);
+    }
+
+    public long getNbMessage(Long channelId) {
+        return messageRepository.countByChannelId(channelId);
+    }
 }
