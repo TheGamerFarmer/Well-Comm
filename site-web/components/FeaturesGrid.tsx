@@ -21,10 +21,9 @@ const features = [
 
 export default function FeaturesGrid() {
     return (
-        <section className="w-full bg-[#cbd5e1] py-20">
+        <section className="w-full bg-[#f4f4f4] py-20">
             <div className="max-w-7xl mx-auto px-6">
 
-                {/* Centrage horizontal parfait pour n'importe quel nombre d'éléments */}
                 <div className="flex flex-wrap justify-center gap-12 lg:gap-16">
                     {features.map((f, i) => (
                         <div key={i} className="flex flex-col items-center text-center w-full sm:w-[250px]">
