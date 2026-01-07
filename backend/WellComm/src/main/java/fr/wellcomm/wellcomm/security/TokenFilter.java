@@ -30,10 +30,10 @@ public class TokenFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             sessionRepository.findById(token).ifPresent(session -> {
-                if (session.getDateExpiration().isAfter(LocalDateTime.now())) {
+                if (session.getExpirationDate().isAfter(LocalDateTime.now())) {
 
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            session.getUser().getUserName(), null, new ArrayList<>()
+                            session.getAccount().getUserName(), null, new ArrayList<>()
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

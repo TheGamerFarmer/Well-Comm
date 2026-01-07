@@ -9,7 +9,6 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Resume {
-    private ArrayList<String> resume = new ArrayList<>();
-
+public class Report {
+    private ArrayList<String> report = new ArrayList<>();
 }

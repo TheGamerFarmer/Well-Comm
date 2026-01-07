@@ -1,7 +1,7 @@
 package fr.wellcomm.wellcomm.controllers;
 
-import fr.wellcomm.wellcomm.entities.Utilisateur;
-import fr.wellcomm.wellcomm.services.UtilisateurService;
+import fr.wellcomm.wellcomm.entities.Account;
+import fr.wellcomm.wellcomm.services.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/{userName}")
 @AllArgsConstructor
-public class UserController {
-    public final UtilisateurService utilisateurService;
+public class AccountController {
+    public final AccountService accountService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Getter
@@ -30,22 +30,26 @@ public class UserController {
 
     @GetMapping("/infos")
     @PreAuthorize("#userName == authentication.name")
-    public UserInfos getInfos(@PathVariable String userName) {
-        Utilisateur user = utilisateurService.getUtilisateur(userName);
+    public ResponseEntity<?> getInfos(@PathVariable String userName) {
+        Account account = accountService.getUser(userName);
+        if (account == null)
+            return ResponseEntity.badRequest().body("User not found");
 
-        return new UserInfos(user.getPrenom(),
-                user.getNom());
+        return ResponseEntity.ok(new UserInfos(account.getFirstName(),
+                account.getLastName()));
     }
 
     @GetMapping("/changePassword/{oldPassword}/{newPassword}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> checkPassword(@PathVariable String userName, @PathVariable String oldPassword, @PathVariable String newPassword) {
-        Utilisateur user = utilisateurService.getUtilisateur(userName);
+        Account account = accountService.getUser(userName);
+        if (account == null)
+            return ResponseEntity.badRequest().body("User not found");
 
-        if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(newPassword));
+        if (passwordEncoder.matches(oldPassword, account.getPassword())) {
+            account.setPassword(passwordEncoder.encode(newPassword));
 
-            utilisateurService.saveUser(user);
+            accountService.saveUser(account);
 
             return ResponseEntity.ok().build();
         } else {
@@ -55,7 +59,13 @@ public class UserController {
 
     @GetMapping("/deleteUser")
     @PreAuthorize("#userName == authentication.name")
-    public void deleteUser(@PathVariable String userName) {
-        utilisateurService.deleteUtilisateur(userName);
+    public ResponseEntity<?> deleteUser(@PathVariable String userName) {
+        Account account = accountService.getUser(userName);
+        if (account == null)
+            return ResponseEntity.badRequest().body("User not found");
+
+        accountService.deleteUser(account);
+
+        return ResponseEntity.ok().build();
     }
 }

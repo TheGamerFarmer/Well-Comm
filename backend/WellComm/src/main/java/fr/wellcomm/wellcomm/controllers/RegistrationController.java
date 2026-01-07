@@ -1,7 +1,7 @@
 package fr.wellcomm.wellcomm.controllers;
 
-import fr.wellcomm.wellcomm.entities.Utilisateur;
-import fr.wellcomm.wellcomm.repositories.UtilisateurRepository;
+import fr.wellcomm.wellcomm.entities.Account;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 @AllArgsConstructor
 public class RegistrationController {
-    private final UtilisateurRepository utilisateurRepository;
+    private final AccountRepository accountRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Getter
@@ -30,11 +30,11 @@ public class RegistrationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (utilisateurRepository.existsById(request.getUserName())) {
+        if (accountRepository.existsById(request.getUserName())) {
             return ResponseEntity.status(409).body("Utilisateur déjà existant");
         }
 
-        utilisateurRepository.save(new Utilisateur(request.getUserName(),
+        accountRepository.save(new Account(request.getUserName(),
                 request.getName(),
                 request.getFirstName(),
                 passwordEncoder.encode(request.getPassword())));

@@ -1,9 +1,9 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.entities.Session;
-import fr.wellcomm.wellcomm.entities.Utilisateur;
+import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
-import fr.wellcomm.wellcomm.repositories.UtilisateurRepository;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequestMapping("/api")
 @AllArgsConstructor
 public class LoginController {
-    private final UtilisateurRepository userRepository;
+    private final AccountRepository accountRepository;
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -42,17 +42,17 @@ public class LoginController {
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
 
-        Utilisateur user = userRepository.findById(userName).orElse(null);
+        Account account = accountRepository.findById(userName).orElse(null);
 
-        if (user == null) {
+        if (account == null) {
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
         }
 
-        if (passwordEncoder.matches(password, user.getPassword())) {
+        if (passwordEncoder.matches(password, account.getPassword())) {
             String token = UUID.randomUUID().toString();
 
             sessionRepository.save(new Session(token,
-                    user,
+                    account,
                     LocalDateTime.now().plusHours(24)));
 
             return ResponseEntity.ok(new LoginResponse(token));

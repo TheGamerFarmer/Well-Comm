@@ -10,5 +10,5 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
     // JpaRepository contient déjà les méthodes : findById, save, findAll, etc.
 
-    List<Message> findByFilIdOrderByDateEnvoiAsc(Long filId);
+    List<Message> findByChannelIdOrderByDateAsc(Long channelId);
 }
