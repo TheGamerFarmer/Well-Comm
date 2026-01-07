@@ -24,10 +24,10 @@ public class Dossier {
     private String nom;
 
     //Relation vers Fil (Un dossier a plusieurs fils)
-    @OneToMany
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fil> fils = new ArrayList<>();
     //Relation vers CompteParDossier (Un dossier a plusieurs comptesParDossier)
-    @OneToMany
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CompteParDossier> comptesParDossier = new ArrayList<>();
     @Transient
     private Historique historique;

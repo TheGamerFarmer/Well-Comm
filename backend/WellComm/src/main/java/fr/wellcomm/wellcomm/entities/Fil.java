@@ -27,10 +27,15 @@ public class Fil {
     @OneToMany(mappedBy = "fil", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
-    public Fil(String titre, Date datedecreation, Categorie categorie) {
+    @ManyToOne
+    @JoinColumn(name = "dossier_id")
+    private Dossier dossier;
+
+    public Fil(String titre, Date datedecreation, Categorie categorie, Dossier dossier) {
         this.titre = titre;
         this.datedecreation = datedecreation;
         this.categorie = categorie;
+        this.dossier = dossier;
     }
 
     public void envoyerMessage(Message message) {
@@ -47,6 +52,6 @@ public class Fil {
             return null;
         }
         // On récupère le message envoyé
-        return messages.get(messages.size() - 1);
+        return messages.getLast();
     }
 }

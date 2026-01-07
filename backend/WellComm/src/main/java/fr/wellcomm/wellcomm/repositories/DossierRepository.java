@@ -12,5 +12,5 @@ import java.util.List;
 public interface DossierRepository extends JpaRepository<Dossier, String> {
     // JpaRepository contient déjà les méthodes : findById, save, findAll, etc.
     @Query("SELECT c.dossier FROM CompteParDossier c WHERE c.utilisateur.userName = :userName")
-    List<Dossier> findDossiersByUtilisateurUserName(@Param("userName") String email);
+    List<Dossier> findDossiersByUtilisateurUserName(@Param("userName") String userName);
 }

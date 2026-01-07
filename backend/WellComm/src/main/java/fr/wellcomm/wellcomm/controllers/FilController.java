@@ -72,7 +72,7 @@ public class FilController {
             @PathVariable Long filId,
             @RequestBody MessageRequest request) {
 
-        Message msg = filService.ajouterMessageAuFil(filId, request.getContenu(), userName, request.getAuteurRole());
+        Message msg = filService.ajouterMessageAuFil(filId, request.getContenu(), userName);
 
         return ResponseEntity.ok(new MessageResponse(
                 msg.getId(),

@@ -24,5 +24,7 @@ public class CompteParDossier {
     @ManyToOne
     private Dossier dossier;
 
+    private String titre;
+
 
 }
