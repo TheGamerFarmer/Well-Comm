@@ -1,39 +1,39 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.entities.Dossier;
 import fr.wellcomm.wellcomm.entities.Fil;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.repositories.FilRepository;
+import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+
 @Service
 @Transactional
+@AllArgsConstructor
 public class FilService {
 
     private final FilRepository filRepository;
+    private final MessageRepository messageRepository;
 
-    public FilService(FilRepository filRepository) {
-        this.filRepository = filRepository;
-    }
-
-    public void envoyerMessage(Long FilId, String contenu, String auteurnom, String auteurrole) {
-        Fil fil = getFil(FilId);
-        Message message = new Message(contenu, auteurnom, auteurrole);
-        fil.getMessages().add(message);
-        filRepository.save(fil);
-    }
-
-    public void supprimerMessage(Long FilId, Message message) {
-        Fil fil = getFil(FilId);
-        fil.getMessages().remove(message);
-        filRepository.save(fil);
-    }
-
-    private Fil getFil(Long id) {
+    public Fil getFilById(Long id) {
         return filRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Dossier introuvable"));
+                .orElseThrow(() -> new RuntimeException("Fil non trouvé"));
+    }
+
+    public Message ajouterMessageAuFil(Long filId, String contenu, String userName, String role) {
+        Fil fil = getFilById(filId);
+
+        Message message = new Message();
+        message.setContenu(contenu);
+        message.setAuteurNom(userName);
+        message.setAuteurRole(role != null ? role : "Utilisateur");
+        message.setDateEnvoi(new Date());
+        message.setFil(fil);
+
+        return messageRepository.save(message);
     }
 }
