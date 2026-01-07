@@ -33,7 +33,8 @@ export default function RegisterPage() {
                     Confirmer le mot de passe
                 </p>
                 //text input
-                <form>
+
+                <form  className="w-[466px] h-197 mt-12 mx-auto pt-7 pr-[33px] pb-[89px] pl-8 rounded-2xl shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] bg-white" >
 
                 </form>
             </div>
