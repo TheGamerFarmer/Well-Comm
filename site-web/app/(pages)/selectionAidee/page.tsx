@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import FilArianne from '@/components/FilArianne';
+import {Button} from "@/components/ButtonMain";
 
 export default function Calendar() {
     const [items, setItems] = useState<string[]>([]);
@@ -23,18 +24,18 @@ export default function Calendar() {
     return (
 
         <>
-                <div className="flex flex-col p-10">
+                <div className=" p-10">
 
                     <p className=" mt-10 flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
-                        Choisir une personne aidée
+                        Choisir un dossier
                     </p>
 
                     <FilArianne />
 
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="px-4 py-2 bg-[#0551ab] text-white rounded-lg">
-                        Ajouter une personne
+                        className="px-4 py-2 bg-[#0551ab] text-white rounded-full my-4">
+                        Ajouter un dossier
                     </button>
 
                     <div className=" p-4 rounded-2xl shadow-[0 3px 6px 0 rgba(0, 0, 0, 0.1)] bg-[#fff]">
@@ -53,31 +54,28 @@ export default function Calendar() {
                         {isOpen && (
                             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                                 <div className="bg-white p-6 rounded-2xl w-[400px]">
-                                    <h2 className="text-lg font-bold mb-4">Nouvelle personne</h2>
+                                    <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau dossier</h2>
 
                                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
                                         <input
                                             type="text"
-                                            placeholder="Nom"
                                             value={name}
+                                            placeholder="Nom du dossier"
                                             onChange={(e) => setName(e.target.value)}
-                                            className="border rounded-lg p-2"/>
+                                            className="border rounded-lg p-2 text-black "/>
 
-                                        <div className="flex justify-end gap-2">
+                                        <div className="flex justify-center gap-3">
 
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsOpen(false)}
-                                                className="px-4 py-2 border rounded-lg">
+
+                                            <Button variant="secondary" type="button" onClick={() => setIsOpen(false)}>
                                                 Annuler
-                                            </button>
+                                            </Button>
 
-                                            <button
-                                                type="submit"
-                                                className="px-4 py-2 bg-[#0551ab] text-white rounded-lg">
+                                            <Button variant="primary"  type="submit" >
                                                 Créer
-                                            </button>
+                                            </Button>
+
 
                                         </div>
                                     </form>

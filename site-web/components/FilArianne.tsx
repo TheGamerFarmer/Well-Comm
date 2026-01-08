@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const breadcrumbNames: Record<string, string> = {
+    home: "Accueil",
+    selectionAidee: "Choisir un dossier",
+    calendrier: "Calendrier",
+    profil: "Mon profil",
+};
+
 export default function Breadcrumb() {
     const pathname = usePathname();
 
@@ -21,21 +28,20 @@ export default function Breadcrumb() {
                 {segments.map((segment, index) => {
                     const href = "/" + segments.slice(0, index + 1).join("/");
                     const isLast = index === segments.length - 1;
+                    const name = breadcrumbNames[segment] || decodeURIComponent(segment);
 
                     return (
                         <li key={href} className="flex items-center space-x-2">
                             <span>/</span>
 
                             {isLast ? (
-                                <span className="font-bold text-gray capitalize">
-                  {decodeURIComponent(segment)}
-                </span>
+                                <span className="font-bold text-gray">{name}</span>
                             ) : (
                                 <Link
                                     href={href}
-                                    className="text-blue-600 hover:underline capitalize"
+                                    className="text-blue-600 hover:underline"
                                 >
-                                    {decodeURIComponent(segment)}
+                                    {name}
                                 </Link>
                             )}
                         </li>
