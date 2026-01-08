@@ -8,7 +8,7 @@ export default function Header() {
     return (
         // La barre de navigation principale
         <header className="bg-white shadow-md">
-            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div className="w-full mx-auto px-4 py-3 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-2">
                     <Image
                         src="/images/logo.svg" //  Assurez-vous que ce nom de fichier est exact
