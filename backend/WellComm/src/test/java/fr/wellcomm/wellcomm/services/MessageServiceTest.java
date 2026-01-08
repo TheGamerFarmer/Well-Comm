@@ -15,7 +15,6 @@ public class MessageServiceTest {
     @Autowired private MessageService messageService;
     @Autowired private RecordService recordService;
     @Autowired private ChannelService channelService;
-
     private Message testMessage;
     private OpenChannel testChannel;
 
