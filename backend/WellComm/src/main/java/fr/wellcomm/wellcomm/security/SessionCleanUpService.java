@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
-public class SessionCleanupService {
+public class SessionCleanUpService {
     private final SessionRepository sessionRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void removeExpiredSessions() {
-        sessionRepository.deleteByDateExpirationBefore(LocalDateTime.now());
+        sessionRepository.deleteByExpirationDateBefore(LocalDateTime.now());
         System.out.println("Nettoyage des sessions terminées.");
     }
 }

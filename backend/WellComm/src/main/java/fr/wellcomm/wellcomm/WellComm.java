@@ -11,9 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 @EnableScheduling
-public class WellCommApplication {
+public class WellComm {
     public static void main(String[] args) {
-        SpringApplication.run(WellCommApplication.class, args);
+        SpringApplication.run(WellComm.class, args);
     }
 
     @Bean

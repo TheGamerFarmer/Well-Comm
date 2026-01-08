@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name = "Message")
+@Table(name = "message")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,27 +17,20 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    private String contenu;
-
-    private Date dateEnvoi;
-
-    // Pour simplifier dans un premier temps, on stocke le nom et le rôle en dur.
-    // Plus tard, on pourra lier cela à l'entité Utilisateur.
-    private String auteurNom;
-    private String auteurRole;
-
+    private String content;
+    private Date date;
+    private String authorName;
+    private String authorRole;
     @ManyToOne
-    @JoinColumn(name = "fil_id") // C'est ici que le filId sera créé en base de données
+    @JoinColumn(name = "channel_id", nullable = false)
     @JsonIgnore // Indispensable pour éviter la boucle infinie JSON
-    private Fil fil;
+    private Channel channel;
 
-    public Message(String contenu, String auteurNom, String auteurRole) {
-        this.contenu = contenu;
-        this.auteurNom = auteurNom;
-        this.auteurRole = auteurRole;
-        this.dateEnvoi = new Date();
-        this.fil = fil;
+    public Message(String content, Date date, String authorName, String authorRole, Channel channel) {
+        this.content = content;
+        this.date = date;
+        this.authorName = authorName;
+        this.authorRole = authorRole;
+        this.channel = channel;
     }
-
 }
