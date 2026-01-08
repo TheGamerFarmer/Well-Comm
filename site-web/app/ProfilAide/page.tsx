@@ -25,12 +25,12 @@ export default function ProfilAide() {
 
                     <div className="flex flex-col md:flex-row  gap-4">
                         <div>
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Âge</label>
-                            <input className="h-[50px] self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
+                            <input type="date" className=" w-[256.2] h-[50px] self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Numéro de téléphone</label>
-                            <input className="h-[50px] self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input type="tel" className="h-[50px] self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
                 <div className="w-full">
