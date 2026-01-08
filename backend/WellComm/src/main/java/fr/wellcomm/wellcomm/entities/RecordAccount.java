@@ -23,4 +23,10 @@ public class RecordAccount {
     @ManyToOne
     private Record record;
     private String title;
+
+    public RecordAccount(Account account, Record record, String title) {
+        this.account = account;
+        this.record = record;
+        this.title = title;
+    }
 }
