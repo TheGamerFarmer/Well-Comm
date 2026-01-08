@@ -2,37 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import sha256 from 'crypto-js/sha256';
+import encryptPassword from "../../functions/encryptPassword"
+import logUser from "../../functions/logUser"
+import {useSearchParams} from "next/dist/client/components/navigation";
+import {redirect} from "next/dist/client/components/redirect";
 
 export default function LoginPage() {
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/";
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault(); // Empêche le reload de la page
 
         // Hash du mot de passe
-        const hashedPwd = sha256(password + "Bonjour, Ceci est un hash pour du sha256 aueaie").toString();
+        const hashedPwd = encryptPassword(password);
 
-        try {
-            const response = await fetch("http://localhost:8080/api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userName: userName,
-                    password: hashedPwd,
-                }),
-            });
-
-            if (response.ok) {
-                alert("Login réussi !");
-            } else {
-                alert("Erreur : nom d'utilisateur ou mot de passe incorrect");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Erreur réseau");
-        }
+        if (await logUser(userName, hashedPwd))
+            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
+        else
+            redirect(callbackUrl);
     };
 
 
@@ -56,9 +47,10 @@ export default function LoginPage() {
             <input onChange={(e) => setPassword(e.target.value)}
                    className="h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black" type="password" id="t_Mdp" name="t_Mdp"/>
 
+            {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
             <input className=" rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="Se connecter"/><br/>
 
-            <Link href="/register" className="cursor-pointer m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
+            <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="cursor-pointer m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
         </form>
     )
 }

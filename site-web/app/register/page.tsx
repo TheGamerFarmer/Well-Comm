@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import encryptPassword from "../../functions/encryptPassword"
+import logUser from "../../functions/logUser"
+import {redirect} from "next/dist/client/components/redirect";
+import {useSearchParams} from "next/dist/client/components/navigation";
 
 export default function RegisterPage() {
 
@@ -12,8 +16,10 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // 1️⃣ Vérifier tous les champs
@@ -29,16 +35,37 @@ export default function RegisterPage() {
         }
 
         // 3️⃣ Interdire certains caractères
-        const forbiddenChars = /\\/; // backslash
-        if (forbiddenChars.test(firstName) || forbiddenChars.test(lastName) || forbiddenChars.test(userName) || forbiddenChars.test(password)) {
-            setErrorMessage("Certains caractères sont interdits (ex : \\ ).");
-            return;
+        const forbiddenChars = ["\\", ";", "\"", "'", "#", "/", "<", ">", "&", "-", "?", "."];
+        forbiddenChars.forEach(char => {
+            firstName.replace(char, "\\" + char);
+            lastName.replace(char, "\\" + char);
+            userName.replace(char, "\\" + char);
+            password.replace(char, "\\" + char);
+        })
+
+        const hashedPwd = encryptPassword(password);
+
+        try {
+            const response = await fetch("http://localhost:8080/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userName: userName,
+                    password: hashedPwd,
+                    firstName: firstName,
+                    lastName: lastName,
+                }),
+            });
+
+            if (response.ok) {
+                await logUser(userName, hashedPwd);
+                redirect(callbackUrl);
+            } else {
+                setErrorMessage("L'utilisateur éxiste déjà");
+            }
+        } catch (err) {
+            console.error(err);
         }
-
-        setErrorMessage(""); // ✅ Tout est ok
-
-        alert("Formulaire OK, prêt à envoyer !");
-        // Ici tu peux appeler ton backend avec fetch()
     };
 
     return (
@@ -75,7 +102,7 @@ export default function RegisterPage() {
                 {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
                 <input className="cursor-pointer w-full rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="S'inscrire"/><br/>
 
-                <Link href="/login" className="self-center mt-4 font-montserrat text-base text-[#20baa7] font-bold">J'ai déjà un compte</Link>
+                <Link href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="self-center mt-4 font-montserrat text-base text-[#20baa7] font-bold">J'ai déjà un compte</Link>
 
             </form>
 
