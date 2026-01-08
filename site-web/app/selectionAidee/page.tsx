@@ -5,9 +5,9 @@ export default function Calendar() {
         <>
             <MiniHeader />
             <main className="min-h-screen flex items-center space-x-2 bg-[#f1f2f2]">
-                <div className="flex items-center space-x-2 bg-white flex items-center space-x-2">
-                    <p className="w-[229px] h-[34px] flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
-                        Choisir un aidéé
+                <div className="mx-auto flex items-center space-x-2 bg-white flex items-center space-x-2">
+                    <p className=" w-285 h-180 mt-[18px] mr-[39px] mb-[39px] ml-[41px] pt-[14px] pr-[34px] pb-6 pl-10 rounded-2xl shadow-[0 3px 6px 0 rgba(0, 0, 0, 0.1)] bg-[#fff">
+                        Choisir une personne aidée
                     </p>
                 </div>
             </main>
