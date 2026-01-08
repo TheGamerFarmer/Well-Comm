@@ -7,7 +7,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col min-h-screen ">
             <header className="bg-white shadow-md relative z-10">
 
-                <div className="container mx-auto px-4 py-3 flex justify-between items-center ">
+                <div className="w-full mx-auto px-4 py-3 flex justify-between items-center ">
 
                     {/* 1. Logo/Titre (Image dans la maquette) */}
                     <Link href="/"
@@ -27,7 +27,6 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                 </div>
             </header>
             <main className="bg-[#fafafa] flex-1">{children}</main>
-
         </div>
     )
 }

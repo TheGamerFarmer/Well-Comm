@@ -22,12 +22,18 @@ export default function Header() {
 
                 <div className="flex items-center space-x-2 sm:space-x-4">
 
-                    <Button variant="secondary">
-                        Se connecter
-                    </Button>
-                    <Button variant="primary">
-                        S&#39;inscrire
-                    </Button>
+                    <Link href="/login">
+                        <Button variant="secondary">
+                            Se connecter
+                        </Button>
+                    </Link>
+
+                    <Link href="/register">
+                        <Button variant="primary">
+                            S&#39;inscrire
+                        </Button>
+                    </Link>
+
 
                 </div>
             </div>
