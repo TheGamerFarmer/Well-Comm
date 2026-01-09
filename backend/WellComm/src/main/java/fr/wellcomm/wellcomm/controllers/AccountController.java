@@ -110,7 +110,8 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().stream()
+        RecordAccount recordAccount = account.getRecordAccounts().values()
+                .stream()
                 .filter(ra -> ra.getRecord().getId() == request.getRecordId())
                 .findFirst()
                 .orElse(null);
