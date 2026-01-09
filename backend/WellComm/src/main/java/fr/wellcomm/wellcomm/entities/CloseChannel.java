@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 @NoArgsConstructor
 public class CloseChannel extends Channel {
     public CloseChannel(@NotNull OpenChannel channel) {
-        this.id = channel.getId();
         this.title = channel.getTitle();
         this.creationDate = channel.getCreationDate();
         this.category = channel.getCategory();
