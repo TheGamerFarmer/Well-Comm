@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MessageServiceTest {
     @Autowired private MessageService messageService;
     @Autowired private RecordService recordService;
-    @Autowired private ChannelService channelService;
     private Message testMessage;
     private OpenChannel testChannel;
 
@@ -24,10 +24,11 @@ public class MessageServiceTest {
         Record record = recordService.createRecord("Dossier de Test");
 
         // 2. Créer un Channel
-        testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", "testUser");
+        Account testUser = new Account();
+        testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", testUser);
 
         // 3. Récupérer le message créé par createChannel
-        testMessage = channelService.getLastMessage(testChannel);
+        testMessage = testChannel.getLastMessage();
     }
 
     @Test

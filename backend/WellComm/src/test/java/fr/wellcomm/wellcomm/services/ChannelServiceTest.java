@@ -1,11 +1,15 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,16 +27,18 @@ public class ChannelServiceTest {
         user.setUserName("testUser");
         accountService.saveUser(user);
         Record record = recordService.createRecord("Dossier");
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT"));
-        OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", "testUser");
+        List<Permission> permissionList = new ArrayList<>();
+        permissionList.add(Permission.AssignerPermissions);
+        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT",permissionList));
+        OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
         // 1. Test addMessage
-        Message newMessage = channelService.addMessage(channel, "probleme regle", "testUser");
+        Message newMessage = channelService.addMessage(channel, "probleme regle", user);
         assertNotNull(newMessage);
         assertEquals("AIDANT", newMessage.getAuthorRole());
 
         // 2. Test getLastMessage
-        Message last = channelService.getLastMessage(channel);
+        Message last = channel.getLastMessage();
         assertEquals("probleme regle", last.getContent());
     }
 
@@ -44,31 +50,38 @@ public class ChannelServiceTest {
         accountService.saveUser(user);
 
         Record record = recordService.createRecord("Dossier Ordre");
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN"));
+        List<Permission> permissionList = new ArrayList<>();
+        permissionList.add(Permission.AssignerPermissions);
+        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN",permissionList));
 
         // Le premier message est créé ici (Message Index 0)
-        OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", "testOrder");
+        OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", user);
 
         // 2. Ajouter d'autres messages avec un petit délai pour garantir l'ordre des dates
         Thread.sleep(10);
-        channelService.addMessage(channel, "Second message", "testOrder");
+        channelService.addMessage(channel, "Second message", user);
 
         Thread.sleep(10);
-        channelService.addMessage(channel, "Troisième message", "testOrder");
+        channelService.addMessage(channel, "Troisième message", user);
 
+        OpenChannel updatedChannel = channelService.getChannel(channel.getId());
+        
         // 3. Récupérer les messages du canal
-        List<Message> messages = channel.getMessages();
+        List<Message> sortedMessages = updatedChannel.getMessages().values().stream()
+                .sorted(Comparator.comparing(Message::getDate))
+                .toList();
+        
 
         // 4. Vérifications
-        assertEquals(3, messages.size(), "Il devrait y avoir 3 messages au total");
+        assertEquals(3, sortedMessages.size(), "Il devrait y avoir 3 messages au total");
 
         // Vérification de l'ordre chronologique (L'index le plus bas est le plus ancien)
-        assertEquals("Premier !", messages.get(0).getContent());
-        assertEquals("Second message", messages.get(1).getContent());
-        assertEquals("Troisième message", messages.get(2).getContent());
+        assertEquals("Premier !", sortedMessages.get(0).getContent());
+        assertEquals("Second message", sortedMessages.get(1).getContent());
+        assertEquals("Troisième message", sortedMessages.get(2).getContent());
 
         // Vérification stricte des dates
-        assertTrue(messages.get(0).getDate().before(messages.get(1).getDate()));
-        assertTrue(messages.get(1).getDate().before(messages.get(2).getDate()));
+        assertTrue(sortedMessages.get(0).getDate().before(sortedMessages.get(1).getDate()));
+        assertTrue(sortedMessages.get(1).getDate().before(sortedMessages.get(2).getDate()));
     }
 }
