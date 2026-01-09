@@ -2,7 +2,8 @@ import {Button} from "@/components/ButtonMain";
 
 export default function Categories(){
     return (
-        <div className=" w-full grid  sm:flex sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-5 bg-[#f3f3f3] border border-[#f3f3f3] rounded-xl p-3">
+        <div className="flex justify-center items-center">
+        <div className=" w-[75%] grid  sm:flex sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-5 bg-[#f3f3f3] border border-[#f3f3f3] rounded-xl p-3">
             <Button variant="secondary">
                 Santé
             </Button>
@@ -21,6 +22,7 @@ export default function Categories(){
             <Button variant="secondary">
                 Autres
             </Button>
+        </div>
         </div>
     );
 }
