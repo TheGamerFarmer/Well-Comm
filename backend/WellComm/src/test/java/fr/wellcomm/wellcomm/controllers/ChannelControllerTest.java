@@ -46,6 +46,10 @@ public class ChannelControllerTest {
     @MockitoBean
     private ChannelService channelService;
 
+    public ChannelControllerTest(ChannelService channelService) {
+        this.channelService = channelService;
+    }
+
     @BeforeEach
     void setup() {
         // Pour tester la sécurité @PreAuthorize, on doit appliquer springSecurity()
@@ -76,12 +80,11 @@ public class ChannelControllerTest {
         mockChan.setRecord(record);
         mockChan.setId(1L);
 
-        Message mockMsg = new Message();
-        mockMsg.setId(100L);
-        mockMsg.setContent("Hello");
-        mockMsg.setAuthorName("userTest");
-        mockMsg.setAuthorRole("ADMIN");
-        mockMsg.setDate(new Date());
+        Message mockMsg = new Message("Hello",
+                new Date(),
+                new Account(),
+                "ADMIN",
+                mockChan);
 
         // 2. Configuration du Mock pour retourner ce message
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
