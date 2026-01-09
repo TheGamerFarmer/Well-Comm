@@ -36,7 +36,7 @@ export default function CTASection() {
                 <div className="relative w-full md:w-1/2 h-[300px] md:h-full z-10">
                     <Image
                         src="/images/Mask group1.png"
-                        alt="Seniors au soleil"
+                        alt=""
                         fill
                         className="object-cover object-top"
                     />
