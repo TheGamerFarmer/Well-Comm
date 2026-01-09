@@ -4,6 +4,7 @@ import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.entities.Message;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
@@ -20,12 +21,16 @@ public class ChannelService {
     private final ChannelRepository channelRepository;
     private final RecordAccountRepository recordAccountRepository;
     private final MessageRepository messageRepository;
+    private final AccountRepository accountRepository;
 
     public OpenChannel getChannel(long id) {
         return channelRepository.findById(id).orElse(null);
     }
 
     public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
+        accountRepository.findById(account.getUserName())
+                .orElseGet(() -> accountRepository.save(account));
+
         if (channel.getId() == 0) {
             channel = channelRepository.save(channel);
         }

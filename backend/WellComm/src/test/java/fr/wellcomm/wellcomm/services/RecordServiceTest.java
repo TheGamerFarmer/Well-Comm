@@ -76,9 +76,10 @@ public class RecordServiceTest {
     @Test
     void testGetChannelsOfCategory() {
         // On crée deux canaux de catégories différentes
-        Account user = new Account();
-        recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", user);
-        recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", user);
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
+        recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
 
         // On teste le filtre par catégorie
         List<OpenChannel> commChannels = recordService.getChannelsOfCategory(testRecord.getId(), Category.Menage);
@@ -90,8 +91,9 @@ public class RecordServiceTest {
     @Test
     void testArchiveChannel() {
         // 1. Création du channel
-        Account user = new Account();
-        OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", user);
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", testUser);
         long channelId = channel.getId();
 
         // 2. Archivage
