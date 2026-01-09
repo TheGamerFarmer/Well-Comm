@@ -28,7 +28,7 @@ const ImagePreview = ({ file }: ImagePreviewProps) => {
         <img
             src={previewUrl || "/images/placeholder.png"}
             alt="Preview"
-            className="w-[300px] h-[300px] object-contain rounded-lg border cursor-pointer hover:opacity-80 transition"
+            className=" object-contain rounded-lg border cursor-pointer hover:opacity-80 transition"
         />
     );
 };

@@ -7,7 +7,7 @@ import {Button} from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 
 
-export default function SelectionAidee() {
+export default function mesAides() {
     const [items, setItems] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState("");
@@ -69,8 +69,10 @@ export default function SelectionAidee() {
                                     key={index}
                                     onClick={() => alert("fonctionne")}
                                     className="w-full h-[83px] mb-1 pt-[18px] pr-[23px] pb-[17px] pl-5 rounded-lg bg-[#f6f6f6] text-black font-bold flex items-center">
-
+                                    <ImagePreview file={file} />
                                     {item}
+
+
                                 </div>
                             ))}
                         </div>
