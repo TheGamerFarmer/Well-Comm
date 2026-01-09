@@ -6,6 +6,7 @@ import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,14 +30,14 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public void addRecordAccount(Account account, RecordAccount recordAccount) {
+    public void addRecordAccount(Account account, @NotNull RecordAccount recordAccount) {
         recordAccount.setAccount(account);
-        account.getRecordAccounts().add(recordAccount);
+        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
     }
 
-    public void deleteRecordAccount(Account account, RecordAccount recordAccount) {
-        account.getRecordAccounts().remove(recordAccount);
+    public void deleteRecordAccount(@NotNull Account account, @NotNull RecordAccount recordAccount) {
+        account.getRecordAccounts().remove(recordAccount.getId());
         accountRepository.save(account);
     }
 }

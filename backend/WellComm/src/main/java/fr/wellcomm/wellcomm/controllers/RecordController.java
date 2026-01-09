@@ -1,8 +1,9 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
-import fr.wellcomm.wellcomm.services.ChannelService;
+import fr.wellcomm.wellcomm.services.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +17,11 @@ import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
 
 @RestController
-@RequestMapping("/api/records/{userName}")
+@RequestMapping("/api/{userName}/records")
 @AllArgsConstructor
 public class RecordController {
     private final RecordService recordService;
-    private final ChannelService channelService;
+    private final AccountService accountService;
 
     @Getter
     @Setter
@@ -69,7 +70,7 @@ public class RecordController {
         return ResponseEntity.ok(newRecord);
     }
 
-    @GetMapping("/{recordId}/channel/{category}")
+    @GetMapping("/{recordId}/channels/{category}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable Long recordId,
@@ -77,23 +78,29 @@ public class RecordController {
 
         List<FilResponse> response = recordService.getChannelsOfCategory(recordId, category).stream()
                 .map(f -> {
-                    Message lastMsg = channelService.getLastMessage(f);
+                    Message lastMsg = f.getLastMessage();
                     return new FilResponse(
                             f.getId(), f.getTitle(), f.getCategory(), f.getCreationDate(),
                             lastMsg != null ? lastMsg.getContent() : "Aucun message",
-                            lastMsg != null ? lastMsg.getAuthorName() : ""
+                            lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
                     );
                 }).collect(Collectors.toList());
 
         return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{recordId}/channel/new")
+    @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
             @PathVariable long recordId,
             @RequestBody CreateFilRequest request) {
-        Record record = recordService.getRecord(recordId);
+        Account account = accountService.getUser(userName);
+        if (account == null)
+            return ResponseEntity.badRequest().body("Message not found");
+        RecordAccount recordAccount = account.getRecordAccounts().get(recordId);
+        if (recordAccount == null)
+            return ResponseEntity.badRequest().body("RecordAccount not found");
+        Record record = recordAccount.getRecord();
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
 
@@ -102,10 +109,10 @@ public class RecordController {
                 request.getTitle(),
                 request.getCategory(),
                 request.getFirstMessage(),
-                userName
+                account
         );
 
-        Message lastMsg = channelService.getLastMessage(newChannel);
+        Message lastMsg = newChannel.getLastMessage();
 
         return ResponseEntity.ok(new FilResponse(
                 newChannel.getId(),
@@ -113,11 +120,11 @@ public class RecordController {
                 newChannel.getCategory(),
                 newChannel.getCreationDate(),
                 lastMsg != null ? lastMsg.getContent() : "",
-                lastMsg != null ? lastMsg.getAuthorName() : ""
+                lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
         ));
     }
 
-    @GetMapping("/{recordId}/{channelId}/archive")
+    @GetMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,

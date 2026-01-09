@@ -1,8 +1,10 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.entities.Message;
+import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import jakarta.transaction.Transactional;
@@ -10,7 +12,6 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Transactional
@@ -18,36 +19,31 @@ import java.util.List;
 public class ChannelService {
     private final ChannelRepository channelRepository;
     private final RecordAccountRepository recordAccountRepository;
+    private final MessageRepository messageRepository;
 
     public OpenChannel getChannel(long id) {
         return channelRepository.findById(id).orElse(null);
     }
 
-    public Message getLastMessage(OpenChannel channel) {
-        if (channel == null)
-            return null;
+    public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
+        if (channel.getId() == 0) {
+            channel = channelRepository.save(channel);
+        }
 
-        List<Message> messages = channel.getMessages();
-
-        if (messages == null || messages.isEmpty())
-            return null;
-
-        return messages.getLast();
-    }
-
-    public Message addMessage(@NotNull OpenChannel channel, String content, String userName) {
         String userTitle = recordAccountRepository
-                .findByAccountUserNameAndRecordId(userName, channel.getRecord().getId())
+                .findByAccountUserNameAndRecordId(account.getUserName(), channel.getRecord().getId())
                 .map(RecordAccount::getTitle)
                 .orElse("Membre");
 
         Message message = new Message(content,
                 new Date(),
-                userName,
+                account,
                 userTitle,
                 channel);
 
-        channel.getMessages().add(message);
+        message = messageRepository.save(message);
+
+        channel.getMessages().put(message.getId(), message);
 
         channelRepository.save(channel);
 

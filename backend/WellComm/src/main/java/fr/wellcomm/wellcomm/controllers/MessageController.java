@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
-import fr.wellcomm.wellcomm.entities.Message;
+import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.services.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,14 +8,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/message/{userName}")
+@RequestMapping("/api/{userName}/records/{recordId}/channels/{channelId}/messages/{messageId}")
 @AllArgsConstructor
 public class MessageController {
     private final MessageService messageService;
 
-    @GetMapping("/{messageId}/modify")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> modifyContent(@PathVariable String userName,
+    @GetMapping("/modify")
+    @PreAuthorize("#userName == authentication.name and" +
+            "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or" +
+                    "@securityService.ownMessage())")
+    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") String userName,
+                                           @PathVariable @SuppressWarnings("unused") long recordId,
+                                           @PathVariable @SuppressWarnings("unused") long channelId,
                                            @PathVariable long messageId,
                                            @RequestBody String newContent) {
         Message message = messageService.getMessage(messageId);
@@ -26,9 +30,13 @@ public class MessageController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{messageId}/delete")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> deleteMessage(@PathVariable String userName,
+    @GetMapping("/delete")
+    @PreAuthorize("#userName == authentication.name and" +
+            "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
+                    "@securityService.ownMessage())")
+    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") String userName,
+                                           @PathVariable @SuppressWarnings("unused") long recordId,
+                                           @PathVariable @SuppressWarnings("unused") long channelId,
                                            @PathVariable Long messageId) {
         Message message = messageService.getMessage(messageId);
         if (message == null)
