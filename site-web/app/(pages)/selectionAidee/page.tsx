@@ -4,6 +4,9 @@ import { useState } from "react";
 import FilArianne from '@/components/FilArianne';
 import {Button} from "@/components/ButtonMain";
 
+import ImagePreview from "@/components/ImagePreview";
+
+
 export default function SelectionAidee() {
     const [items, setItems] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +14,7 @@ export default function SelectionAidee() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        console.log(file);
 
         if (!name.trim()) return;
 
@@ -19,30 +23,43 @@ export default function SelectionAidee() {
         setIsOpen(false);
     }
 
+    //ImagePreview
+    const [file, setFile] = useState<File | null>(null);
 
-    //code pour la selection de l'image
-    const [preview, setPreview] = useState<File | null>(null);
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const fileList = event.target.files;
+        if (fileList && fileList.length > 0) {
+            setFile(fileList[0]);
+        } else {
+            setFile(null);
+        }
+    };
 
-    const handle
-
-
+    /*
+    const handleSubmit2 = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        console.log(file);
+    };
+    */
 
     return (
 
         <>
-                <div className=" p-10">
+                <div className=" p-10 ">
 
                     <p className=" mt-10 flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
                         Mes aidés
                     </p>
 
                     <FilArianne />
+                    <div className="flex flex-col items-end my-4">
 
-                    <button
-                        onClick={() => setIsOpen(true)}
-                        className="px-4 py-2 bg-[#0551ab] text-white rounded-full my-4">
-                        Ajouter un aidé
-                    </button>
+                        <Button variant="primary" type="button"
+                                onClick={() => setIsOpen(true)}>
+                            Ajouter un aidé
+                        </Button>
+
+                    </div>
 
                     <div className=" p-4 rounded-2xl shadow-[0 3px 6px 0 rgba(0, 0, 0, 0.1)] bg-[#fff]">
 
@@ -62,12 +79,24 @@ export default function SelectionAidee() {
                             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                                 <div className="bg-white p-6 rounded-2xl w-[400px]">
                                     <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
+                                    <div className="flex justify-center">
+
+                                    </div>
 
                                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-                                        <img
-                                            scr={}
+                                        <label htmlFor="file-upload" className="cursor-pointer flex items-center justify-center">
+                                            <ImagePreview file={file} />
+                                        </label>
+
+                                        <input
+                                            id="file-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleFileChange}
                                         />
+
                                         <input
                                             type="text"
                                             value={name}

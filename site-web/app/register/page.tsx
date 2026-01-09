@@ -71,7 +71,7 @@ export default function RegisterPage() {
     return (
         <>
             <form  onSubmit={handleLogin}
-                   className=" w-full max-w-md mx-auto flex flex-col bg-white p-2 shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] rounded-lg mt-10" >
+                   className=" w-full max-w-md mx-auto flex flex-col bg-white p-10 pb-20 shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] rounded-lg mt-10" >
                 <label htmlFor="l_CreateAccount" className="w-37 h-[29px] mr-[305px] mb-[26.5px] font-helvetica-neue text-2xl font-bold text-left text-[#0551ab] whitespace-nowrap" >Créer un compte</label>
 
                 <label htmlFor="l_FirstName" className="w-37 h-[17px] flex font-montserrat text-sm font-bold text-left text-[#727272] ">Prénom</label>

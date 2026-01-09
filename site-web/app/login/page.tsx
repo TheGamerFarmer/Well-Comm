@@ -29,7 +29,7 @@ export default function LoginPage() {
 
     return (
         <form onSubmit={handleLogin}
-            className="w-full max-w-md mx-auto flex flex-col bg-white p-2 shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] rounded-lg mt-10">
+            className="w-full max-w-md mx-auto flex flex-col bg-white p-10 pb-20 shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] rounded-lg mt-10">
             <label htmlFor="l_Seconnecter"
                    className=" w-full  font-helvetica-neue text-2xl font-bold text-left text-[#0551ab] whitespace-nowrap block mb-4" >Se
                 connecter</label>
