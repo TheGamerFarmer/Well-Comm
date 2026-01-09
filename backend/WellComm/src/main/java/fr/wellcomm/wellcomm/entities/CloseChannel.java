@@ -19,7 +19,6 @@ public class CloseChannel extends Channel {
     protected List<Message> messages = new ArrayList<>();
 
     public CloseChannel(@NotNull OpenChannel channel) {
-        this.id = channel.getId();
         this.title = channel.getTitle();
         this.creationDate = channel.getCreationDate();
         this.category = channel.getCategory();
