@@ -1,17 +1,20 @@
 "use client";
 
 import React from "react";
+import {hmrRefreshReducer} from "next/dist/client/components/router-reducer/reducers/hmr-refresh-reducer";
+import Link from "next/link";
 
 type ButtonProps = {
     children: React.ReactNode;
     variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel";
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
-    onClick?: () => void;
+    onClickAction?: () => void;
+    link: string;
 };
 
 const baseStyles =
-    "flex flex flex-row justify-center items-center gap-[10px] py-4 px-6 rounded-[100px] font-bold";
+    "flex flex flex-row justify-center items-center gap-[10px] py-4 px-6 rounded-[100px] font-bold cursor-pointer";
 
 const variantStyles = {
     primary:
@@ -48,16 +51,19 @@ export const Button = ({
                            variant = "primary",
                            type = "button",
                            disabled = false,
-                           onClick,
+                           onClickAction,
+                           link,
                        }: ButtonProps) => {
     return (
-        <button
-            type={type}
-            disabled={disabled}
-            onClick={onClick}
-            className={`${baseStyles} ${variantStyles[variant]}`}
-        >
-            {children}
-        </button>
+        <Link href={link}>
+            <button
+                type={type}
+                disabled={disabled}
+                onClick={onClickAction}
+                className={`${baseStyles} ${variantStyles[variant]}`}
+            >
+                {children}
+            </button>
+        </Link>
     );
 };
