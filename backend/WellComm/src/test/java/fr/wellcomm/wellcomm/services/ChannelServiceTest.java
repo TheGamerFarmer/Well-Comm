@@ -1,11 +1,14 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,16 +26,16 @@ public class ChannelServiceTest {
         user.setUserName("testUser");
         accountService.saveUser(user);
         Record record = recordService.createRecord("Dossier");
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT"));
-        OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", "testUser");
+        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT", new ArrayList<>()));
+        OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
         // 1. Test addMessage
-        Message newMessage = channelService.addMessage(channel, "probleme regle", "testUser");
+        Message newMessage = channelService.addMessage(channel, "probleme regle", user);
         assertNotNull(newMessage);
-        assertEquals("AIDANT", newMessage.getAuthorRole());
+        assertEquals("AIDANT", newMessage.getAuthorTitle());
 
         // 2. Test getLastMessage
-        Message last = channelService.getLastMessage(channel);
+        Message last = channel.getLastMessage();
         assertEquals("probleme regle", last.getContent());
     }
 
@@ -44,20 +47,20 @@ public class ChannelServiceTest {
         accountService.saveUser(user);
 
         Record record = recordService.createRecord("Dossier Ordre");
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN"));
+        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN", new ArrayList<>()));
 
         // Le premier message est créé ici (Message Index 0)
-        OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", "testOrder");
+        OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", user);
 
         // 2. Ajouter d'autres messages avec un petit délai pour garantir l'ordre des dates
         Thread.sleep(10);
-        channelService.addMessage(channel, "Second message", "testOrder");
+        channelService.addMessage(channel, "Second message", user);
 
         Thread.sleep(10);
-        channelService.addMessage(channel, "Troisième message", "testOrder");
+        channelService.addMessage(channel, "Troisième message", user);
 
         // 3. Récupérer les messages du canal
-        List<Message> messages = channel.getMessages();
+        List<Message> messages = new ArrayList<>(channel.getMessages().values());
 
         // 4. Vérifications
         assertEquals(3, messages.size(), "Il devrait y avoir 3 messages au total");

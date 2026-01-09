@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -27,7 +30,7 @@ public class AccountServiceTest {
 
         // 2. Test RecordAccount
         Record record = recordService.createRecord("Dossier A");
-        RecordAccount ra = new RecordAccount(user, record, "Manager");
+        RecordAccount ra = new RecordAccount(user, record, "Manager", new ArrayList<>());
 
         accountService.addRecordAccount(user, ra);
         assertEquals(1, found.getRecordAccounts().size());

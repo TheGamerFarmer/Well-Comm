@@ -6,4 +6,6 @@ public enum Permission {
     AssignerPermissions,
     Inviter,
     SEND_MESSAGE,
+    MODIFY_MESSAGE,
+    DELETE_MESSAGE,
 }

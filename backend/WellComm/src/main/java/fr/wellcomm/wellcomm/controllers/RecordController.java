@@ -4,7 +4,6 @@ import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.ChannelService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +21,6 @@ import fr.wellcomm.wellcomm.services.RecordService;
 @AllArgsConstructor
 public class RecordController {
     private final RecordService recordService;
-    private final ChannelService channelService;
     private final AccountService accountService;
 
     @Getter
@@ -84,7 +82,7 @@ public class RecordController {
                     return new FilResponse(
                             f.getId(), f.getTitle(), f.getCategory(), f.getCreationDate(),
                             lastMsg != null ? lastMsg.getContent() : "Aucun message",
-                            lastMsg != null ? lastMsg.getAuthorName() : ""
+                            lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
                     );
                 }).collect(Collectors.toList());
 
@@ -122,7 +120,7 @@ public class RecordController {
                 newChannel.getCategory(),
                 newChannel.getCreationDate(),
                 lastMsg != null ? lastMsg.getContent() : "",
-                lastMsg != null ? lastMsg.getAuthorName() : ""
+                lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
         ));
     }
 

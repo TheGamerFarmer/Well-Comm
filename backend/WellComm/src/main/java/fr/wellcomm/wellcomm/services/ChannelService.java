@@ -31,7 +31,7 @@ public class ChannelService {
 
         Message message = new Message(content,
                 new Date(),
-                account.getUserName(),
+                account,
                 userTitle,
                 channel);
 

@@ -19,18 +19,20 @@ public class Message {
     private long id;
     private String content;
     private Date date;
-    private String authorName;
-    private String authorRole;
+    @ManyToOne
+    @JoinColumn(name = "author_username")
+    private Account author;
+    private String authorTitle;
     @ManyToOne
     @JoinColumn(name = "channel_id", nullable = false)
     @JsonIgnore // Indispensable pour éviter la boucle infinie JSON
     private Channel channel;
 
-    public Message(String content, Date date, String authorName, String authorRole, Channel channel) {
+    public Message(String content, Date date, Account author, String authorTitle, Channel channel) {
         this.content = content;
         this.date = date;
-        this.authorName = authorName;
-        this.authorRole = authorRole;
+        this.author = author;
+        this.authorTitle = authorTitle;
         this.channel = channel;
     }
 }
