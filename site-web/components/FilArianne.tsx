@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const breadcrumbNames: Record<string, string> = {
     home: "Accueil",
-    selectionAidee: "Choisir un dossier",
+    selectionAidee: "Mes aidés",
     calendrier: "Calendrier",
     profil: "Mon profil",
 };
