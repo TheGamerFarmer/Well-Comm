@@ -1,6 +1,6 @@
 package fr.wellcomm.wellcomm.repositories;
 
-import fr.wellcomm.wellcomm.entities.Category;
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

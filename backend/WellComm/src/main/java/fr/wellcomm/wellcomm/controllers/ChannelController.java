@@ -1,7 +1,9 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
+import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,10 +16,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/fil/{userName}")
+@RequestMapping("/api/{userName}/records/{recordId}/channels/{channelId}")
 @AllArgsConstructor
 public class ChannelController {
     private final ChannelService channelService;
+    private final AccountService accountService;
 
     @Getter
     @Setter
@@ -40,12 +43,14 @@ public class ChannelController {
         private List<MessageInfos> messages;
     }
 
-    @GetMapping("/{filId}")
+    @GetMapping("/")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long filId) {
-        OpenChannel channel = channelService.getChannel(filId);
+    public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") String userName,
+                                                          @PathVariable @SuppressWarnings("unused") long recordId,
+                                                          @PathVariable Long channelId) {
+        OpenChannel channel = channelService.getChannel(channelId);
 
-        List<MessageInfos> messages = channel.getMessages().stream()
+        List<MessageInfos> messages = channel.getMessages().values().stream()
                 .map(m -> new MessageInfos(m.getId(), m.getContent(), m.getDate(), m.getAuthorName(), m.getAuthorRole()))
                 .collect(Collectors.toList());
 
@@ -57,17 +62,22 @@ public class ChannelController {
         ));
     }
 
-    @PostMapping("/{channelID}/messages")
-    @PreAuthorize("#userName == authentication.name")
+    @PostMapping("/messages")
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<?> addMessage(
             @PathVariable String userName,
-            @PathVariable long channelID,
+            @PathVariable @SuppressWarnings("unused") long recordId,
+            @PathVariable long channelId,
             @RequestBody String content) {
-        OpenChannel channel = channelService.getChannel(channelID);
+        Account account = accountService.getUser(userName);
+        if (account == null)
+            return ResponseEntity.badRequest().body("Message not found");
+        OpenChannel channel = channelService.getChannel(channelId);
         if (channel == null)
             return ResponseEntity.badRequest().body("Channel not found");
 
-        Message msg = channelService.addMessage(channel, content, userName);
+        Message msg = channelService.addMessage(channel, content, account);
 
         return ResponseEntity.ok(new MessageInfos(
                 msg.getId(),

@@ -1,8 +1,9 @@
-package fr.wellcomm.wellcomm.entities;
+package fr.wellcomm.wellcomm.domain;
 
 public enum Permission {
     IsMedecin,
     ModifierAgenda,
     AssignerPermissions,
-    Inviter
+    Inviter,
+    SEND_MESSAGE,
 }

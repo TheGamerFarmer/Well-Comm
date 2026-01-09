@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
@@ -8,7 +9,6 @@ import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
-
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import lombok.AllArgsConstructor;
 import java.util.List;
@@ -20,9 +20,14 @@ public class RecordService {
     private final ReportRepository recordRepository;
     private final ChannelRepository channelRepository;
     private final RecordAccountRepository recordAccountRepository;
+    private final ChannelService channelService;
 
     public Record getRecord(long id) {
         return recordRepository.findById(String.valueOf(id)).orElse(null);
+    }
+
+    public RecordAccount getRecordAccount(@NotNull Record record, @NotNull Account user) {
+        return recordAccountRepository.findByAccountUserNameAndRecordId(user.getUserName(), record.getId()).orElse(null);
     }
 
     public List<Record> getRecords(String userName) {
@@ -44,36 +49,25 @@ public class RecordService {
 
         CloseChannel closeChannel = new CloseChannel(channel);
 
-        channel.getMessages().forEach(message -> message.setChannel(closeChannel));
+        channel.getMessages().values().forEach(message -> message.setChannel(closeChannel));
 
-        record.getOpenChannels().remove(channel);
-        record.getCloseChannels().add(closeChannel);
+        record.getOpenChannels().remove(channel.getId());
+        record.getCloseChannels().put(closeChannel.getId(), closeChannel);
 
         recordRepository.save(record);
     }
 
-    public OpenChannel createChannel(@NotNull Record record, String title, Category category, String content, String userName) {
-        String userTitle = recordAccountRepository
-                .findByAccountUserNameAndRecordId(userName, record.getId())
-                .map(RecordAccount::getTitle)
-                .orElse("Membre");
-
+    public OpenChannel createChannel(@NotNull Record record, String title, Category category, String content, Account account) {
         OpenChannel channel = new OpenChannel(title,
                 new Date(),
                 category,
                 record);
 
-        Message firstMessage = new Message(content,
-                new Date(),
-                userName,
-                userTitle,
-                channel);
-
-        channel.getMessages().add(firstMessage);
-        record.getOpenChannels().add(channel);
+        channelService.addMessage(channel, content, account);
+        record.getOpenChannels().put(channel.getId(), channel);
 
         recordRepository.save(record);
 
-        return record.getOpenChannels().getLast();
+        return channel;
     }
 }

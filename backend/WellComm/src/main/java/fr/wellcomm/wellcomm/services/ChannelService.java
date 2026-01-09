@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.entities.Message;
@@ -10,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Transactional
@@ -23,31 +23,19 @@ public class ChannelService {
         return channelRepository.findById(id).orElse(null);
     }
 
-    public Message getLastMessage(OpenChannel channel) {
-        if (channel == null)
-            return null;
-
-        List<Message> messages = channel.getMessages();
-
-        if (messages == null || messages.isEmpty())
-            return null;
-
-        return messages.getLast();
-    }
-
-    public Message addMessage(@NotNull OpenChannel channel, String content, String userName) {
+    public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
         String userTitle = recordAccountRepository
-                .findByAccountUserNameAndRecordId(userName, channel.getRecord().getId())
+                .findByAccountUserNameAndRecordId(account.getUserName(), channel.getRecord().getId())
                 .map(RecordAccount::getTitle)
                 .orElse("Membre");
 
         Message message = new Message(content,
                 new Date(),
-                userName,
+                account.getUserName(),
                 userTitle,
                 channel);
 
-        channel.getMessages().add(message);
+        channel.getMessages().put(message.getId(), message);
 
         channelRepository.save(channel);
 
