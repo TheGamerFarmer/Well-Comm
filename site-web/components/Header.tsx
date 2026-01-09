@@ -21,14 +21,17 @@ export default function Header() {
                 </Link>
 
                 <div className="flex items-center space-x-2 sm:space-x-4">
+                    <Link href="/login">
+                        <Button variant="secondary">
+                            Se connecter
+                        </Button>
+                    </Link>
 
-                    <Button variant="secondary">
-                        Se connecter
-                    </Button>
-                    <Button variant="primary">
-                        S&#39;inscrire
-                    </Button>
-
+                    <Link href="/register">
+                        <Button variant="primary">
+                            S&#39;inscrire
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </header>
