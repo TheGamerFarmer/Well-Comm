@@ -22,8 +22,10 @@ public class Record {
     private String name;
     //Relation vers Fil (Un dossier a plusieurs fils)
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapKey(name = "id")
     private Map<Long, OpenChannel> openChannels = new HashMap<>();
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapKey(name = "id")
     private Map<Long, CloseChannel> closeChannels = new HashMap<>();
     //Relation vers CompteParDossier (Un dossier a plusieurs comptesParDossier)
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)

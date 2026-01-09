@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 public class MessageServiceTest {
-    @Autowired private AccountService accountService;
     @Autowired private MessageService messageService;
     @Autowired private RecordService recordService;
     private Message testMessage;
@@ -25,7 +24,8 @@ public class MessageServiceTest {
         Record record = recordService.createRecord("Dossier de Test");
 
         // 2. Créer un Channel
-        testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", accountService.getUser("testUser"));
+        Account testUser = new Account();
+        testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", testUser);
 
         // 3. Récupérer le message créé par createChannel
         testMessage = testChannel.getLastMessage();

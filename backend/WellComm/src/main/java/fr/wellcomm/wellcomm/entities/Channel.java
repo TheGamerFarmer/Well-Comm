@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity
@@ -25,7 +26,7 @@ public abstract class Channel {
     @JoinColumn(name = "record_id")
     protected Record record;
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
-    protected Map<Long, Message> messages;
+    protected Map<Long, Message> messages = new HashMap<>();
 
     public Message getLastMessage() {
         return messages.values()
