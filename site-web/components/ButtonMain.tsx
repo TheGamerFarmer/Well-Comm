@@ -4,7 +4,7 @@ import React from "react";
 
 type ButtonProps = {
     children: React.ReactNode;
-    variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate";
+    variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel";
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
     onClick?: () => void;
@@ -37,6 +37,9 @@ const variantStyles = {
     validate:
        "w-100% h-100% px-4 py-[12px] rounded-[100px] bg-[#0551ab]" +
         " font-medium font-stretch-normal hover:bg-[#f87c7c]",
+
+    cancel: "w-100% h-12 bg-[#ffffff] text-[#f87c7c] border #f87c7c border-solid  " +
+        "hover:bg-[#f87c7c] hover:text-white ",
 
 };
 
