@@ -22,10 +22,10 @@ export default function Header() {
 
                 <div className="flex items-center space-x-2 sm:space-x-4">
 
-                    <Button variant="secondary">
+                    <Button variant="secondary" link="/login" >
                         Se connecter
                     </Button>
-                    <Button variant="primary">
+                    <Button variant="primary" link="/register" >
                         S&#39;inscrire
                     </Button>
 

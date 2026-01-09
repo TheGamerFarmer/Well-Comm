@@ -26,7 +26,7 @@ export default function CTASection() {
                         des rappels et du soutien.
                     </p>
 
-                    <Button variant={"start1"}>
+                    <Button variant={"start1"} link={"/register"}>
                         Commencer
                     </Button>
 

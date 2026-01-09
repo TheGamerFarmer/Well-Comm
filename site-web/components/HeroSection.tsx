@@ -29,7 +29,7 @@ export default function HeroSection() {
                     WellComm est un assistant indispensable pour les seniors et leurs aidants.
                 </p>
 
-                <Button variant={"start1"}>
+                <Button variant={"start1"} link={"/register"}>
                     Commencer
                 </Button>
 

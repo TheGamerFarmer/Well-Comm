@@ -26,10 +26,10 @@ export default function Footer() {
 
                 <div className="flex space-x-2 ml-75">
 
-                    <Button variant="secondary">
+                    <Button variant="secondary" link="/login">
                         Se connecter
                     </Button>
-                    <Button variant="primary">
+                    <Button variant="primary" link="/register">
                         S&#39;inscrire
                     </Button>
 
