@@ -1,4 +1,4 @@
-module.exports = async (userName, hashPassWord) => {
+export default async (userName: string, hashPassWord: string) => {
     try {
         const response = await fetch("http://localhost:8080/api/login", {
             method: "POST",
