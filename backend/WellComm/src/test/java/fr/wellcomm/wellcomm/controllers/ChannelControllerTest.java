@@ -28,7 +28,6 @@ import java.util.List;
 @SpringBootTest
 @Transactional
 public class ChannelControllerTest {
-
     private MockMvc mockMvc;
 
     @Autowired
@@ -45,10 +44,6 @@ public class ChannelControllerTest {
 
     @MockitoBean
     private ChannelService channelService;
-
-    public ChannelControllerTest(ChannelService channelService) {
-        this.channelService = channelService;
-    }
 
     @BeforeEach
     void setup() {
