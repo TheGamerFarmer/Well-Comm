@@ -26,8 +26,8 @@ export default function HeroSection() {
                 </h1>
                 <p className="
 
-                md:w-120 h-[82px] mb-4 md:text-2xl md:font-normal md:font-stretch-normal md:leading-[1.42px] md:tracking-normal text-left text-white
-                  md:mb-16
+                md:w-120 h-[82px] mb-4 md:text-2xl md:font-normal md:font-stretch-normal  md:tracking-normal text-left text-white
+                  md:mb-16  md:leading-relaxed
                   lg:mb-16
                 ">
                     WellComm est un assistant indispensable pour les seniors et leurs aidants.
