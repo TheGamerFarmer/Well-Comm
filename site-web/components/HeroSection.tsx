@@ -1,6 +1,5 @@
 // mon-site-web/components/HeroSection.tsx
 import Image from 'next/image';
-import Link from 'next/link';
 import {Button} from "@/components/ButtonMain";
 
 export default function HeroSection() {
@@ -27,8 +26,8 @@ export default function HeroSection() {
                 </h1>
                 <p className="
 
-                md:w-120 h-[82px] mb-[16px] md:text-2xl md:font-normal md:font-stretch-normal md:leading-[1.42px] md:tracking-normal text-left text-[#fff]
-                  md:mb-16  md:leading-relaxed
+                md:w-120 h-[82px] mb-4 md:text-2xl md:font-normal md:font-stretch-normal md:leading-[1.42px] md:tracking-normal text-left text-white
+                  md:mb-16
                   lg:mb-16
                 ">
                     WellComm est un assistant indispensable pour les seniors et leurs aidants.

@@ -24,7 +24,7 @@ export default function Footer() {
 
                 </div>
 
-                <div className="flex space-x-2 ml-75 hidden lg:flex items-center space-x-2">
+                <div className="space-x-2 ml-75 hidden lg:flex items-center">
 
                     <Button variant="secondary" link="/login">
                         Se connecter
