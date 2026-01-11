@@ -21,7 +21,7 @@ const BurgerScreen = () => {
         { text: "L’aidé", iconWhite: "/images/icons/white/icons-patient.svg", iconBlue: "/images/icons/blue/icons-patient.svg", href: "/" },
         { text: "Calendrier", iconWhite: "/images/icons/white/solar-calendar-outline.svg", iconBlue: "/images/icons/blue/solar-calendar-outline(1).svg", href: "/calendar" },
         { text: "Résumé", iconWhite: "/images/icons/white/icons-bell.svg", iconBlue: "/images/icons/blue/icons-bell(1).svg", href: "/" },
-        { text: "Fil de transmission", iconWhite: "/images/icons/white/icons-message.svg", iconBlue: "/images/icons/blue/ep-message.svg", href: "/" },
+        { text: "Fil de transmission", iconWhite: "/images/icons/white/icons-message.svg", iconBlue: "/images/icons/blue/ep-message.svg", href: "/fil" },
         { text: "Médecin", iconWhite: "/images/icons/white/hugeicons-doctor-03.svg", iconBlue: "/images/icons/blue/hugeicons-doctor-03(1).svg", href: "/" },
         { text: "Assistants", iconWhite: "/images/icons/white/lucide-users.svg", iconBlue: "/images/icons/blue/lucide-users(1).svg", href: "/" },
     ];
