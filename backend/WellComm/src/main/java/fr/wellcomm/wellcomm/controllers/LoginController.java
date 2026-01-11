@@ -55,7 +55,7 @@ public class LoginController {
 
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
-                    .secure(true)
+                    .secure(false)
                     .path("/")
                     .maxAge(86400)
                     .sameSite("Strict")
@@ -64,9 +64,8 @@ public class LoginController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .build();
-        }
-
-        return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
+        } else
+            return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
     }
 
     @GetMapping("/isLogin")

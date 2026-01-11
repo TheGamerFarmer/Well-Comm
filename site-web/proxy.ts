@@ -11,13 +11,19 @@ export async function proxy(request: NextRequest) {
             || request.nextUrl.pathname.startsWith(imagesPrefix))
         return NextResponse.next();
 
-    let response = await fetch("http://localhost:8080/api/isLogin");
-    if (!response.ok)
-        return false;
+    const cookieHeader = request.headers.get('cookie');
 
-    let isLoged = await response.json();
+    const response = await fetch("http://localhost:8080/api/isLogin", {
+        method: "GET",
+        headers: {
+            "Cookie": cookieHeader || ""
+        },
+        cache: 'no-store'
+    });
 
-    if (isLoged && logPages.includes(request.nextUrl.pathname))
+    const isLoged = await response.json();
+
+    if (!response.ok && isLoged && logPages.includes(request.nextUrl.pathname))
         return NextResponse.redirect(new URL("/", request.url));
     else if (isLoged
                 || logPages.includes(request.nextUrl.pathname)
