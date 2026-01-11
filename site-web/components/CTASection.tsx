@@ -1,6 +1,6 @@
 // components/CTASection.tsx
 import Image from 'next/image';
-import Link from 'next/link';
+
 import {Button} from "@/components/ButtonMain";
 
 export default function CTASection() {
@@ -8,7 +8,7 @@ export default function CTASection() {
         <section className="py-12 px-6 bg-white">
             <div className="
 
-             bg-[linear-gradient(89deg,_#215a9e_0%,_#45bbb1_140%)]  lg:container mx-auto relative overflow-hidden rounded-[2.5rem] min-h-[350px] flex flex-col md:flex-row items-center text-white">
+             bg-[linear-gradient(89deg,#215a9e_0%,#45bbb1_140%)]  lg:container mx-auto relative overflow-hidden rounded-[2.5rem] min-h-[350px] flex flex-col md:flex-row items-center text-white">
 
                 <Image
                     src="/images/CTA.png"

@@ -22,7 +22,7 @@ export default function ImageTextSection() {
                     {/* 2. Bloc Texte à droite (Plus de contenu, pas de bouton) */}
                     <div className="w-full text-gray-700 p-8">
                         <h2 className="text-3xl md:text-4xl font-bold text-[#1e40af] mb-6">
-                            Qu'est-ce que WellComm?
+                            Qu&#39;est-ce que WellComm?
                         </h2>
 
                         <div className="space-y-5 text-base md:text-lg leading-relaxed">
@@ -35,7 +35,7 @@ export default function ImageTextSection() {
                             </p>
 
                             <p>
-                                C'est un assistant simple et fiable qui facilite le quotidien et vous apporte sérénité, jour après jour.
+                                C&#39;est un assistant simple et fiable qui facilite le quotidien et vous apporte sérénité, jour après jour.
                             </p>
                         </div>
                     </div>
