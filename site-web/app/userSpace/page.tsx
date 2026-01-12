@@ -11,7 +11,7 @@ export default function UserSpace() {
 
             <div  className=" flex justify-center items-center flex-col  bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
 
-                <div className="relative w-[130px] h-[130px] overflow-visible">
+                <div className="p-8 relative  overflow-visible">
                     <Image
                         src="/images/avatar.svg"
                         alt="user avatar"
@@ -26,7 +26,7 @@ export default function UserSpace() {
                         width={32}
                         height={32}
                         priority
-                        className="absolute bottom-3 right-3 z-10 translate-x-1/4 translate-y-1/4 cursor-pointer"
+                        className="absolute bottom-11 right-11 z-10 translate-x-1/4 translate-y-1/4 cursor-pointer"
                     />
                 </div>
 
