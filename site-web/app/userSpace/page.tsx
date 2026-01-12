@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import HeaderLoged from "@/components/HeaderLoged";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 
