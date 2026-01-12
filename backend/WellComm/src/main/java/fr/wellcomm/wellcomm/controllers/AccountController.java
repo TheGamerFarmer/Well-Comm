@@ -123,13 +123,16 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().values()
-                .stream()
-                .filter(ra -> ra.getRecord().getId() == request.getRecordId())
-                .findFirst()
-                .orElse(null);
+        RecordAccount recordAccount = new RecordAccount();
+        int i = 0;
+        while (i < account.getRecordAccounts().size()){
+            if (account.getRecordAccounts().get(i).getId() == request.getRecordId()){
+                recordAccount = account.getRecordAccounts().get(i);
+            }
+            i++;
+        }
 
-        if (recordAccount == null)
+        if (i == account.getRecordAccounts().size())
             return ResponseEntity.badRequest().body("Access not found");
 
         accountService.deleteRecordAccount(account, recordAccount);
