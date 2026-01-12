@@ -26,7 +26,7 @@ export default function UserSpace() {
                         width={32}
                         height={32}
                         priority
-                        className="absolute bottom-11 right-11 z-10 translate-x-1/4 translate-y-1/4 cursor-pointer"
+                        className="absolute bottom-11 right-11 z-3 translate-x-1/4 translate-y-1/4 cursor-pointer"
                     />
                 </div>
 
@@ -53,7 +53,8 @@ export default function UserSpace() {
                         </div>
                     </div>
 
-                <div className="flex gap-4 justify-end">
+                <div className="flex gap-4 justify-end mt-4 mb-4
+                lg:mt-16 lg:mb-16">
                     <Button variant="cancel" link={""}>
                         Annuler
                     </Button>
