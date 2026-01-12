@@ -30,7 +30,7 @@ export default function UserSpace() {
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <p className="p-4 text-lg font-bold text-[#0551ab]">Mon Profil</p>
+            <p className="p-4 font-bold text-[#0551ab] text-2xl">Mon Profil</p>
 
             <div className="flex justify-center items-center flex-col bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
 
