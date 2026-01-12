@@ -22,7 +22,7 @@ export default function AssistantsPage() {
     return (
 
         <>
-            <div className=" p-10 ">
+            <div className=" p-[5%] ">
                 <p className=" mt-10 flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
                     Assistans
                 </p>
@@ -40,48 +40,56 @@ export default function AssistantsPage() {
                     {invitations.map((inv) => (
                         <div
                             key={inv.id}
-                            className="flex justify-between items-center p-4 rounded-lg bg-[#f6f6f6]">
-                            <div className="flex items-center gap-4">
+                            className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
+                            <div className="flex flex-nowrap items-center gap-4 m-4">
                                 <img
                                     src={`https://ui-avatars.com/api/?name=${inv.username}&background=0551ab&color=fff`}
                                     alt="avatar"
                                     className="w-12 h-12 rounded-full"
                                 />
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-black">{inv.username}</span>
-                                    <span className="text-gray-500">téléphone : </span>
-                                    <span className="text-gray-500">ajouté le : </span>
-                                </div>
+                                <ul>
+                                    <li>
+                                        <span className="font-bold text-black ">{inv.username}</span>
+                                    </li>
+                                    <li>
+                                        <span className="text-gray-500 whitespace-nowrap">téléphone : </span>
+                                    </li>
+                                    <li>
+                                        <span className="text-gray-500 ">ajouté le : </span>
+                                    </li>
+                                </ul>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className=" my-auto flex-1 items-center min-w- justify-center h-0 border border-solid border-gray-400 text-black"></div>
+
+                            <div className="flex flex-col md:flex-row items-center gap-4 p-4">
                                 <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)}>
                                     Permissions
                                 </Button>
-                            <select
-                                value={inv.role}
-                                onChange={(e) =>
-                                    setInvitations((prev) =>
-                                        prev.map((i) =>
-                                            i.id === inv.id
-                                                ? { ...i, role: e.target.value as Invitation["role"] }
-                                                : i
+                                <select
+                                    value={inv.role}
+                                    onChange={(e) =>
+                                        setInvitations((prev) =>
+                                            prev.map((i) =>
+                                                i.id === inv.id
+                                                    ? { ...i, role: e.target.value as Invitation["role"] }
+                                                    : i
+                                            )
                                         )
-                                    )
-                                }
-                                className="border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
-                                <option>Aidant</option>
-                                <option>Infirmier(e)</option>
-                                <option>Médecin</option>
-                                <option>Aide soignant(e)</option>
-                                <option>Aide à domicile</option>
-                            </select>
-                            <button
-                                onClick={() => setInvitationToDelete(inv)}
-                                className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">
+                                    }
+                                    className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
+                                    <option>Aidant</option>
+                                    <option>Infirmier(e)</option>
+                                    <option>Médecin</option>
+                                    <option>Aide soignant(e)</option>
+                                    <option>Aide à domicile</option>
+                                </select>
+                                <button
+                                    onClick={() => setInvitationToDelete(inv)}
+                                    className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">
 
-                                <svg className="m-4" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="#c10808" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M12 20h5c0.5 0 1 -0.5 1 -1v-14M12 20h-5c-0.5 0 -1 -0.5 -1 -1v-14"/><path d="M4 5h16"/><path d="M10 4h4M10 9v7M14 9v7"/></g></svg>
-                            </button>
+                                    <svg className="m-4" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="#c10808" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M12 20h5c0.5 0 1 -0.5 1 -1v-14M12 20h-5c-0.5 0 -1 -0.5 -1 -1v-14"/><path d="M4 5h16"/><path d="M10 4h4M10 9v7M14 9v7"/></g></svg>
+                                </button>
                             </div>
 
                         </div>
