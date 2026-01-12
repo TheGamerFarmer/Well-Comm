@@ -5,13 +5,13 @@ import { Button } from "@/components/ButtonMain";
 
 export default function FilDeTransmission() {
     const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
-    
+
     const [activeCategory, setActiveCategory] = useState("Santé");
     const [searchQuery, setSearchQuery] = useState("");
-    
-    const aideNom = ""; 
-    const archiveCount = 0; 
-    const channels = []; 
+
+    const aideNom = "userTemp";
+    const archiveCount = 0;
+    const channels = [];
 
     return (
         <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
@@ -22,16 +22,16 @@ export default function FilDeTransmission() {
                         Home / Fil de transmission / Catégories / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
                     </nav>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
-                    <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-[56px] w-full sm:w-[450px]">
-                        <span className="font-bold text-lg whitespace-nowrap">L'aidé</span>
+                    <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
+                        <span className="font-bold text-lg whitespace-nowrap">L&#39;aidé</span>
                         <select className="bg-white text-black rounded-lg px-4 py-2 outline-none flex-1 text-base font-medium cursor-pointer">
                             <option value="">{aideNom}</option>
                         </select>
                     </div>
 
-					<div className="w-full sm:w-[240px] [&_button]:w-full [&_button]:h-[56px] [&_button]:text-lg [&_button]:font-bold shadow-md rounded-xl overflow-hidden">
+					<div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold shadow-md rounded-xl overflow-hidden">
 						<Button variant="primary">
 							Créer un fil
 						</Button>
@@ -57,7 +57,7 @@ export default function FilDeTransmission() {
 
             <div className="bg-white rounded-[2.5rem] shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 md:p-12 w-full min-h-[70vh]">
                 <h2 className="text-[#26b3a9] font-bold text-3xl mb-8">{activeCategory}</h2>
-                
+
                 <div className="relative mb-10">
                     <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                         <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
