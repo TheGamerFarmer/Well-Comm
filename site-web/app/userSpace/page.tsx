@@ -10,6 +10,8 @@ export default function UserSpace() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
 
     // Состояния для полей профиля
     const [prenom, setPrenom] = useState("");
@@ -173,7 +175,8 @@ export default function UserSpace() {
                             priority
                         />
                         <p
-                            className="text-[#f67a7a] hover:underline text-xm mt-[3px]"
+                            className="text-[#f67a7a] hover:underline text-xm mt-[3px] cursor-pointer"
+                            onClick={() => setShowDeleteModal(true)}
                         >
                             Supprimer le compte
                         </p>
@@ -181,6 +184,59 @@ export default function UserSpace() {
 
                 </form>
             </div>
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl">
+
+                        {/* Крестик */}
+                        <button
+                            onClick={() => setShowDeleteModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="flex justify-center mb-4">
+                            <Image
+                                src="/images/icons/attention.svg"
+                                alt="attention"
+                                width={48}
+                                height={48}
+                                priority
+                            />
+                        </div>
+
+                        {/* Текст */}
+                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
+                            Voulez-vous supprimer ?
+                        </h2>
+                        <p className="text-center text-gray-700 mb-6">
+                            Ceci sera supprimé définitivement.
+                        </p>
+
+                        {/* Кнопки */}
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-6 py-2 rounded-full border border-[#0551ab] text-[#0551ab] hover:bg-gray-100"
+                            >
+                                Non
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    console.log("DELETE ACCOUNT");
+                                    setShowDeleteModal(false);
+                                }}
+                                className="px-6 py-2 rounded-full bg-[#0551ab] text-white hover:bg-blue-700"
+                            >
+                                Oui
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
