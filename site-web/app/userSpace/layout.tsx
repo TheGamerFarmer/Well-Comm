@@ -1,6 +1,6 @@
 import HeaderLoged from "@/components/HeaderLoged";
 
-export default function UserProfil({ children }: { children: React.ReactNode }) {
+export default function UserSpace({ children }: { children: React.ReactNode }) {
     return (
 
         <div className="flex flex-col min-h-screen ">
@@ -9,7 +9,7 @@ export default function UserProfil({ children }: { children: React.ReactNode }) 
                 <HeaderLoged />
 
             </header>
-            <main className="bg-[#fafafa] flex-1">{children}</main>
+            <main className="bg-[#f1f2f2] flex-1">{children}</main>
 
         </div>
     )
