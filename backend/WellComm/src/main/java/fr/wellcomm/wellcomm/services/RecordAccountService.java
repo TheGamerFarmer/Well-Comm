@@ -34,6 +34,6 @@ public class RecordAccountService {
         accountRepository.save(account);
         record.getRecordAccounts().add(recordAccount);
         recordRepository.save(record);
-        return recordAccount;
+        return recordAccountRepository.save(recordAccount);
     }
 }
