@@ -1,37 +1,50 @@
-import { useEffect } from 'react'
+"use client";
 
-type ModalProps = {
-    isOpen: boolean
-    onClose: () => void
+import React, { useEffect } from "react";
+
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose }: ModalProps) {
+/**
+ * Composant Modal avec blocage du défilement de l'arrière-plan
+ */
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+    // Fige la page en fond lors de l'ouverture pour éviter le scroll
     useEffect(() => {
         if (isOpen) {
-            document.body.classList.add('overflow-hidden')
+            document.body.style.overflow = "hidden";
         } else {
-            document.body.classList.remove('overflow-hidden')
+            document.body.style.overflow = "unset";
         }
-
-        // Nettoyage au démontage (important)
         return () => {
-            document.body.classList.remove('overflow-hidden')
-        }
-    }, [isOpen])
+            document.body.style.overflow = "unset";
+        };
+    }, [isOpen]);
 
-    if (!isOpen) return null
+    if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white p-6 rounded-lg">
-                <p>Ma popup</p>
+        <div
+            className="flex justify-center items-center fixed inset-0 bg-black/50 z-100 p-4 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white md:w-[55%] w-full rounded-xl p-8 relative shadow-2xl animate-in fade-in zoom-in duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button
                     onClick={onClose}
-                    className="mt-4 px-4 py-2 bg-black text-white rounded"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl font-light transition-colors"
                 >
-                    Fermer
+                    &times;
                 </button>
+                {children}
             </div>
         </div>
-    )
-}
+    );
+};
+
+export default Modal;
