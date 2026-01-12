@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Modal from './Modal'
 import { Button } from "@/components/ButtonMain";
 
 export default function FilDeTransmission() {
@@ -12,6 +13,8 @@ export default function FilDeTransmission() {
     const aideNom = "userTemp";
     const archiveCount = 0;
     const channels = [];
+
+    const [isOpen, setIsOpen] = useState(false)
 
     return (
         <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
@@ -31,11 +34,13 @@ export default function FilDeTransmission() {
                         </select>
                     </div>
 
-					<div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold shadow-md rounded-xl overflow-hidden">
-						<Button variant="primary">
-							Créer un fil
-						</Button>
-					</div>
+                    <div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold rounded-xl overflow-hidden">
+                        <Button variant="primary" onClick={() => setIsOpen(true)}>
+                            Créer un fil
+                        </Button>
+
+                        <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+                    </div>
                 </div>
             </div>
 
@@ -45,16 +50,48 @@ export default function FilDeTransmission() {
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
                         className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
-                            activeCategory === cat 
-                            ? "bg-[#26b3a9] text-white border-[#26b3a9] shadow-md" 
-                            : "text-[#26b3a9] border-[#26b3a9] hover:bg-[#26b3a9]/5"
+                            activeCategory === cat
+                                ? "bg-[#26b3a9] text-white border-[#26b3a9] shadow-md"
+                                : "text-[#26b3a9] border-[#26b3a9] hover:bg-[#26b3a9]/5"
                         }`}
                     >
                         {cat}
                     </button>
                 ))}
             </div>
-
+            {isOpen && (
+                <div className="flex justify-center items-center fixed inset-0 bg-black/50 z-50">
+                    <div className="bg-white md:w-[55%] rounded-xl p-5">
+                        <form className="mx-auto max-w-132">
+                            <label className="text-xl font-bold text-blue-800 mb-2 flex font-montserrat  font-bold text-left text-[#727272]">Créer un Fil de transmission</label>
+                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sélectionner une catégorie</label>
+                            <div className="mb-2 relative inline-block w-64">
+                                <select
+                                    className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="1">Santé</option>
+                                    <option value="2">Alimentation</option>
+                                    <option value="3">Maison/terrain</option>
+                                    <option value="4">Hygiène</option>
+                                    <option value="5">Ménage</option>
+                                    <option value="6">Autres</option>
+                                </select>
+                            </div>
+                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sujet du fil</label>
+                            <input type="text" className="h-[50px] mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Description du fil</label>
+                            <textarea className="h-[100px] w-full mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"></textarea>
+                            <div className="flex gap-4 justify-between mb-4">
+                                <Button variant="" onClick={() => setIsOpen(false)}>
+                                    Annuler
+                                </Button>
+                                <Button type="submit">
+                                    Créer
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             <div className="bg-white rounded-[2.5rem] shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 md:p-12 w-full min-h-[70vh]">
                 <h2 className="text-[#26b3a9] font-bold text-3xl mb-8">{activeCategory}</h2>
 

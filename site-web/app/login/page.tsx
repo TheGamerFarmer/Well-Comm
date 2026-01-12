@@ -21,9 +21,9 @@ export default function LoginPage() {
         const hashedPwd = encryptPassword(password);
 
         if (await logUser(userName, hashedPwd))
-            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
-        else
             redirect(callbackUrl);
+        else
+            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
     };
 
 
