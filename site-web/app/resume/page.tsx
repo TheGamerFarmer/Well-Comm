@@ -1,8 +1,5 @@
 "use client";
 
-import {Button} from "@/components/ButtonMain";
-import Categories from "@/components/Categories";
-import HeaderLoged from "@/components/HeaderLoged";
 import { useState } from "react";
 
 export default function Resume() {
