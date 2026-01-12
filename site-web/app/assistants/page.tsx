@@ -5,17 +5,19 @@ import {Button} from "@/components/ButtonMain";
 
 type Invitation = {
     id: string;
-    email: string;
+    username: string;
     role: "Aidant" | "Infirmier(e)" | "Médecin" | "Aide soignant(e)" | "Aide à domicile";
 };
 
 export default function AssistantsPage() {
 
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [role, setRole] = useState<Invitation["role"]>("Aidant");
+
 
     return (
 
@@ -24,7 +26,7 @@ export default function AssistantsPage() {
                 <p className=" mt-10 flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
                     Assistans
                 </p>
-
+                <p className="text-black">(fil d'Arianne)</p>
 
                 <div className="flex flex-col items-end my-4">
                     <Button variant="primary" type="button"
@@ -34,25 +36,28 @@ export default function AssistantsPage() {
                 </div>
 
                 {/*liste des assistants*/}
-                <div className="mt-8 space-y-4 bg-white rounded-lg shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] px-4 py-6">
+                <div className=" space-y-4 bg-white rounded-lg shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] px-4 py-6">
                     {invitations.map((inv) => (
                         <div
                             key={inv.id}
-                            className="flex justify-between items-center p-4 rounded-lg bg-[#f6f6f6]"
-                        >
+                            className="flex justify-between items-center p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex items-center gap-4">
                                 <img
-                                    src={`https://ui-avatars.com/api/?name=${inv.email}&background=0551ab&color=fff`}
+                                    src={`https://ui-avatars.com/api/?name=${inv.username}&background=0551ab&color=fff`}
                                     alt="avatar"
                                     className="w-12 h-12 rounded-full"
                                 />
                                 <div className="flex flex-col">
-                                    <span className="font-bold text-black">{inv.email}</span>
-                                    <span className="text-sm text-gray-500">{inv.role}</span>
+                                    <span className="font-bold text-black">{inv.username}</span>
+                                    <span className="text-gray-500">téléphone : </span>
+                                    <span className="text-gray-500">ajouté le : </span>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4">
+                                <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)}>
+                                    Permissions
+                                </Button>
                             <select
                                 value={inv.role}
                                 onChange={(e) =>
@@ -64,7 +69,7 @@ export default function AssistantsPage() {
                                         )
                                     )
                                 }
-                                className="border rounded-lg px-3 py-2 text-black">
+                                className="border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                 <option>Aidant</option>
                                 <option>Infirmier(e)</option>
                                 <option>Médecin</option>
@@ -85,41 +90,37 @@ export default function AssistantsPage() {
 
 
 
-                {/* pop-up */}
+                {/* pop-up ajouter assistant*/}
                     {isOpen && (
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                             <div className="bg-white p-6 rounded-2xl w-[400px]">
                                 <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
-                                <div className="flex justify-center">
-
-                                </div>
-
                                 <form
                                     onSubmit={(e) => {
                                         e.preventDefault();
 
-                                        if (!email.trim()) return;
+                                        if (!username.trim()) return;
 
                                         setInvitations((prev) => [
                                             ...prev,
                                             {
                                                 id: crypto.randomUUID(),
-                                                email,
+                                                username,
                                                 role,
                                             },
                                         ]);
 
-                                        setEmail("");
+                                        setUsername("");
                                         setRole("Aidant");
                                         setIsOpen(false);
                                     }}
                                     className="flex flex-col gap-4"
                                 >
                                     <input
-                                        type="email"
-                                        placeholder="Email de l'assistant"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        type="text"
+                                        placeholder="Nom d'utilisateur de l'assistant"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
                                         className="border rounded-lg p-2 text-black"
                                         required
                                     />
@@ -153,7 +154,7 @@ export default function AssistantsPage() {
 
                 </div>
 
-
+            {/*pop-up delete*/}
             {invitationToDelete && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px] flex flex-col items-center gap-y-4">
@@ -164,7 +165,7 @@ export default function AssistantsPage() {
                             Voulez-vous supprimer l’invitation de
                             <br />
                             <span className="font-bold">
-                    {invitationToDelete.email}
+                    {invitationToDelete.username}
                 </span>
                             ?
                         </p>
@@ -196,6 +197,56 @@ export default function AssistantsPage() {
                                 Non
                             </Button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* pop-up permissions */}
+            {isOpenPerms && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-2xl w-[400px]">
+                        <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Permissions</h2>
+
+                        <form className="flex flex-col gap-3 p-4 m-4 rounded-lg border-2 border-solid border-[#20baa7]">
+                            <div className="flex justify-between">
+                                <label htmlFor="permIsMedecin" className=" text-black"> Est un médecin </label><br/>
+                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permModifierAgenda" className=" text-black"> Peut modifier l'agenda </label><br/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permAssignerPerms" className=" text-black"> Peut assigner des permissions </label><br/>
+                                <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permAddAssistant" className=" text-black"> Peut ajouter un(e) assistant(e) </label><br/>
+                                <input type="checkbox" id="permAddAssistant" name="permAddAssistant" value="PermAddAssistant" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut envoyer des messages </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                            </div>
+
+                        </form>
+
+                        <div className="flex justify-center gap-3">
+
+                            <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(false)}>
+                                    Annuler
+                                </Button>
+
+                                <Button variant="primary" type="submit" onClick={() => setIsOpenPerms(false)}>
+                                    Confirmer
+                                </Button>
+
+
+                            </div>
                     </div>
                 </div>
             )}
