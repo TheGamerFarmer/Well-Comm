@@ -1,84 +1,68 @@
 "use client";
 
-import {Button} from "@/components/ButtonMain";
-import Categories from "@/components/Categories";
-import HeaderLoged from "@/components/HeaderLoged";
 import { useState } from "react";
+import Modal from './Modal'
+import { Button } from "@/components/ButtonMain";
 
-type Aide = {
-    id: string;
-    name: string;
-};
+export default function FilDeTransmission() {
+    const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
-export default function ProfilAide() {
-    const [items, setItems] = useState<Aide[]>([]);
+    const [activeCategory, setActiveCategory] = useState("Santé");
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const [isOpen, setIsOpen] = useState(false);
-    const [name, setName] = useState("");
+    const aideNom = "userTemp";
+    const archiveCount = 0;
+    const channels = [];
 
-    const [file, setFile] = useState<File | null>(null);
+    const [isOpen, setIsOpen] = useState(false)
 
-    const [itemToDelete, setItemToDelete] = useState<Aide | null>(null);
-
-    //ImagePreviewV2
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        setFile(files && files.length > 0 ? files[0] : null);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log(file);
-
-        if (!name.trim()) return;
-
-        setItems((prev) => [
-            ...prev,
-            {
-                id: crypto.randomUUID(),
-                name,
-            },
-        ]);
-
-        //setItems((prev) => [...prev, name]);
-
-        setName("");
-        setFile(null);
-        setIsOpen(false);
-    }
-
-    //ImagePreview
-    /*
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const fileList = event.target.files;
-        if (fileList && fileList.length > 0) {
-            setFile(fileList[0]);
-        } else {
-            setFile(null);
-        }
-    };
-    */
-
-
-    /*
-    const handleSubmit2 = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        console.log(file);
-    };
-    */
     return (
-        <div className="bg-[#f1f2f2]">
-            <HeaderLoged/>
-            <div className="flex justify-between m-2">
-            <p className="text-lg font-bold text-blue-800">Fil de transmission</p>
-            <Button onClick={() => setIsOpen(true)}>
-                Créer un fil de transmission
-            </Button>
+        <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6 w-full pt-12 md:pt-8">
+                <div className="flex-1">
+                    <h1 className="text-3xl font-bold text-[#0551ab]">Fil de transmission</h1>
+                    <nav className="text-sm text-gray-500 mt-1">
+                        Home / Fil de transmission / Catégories / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
+                    </nav>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
+                    <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
+                        <span className="font-bold text-lg whitespace-nowrap">L&#39;aidé</span>
+                        <select className="bg-white text-black rounded-lg px-4 py-2 outline-none flex-1 text-base font-medium cursor-pointer">
+                            <option value="">{aideNom}</option>
+                        </select>
+                    </div>
+
+                    <div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold rounded-xl overflow-hidden">
+                        <Button variant="primary" onClick={() => setIsOpen(true)}>
+                            Créer un fil
+                        </Button>
+
+                        <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.05)] mb-8 flex flex-wrap justify-between gap-4 w-full">
+                {categories.map((cat) => (
+                    <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
+                            activeCategory === cat
+                                ? "bg-[#26b3a9] text-white border-[#26b3a9] shadow-md"
+                                : "text-[#26b3a9] border-[#26b3a9] hover:bg-[#26b3a9]/5"
+                        }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
             </div>
             {isOpen && (
-                <div className="flex justify-center bg-black/50 items-center fixed inset-0 z-50">
-                    <div className="bg-white p-10 rounded-xl">
-                        <form onSubmit={handleSubmit} className="mx-auto max-w-132">
+                <div className="flex justify-center items-center fixed inset-0 bg-black/50 z-50">
+                    <div className="bg-white md:w-[55%] rounded-xl p-5">
+                        <form className="mx-auto max-w-132">
                             <label className="text-xl font-bold text-blue-800 mb-2 flex font-montserrat  font-bold text-left text-[#727272]">Créer un Fil de transmission</label>
                             <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sélectionner une catégorie</label>
                             <div className="mb-2 relative inline-block w-64">
@@ -93,7 +77,7 @@ export default function ProfilAide() {
                                 </select>
                             </div>
                             <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sujet du fil</label>
-                            <input value={name} onChange={(e) => setName(e.target.value)} type="text" className="h-[50px] mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input type="text" className="h-[50px] mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                             <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Description du fil</label>
                             <textarea className="h-[100px] w-full mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"></textarea>
                             <div className="flex gap-4 justify-between mb-4">
@@ -108,37 +92,43 @@ export default function ProfilAide() {
                     </div>
                 </div>
             )}
-            <div className="bg-white rounded-xl border-20 border-white flex-col items-center">
-                <Categories />
-                <div className="flex">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 21H4V10h2v9h12v-9h2zM3 3h18v6H3zm6.5 8h5c.28 0 .5.22.5.5V13H9v-1.5c0-.28.22-.5.5-.5M5 5v2h14V5z"/></svg>
-                <p>Dans les archives:</p>
+            <div className="bg-white rounded-[2.5rem] shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 md:p-12 w-full min-h-[70vh]">
+                <h2 className="text-[#26b3a9] font-bold text-3xl mb-8">{activeCategory}</h2>
+
+                <div className="relative mb-10">
+                    <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Recherche"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 transition-all text-lg shadow-sm"
+                    />
+                </div>
+
+                {/* Archives */}
+                <div className="flex items-center gap-4 mb-10 text-gray-700">
+                    <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 7H4M20 7L19 19H5L4 7M20 7L18 3H6L4 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="text-lg font-semibold">Dans Les Archives :</span>
+                    <span className="bg-[#f27474] text-white text-sm font-black px-3 py-1.5 rounded-full shadow-md">
+                        {archiveCount}
+                    </span>
+                </div>
+
+                <div className="space-y-6">
+                    {channels.length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-24 text-gray-300">
+                            <p className="text-xl font-medium italic">Aucune transmission enregistrée pour la catégorie {activeCategory}.</p>
+                        </div>
+                    )}
                 </div>
             </div>
-            {/*liste des fils*/}
-            <div className="p-4 rounded-2xl shadow bg-white">
-                <div className="flex flex-col gap-4">
-                    {items.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center rounded-lg bg-[#f6f6f6] cursor-pointer hover:bg-gray-100 transition">
-                            <div
-                                className="flex items-center gap-4 p-4 ">
-                                <div className="w-12 h-12 mr-[15px] p-[9.6px] rounded-[100px] bg-[#20baa7]">
-                                    <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.833 21.75H7.25v4.931l6.164-4.93h5.92a2.42 2.42 0 0 0 2.416-2.418V9.668a2.42 2.42 0 0 0-2.417-2.417h-14.5a2.42 2.42 0 0 0-2.416 2.417v9.667a2.42 2.42 0 0 0 2.416 2.416z" fill="#fff"/>
-                                        <path d="M24.167 2.417h-14.5A2.42 2.42 0 0 0 7.25 4.834h14.5a2.42 2.42 0 0 1 2.417 2.416v9.667a2.419 2.419 0 0 0 2.416-2.417V4.834a2.419 2.419 0 0 0-2.416-2.417z" fill="#fff"/>
-                                    </svg>
-                                </div>
-                                <span className="font-bold text-black">{item.name}</span>
-                            </div>
-
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
-                            </svg>
-
-                        </div>
-                    ))}
-                </div>
-        </div>
         </div>
     );
 }
