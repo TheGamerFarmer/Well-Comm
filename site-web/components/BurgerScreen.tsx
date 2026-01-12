@@ -43,7 +43,7 @@ const BurgerScreen = () => {
                     },
                     bmItemList: { paddingTop: "80px" },
                     bmBurgerButton: {
-                        position: "fixed",
+                        position: "absolute",
                         width: "30px",
                         height: "30px",
                         top: "27px",
