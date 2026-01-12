@@ -1,9 +1,11 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
+import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,7 @@ import fr.wellcomm.wellcomm.services.RecordService;
 public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
+    private final RecordAccountService recordAccountService;
 
     @Getter
     @Setter
@@ -62,11 +65,14 @@ public class RecordController {
         return ResponseEntity.ok(dossiers);
     }
 
-    @GetMapping("/create/{name}")
+    @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
                                                @PathVariable String name) {
+
         Record newRecord = recordService.createRecord(name);
+        Role aide = Role.AIDANT;
+        RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
         return ResponseEntity.ok(newRecord);
     }
 
