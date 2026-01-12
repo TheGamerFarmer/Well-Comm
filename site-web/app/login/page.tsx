@@ -35,7 +35,7 @@ export default function LoginPage() {
                 connecter</label>
 
             <label htmlFor="l_UserName"
-                   className=" flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom d'utilisateur</label>
+                   className=" flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom d&#39;utilisateur</label>
 
             <input onChange={(e) => setUserName(e.target.value)}
                    className=" h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black" type="text" id="t_UserName" name="t_UserName"/>
@@ -50,7 +50,7 @@ export default function LoginPage() {
             {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
             <input className=" rounded-full mb-4 mt-1 bg-[#0551ab] text-white py-4 font-bold hover:bg-[#f87c7c]" type="submit" value="Se connecter"/><br/>
 
-            <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="cursor-pointer m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n'avez pas de compte? Créez-en un!</Link>
+            <Link href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="cursor-pointer m-auto flex items-center space-x-2 font-montserrat text-base text-center text-[#20baa7] font-bold">Vous n&#39;avez pas de compte? Créez-en un!</Link>
         </form>
     )
 }
