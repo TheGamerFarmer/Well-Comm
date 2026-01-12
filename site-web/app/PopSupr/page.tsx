@@ -51,7 +51,7 @@ export default function PopSupr() {
             <div className="flex justify-center items-center flex-col gap-y-4">
                 <form>
                     <label className="flex font-bold text-blue-800 text-xl font-bold text-left text-[#727272]">Invitation</label>
-                    <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Email</label>
+                    <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom d'utilisateur</label>
                     <input className="h-[50px] self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
                     <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Message</label>
                     <textarea className="h-[100px] w-full mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"></textarea>
