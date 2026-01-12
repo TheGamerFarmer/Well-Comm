@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import HeaderLoged from "@/components/HeaderLoged";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 
@@ -10,12 +11,29 @@ export default function UserSpace() {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+    // Состояния для полей профиля
+    const [prenom, setPrenom] = useState("");
+    const [nom, setNom] = useState("");
+    const [username, setUsername] = useState("");
+
+    // Загружаем данные из localStorage при монтировании компонента
+    useEffect(() => {
+        const storedUsername = localStorage.getItem("username");
+        const storedPrenom = localStorage.getItem("prenom"); // пока пусто, но можно добавить позже
+        const storedNom = localStorage.getItem("nom");       // пока пусто, но можно добавить позже
+
+        if (storedUsername) setUsername(storedUsername);
+/*        if (storedPrenom) setPrenom(storedPrenom);
+        if (storedNom) setNom(storedNom);*/
+    }, []);
+
     // Функция обработки сохранения пароля
     const handleSavePassword = () => {
         if (newPassword !== confirmPassword) {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
+
         // Здесь можно добавить fetch к API для сохранения пароля
         alert("Mot de passe enregistré !\n(Current: " + currentPassword +
             ", New: " + newPassword + ")");
@@ -57,22 +75,40 @@ export default function UserSpace() {
                     <div className="flex flex-col md:flex-row md:gap-4">
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
-                            <input className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input
+                                type="text"
+                                value={prenom}
+                                onChange={(e) => setPrenom(e.target.value)}
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                            />
                         </div>
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
-                            <input className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input
+                                type="text"
+                                value={nom}
+                                onChange={(e) => setNom(e.target.value)}
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                            />
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
-                            <input type="date" className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input
+                                type="date"
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                            />
                         </div>
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
-                            <input className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input
+                                type="text"
+                                value={username}
+                                readOnly
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                            />
                         </div>
                     </div>
 
@@ -82,7 +118,7 @@ export default function UserSpace() {
                     </div>
 
                     {/* Секция смены пароля */}
-                    <div className="mt-8 ">
+                    <div className="mt-8">
                         <p
                             className="text-[#0551ab] font-bold hover:underline p-4 mb-4 lg:mt-16 lg:mb-16 rounded-[10px] bg-[#f6f6f6] h-[60px]"
                             onClick={() => setShowPasswordFields(!showPasswordFields)}
@@ -92,16 +128,14 @@ export default function UserSpace() {
 
                         {showPasswordFields && (
                             <div className="flex flex-col gap-5 items-end">
-                                {/* Текущий пароль */}
                                 <input
                                     type="password"
                                     placeholder="Mot de passe actuel"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
-                                    className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm "
+                                    className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
 
-                                {/* Новый пароль */}
                                 <input
                                     type="password"
                                     placeholder="Nouveau mot de passe"
@@ -110,7 +144,6 @@ export default function UserSpace() {
                                     className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
 
-                                {/* Подтверждение нового пароля */}
                                 <input
                                     type="password"
                                     placeholder="Confirmer le nouveau mot de passe"
@@ -119,7 +152,6 @@ export default function UserSpace() {
                                     className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
 
-                                {/* Кнопка сохранения нового пароля */}
                                 <Button
                                     type="button"
                                     variant="primary"
@@ -132,7 +164,7 @@ export default function UserSpace() {
                         )}
                     </div>
 
-                    <div className="mt-8 flex row  py-4 mb-4 lg:mt-16 lg:mb-16  border-t-[#dfdfdf] border-t-2 h-[60px] gap-4">
+                    <div className="mt-8 flex row py-4 mb-4 lg:mt-16 lg:mb-16 border-t-[#dfdfdf] border-t-2 h-[60px] gap-4">
                         <Image
                             src="/images/icons/icons-delete.svg"
                             alt="delete"
@@ -141,11 +173,11 @@ export default function UserSpace() {
                             priority
                         />
                         <p
-                            className="text-[#f67a7a]  hover:underline text-xm mt-[3px]"
-                            // onClick={() => setShowPasswordFields(!showPasswordFields)}
+                            className="text-[#f67a7a] hover:underline text-xm mt-[3px]"
                         >
                             Supprimer le compte
-                        </p></div>
+                        </p>
+                    </div>
 
                 </form>
             </div>

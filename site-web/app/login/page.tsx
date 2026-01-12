@@ -20,10 +20,14 @@ export default function LoginPage() {
         // Hash du mot de passe
         const hashedPwd = encryptPassword(password);
 
-        if (await logUser(userName, hashedPwd))
-            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
-        else
+        if (await logUser(userName, hashedPwd)) {
+        setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
+        }
+        else {
+            // Прямо записываем данные в localStorage
+            localStorage.setItem("username", userName);
             redirect(callbackUrl);
+        }
     };
 
 
