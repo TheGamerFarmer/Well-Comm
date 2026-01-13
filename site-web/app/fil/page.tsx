@@ -144,7 +144,7 @@ export default function FilDeTransmission() {
                         </select>
                     </div>
                     <div className="w-full sm:w-60">
-                        <Button onClick={() => setIsOpen(true)}>Créer un fil</Button>
+                        <Button variant="primary" onClick={() => setIsOpen(true)} >Créer un fil</Button>
                     </div>
                 </div>
             </div>
@@ -166,12 +166,12 @@ export default function FilDeTransmission() {
 
             {/* Modal de création */}
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <form className="mx-auto max-w-2xl" onSubmit={handleSubmit}>
+                <form className="mx-auto max-w-2xl " onSubmit={handleSubmit}>
                     <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
 
-                    <label className="text-sm font-bold text-[#727272] mb-2 block">Catégorie</label>
+                    <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
                     <select
-                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab]"
+                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
@@ -184,7 +184,7 @@ export default function FilDeTransmission() {
                         required
                         value={formData.title}
                         onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab]"
+                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab] text-black border-gray-300"
                     />
 
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
@@ -192,12 +192,12 @@ export default function FilDeTransmission() {
                         required
                         value={formData.message}
                         onChange={(e) => setFormData({...formData, message: e.target.value})}
-                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none"
+                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none text-black border-gray-300"
                     ></textarea>
 
                     <div className="flex gap-4">
-                        <Button variant="primary" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
-                        <Button type="submit">Créer</Button>
+                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
+                        <Button variant="validate" type="submit">Créer le fil</Button>
                     </div>
                 </form>
             </Modal>
@@ -205,7 +205,7 @@ export default function FilDeTransmission() {
             {/* Zone de contenu principale */}
             <div className="bg-white rounded-[2.5rem] shadow-sm p-8 md:p-12 min-h-[70vh] border border-gray-50">
                 <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight">{activeCategory}</h2>
-                <div className="relative mb-10">
+                <div className="relative mb-10 text-black">
                     <input
                         type="text"
                         placeholder="Recherche"
