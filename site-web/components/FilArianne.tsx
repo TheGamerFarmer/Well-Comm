@@ -7,7 +7,7 @@ const breadcrumbNames: Record<string, string> = {
     home: "Accueil",
     mesAides: "Mes aidés",
     calendrier: "Calendrier",
-    profil: "Mon profil",
+    userSpace: "Mon profil",
     fil: "Fil de Transmission",
 };
 
@@ -21,7 +21,7 @@ export default function Breadcrumb() {
         <nav aria-label="Breadcrumb" className="text-sm text-gray-600">
             <ol className="flex items-center space-x-2 my-4">
                 <li>
-                    <Link href="/" className="text-blue-600 hover:underline font-bold">
+                    <Link href="/" className="text-[#223f81] hover:underline font-bold">
                         Accueil
                     </Link>
                 </li>
@@ -40,7 +40,7 @@ export default function Breadcrumb() {
                             ) : (
                                 <Link
                                     href={href}
-                                    className="text-blue-600 hover:underline"
+                                    className="text-[#223f81] hover:underline"
                                 >
                                     {name}
                                 </Link>
