@@ -106,26 +106,15 @@ export default function MesAides() {
                 }
             );
 
-            if (!res.ok) {
-                let errorMessage = "Erreur suppression";
-                try {
-                    const text = await res.text(); // lit le corps
-                    if (text) {
-                        const errorData = JSON.parse(text);
-                        errorMessage = errorData.message || errorMessage;
-                    }
-                } catch {}
-                throw new Error(errorMessage);
-            }
+            if (!res.ok) throw new Error("Erreur suppression");
 
-            // Mise à jour côté front
-            setDossiers(prev => prev.filter(d => d.id !== id));
+            // Mise à jour de la liste côté front
+            setDossiers(dossiers.filter(d => d.id !== id));
+
             console.log("Dossier supprimé ✅");
-        } catch (err: unknown) {
-            // Safe fallback
-            const message = err instanceof Error ? err.message : String(err) || "Erreur inconnue";
-            console.error(message);
-            alert(message);
+        } catch (err: any) {
+            console.error(err.message);
+            alert(err.message);
         }
     };
 
