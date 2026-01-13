@@ -17,6 +17,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
+//pour la création de session
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/{userName}/records")
@@ -152,4 +155,17 @@ public class RecordController {
         recordService.archiveChannel(record, channelId);
         return ResponseEntity.ok().build();
     }
+
+    //création d'une session quand on selectionne un dossier
+        @PostMapping("/records/select/{recordId}")
+        @PreAuthorize("#userName == authentication.name")
+        public ResponseEntity<?> selectRecord(
+                @PathVariable Long recordId,
+                HttpSession session,
+                Authentication authentication
+        ) {
+            // Optionnel : vérifier que le record appartient bien à l'utilisateur
+            session.setAttribute("currentRecordId", recordId);
+            return ResponseEntity.ok().build();
+        }
 }

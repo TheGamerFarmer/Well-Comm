@@ -4,6 +4,16 @@ import { useState } from "react";
 import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 
+import {
+    getCurrentUser,
+    getRecords,
+    getChannels,
+    mapCategoryToEnum,
+    createChannel,
+    FilResponse,
+    DossierResponse
+} from "@/functions/fil-API";
+
 type Invitation = {
     id: string;
     username: string;
@@ -11,6 +21,10 @@ type Invitation = {
 };
 
 export default function AssistantsPage() {
+
+    const [currentUserName, setCurrentUserName] = useState<string>("");
+    const [records, setRecords] = useState<DossierResponse[]>([]);
+    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
 
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenPerms,setIsOpenPerms] = useState(false);
