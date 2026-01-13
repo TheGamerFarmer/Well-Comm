@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import HeaderLoged from "@/components/HeaderLoged";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
+import FilArianne from "@/components/FilArianne";
 
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -49,7 +50,10 @@ export default function UserSpace() {
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <p className="p-4 font-bold text-[#0551ab] text-2xl">Mon Profil</p>
+            <div className="py-4 ">
+                <p className="font-bold text-[#0551ab] text-2xl">Mon Profil</p>
+                <FilArianne/>
+            </div>
 
             <div className="flex justify-center items-center flex-col bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
 
