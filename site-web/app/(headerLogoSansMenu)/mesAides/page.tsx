@@ -130,7 +130,7 @@ export default function MesAides() {
             <FilArianne />
 
             <div className="flex justify-end my-4">
-                <Button variant="primary" type="button" onClick={() => setIsOpen(true)}>
+                <Button variant="validate" type="button" onClick={() => setIsOpen(true)}>
                     Ajouter un aidé
                 </Button>
             </div>
@@ -196,10 +196,9 @@ export default function MesAides() {
 
                             <div className="flex justify-center gap-3">
                                 <Button
-                                    variant="secondary"
+                                    variant="cancel"
                                     type="button"
-                                    onClick={() => setIsOpen(false)}
-                                >
+                                    onClick={() => setIsOpen(false)}>
                                     Annuler
                                 </Button>
 
