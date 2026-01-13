@@ -30,10 +30,10 @@ public class RecordAccountService {
                 role.getTitre(),
                 role.getPermission());
 
-        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
+        account.getRecordAccounts().add(recordAccount);
         accountRepository.save(account);
-        record.getRecordAccounts().add(recordAccount);
-        recordRepository.save(record);
+        //record.getRecordAccounts().add(recordAccount);
+        //recordRepository.save(record);
         return recordAccount;
     }
 }

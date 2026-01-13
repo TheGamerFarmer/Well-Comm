@@ -32,12 +32,12 @@ public class AccountService {
 
     public void addRecordAccount(Account account, @NotNull RecordAccount recordAccount) {
         recordAccount.setAccount(account);
-        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
+        account.getRecordAccounts().add(recordAccount);
         accountRepository.save(account);
     }
 
     public void deleteRecordAccount(@NotNull Account account, @NotNull RecordAccount recordAccount) {
-        account.getRecordAccounts().remove(recordAccount.getId());
+        account.getRecordAccounts().remove(recordAccount);
         accountRepository.save(account);
     }
 }

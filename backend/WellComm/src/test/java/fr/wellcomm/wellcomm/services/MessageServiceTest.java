@@ -25,6 +25,7 @@ public class MessageServiceTest {
 
         // 2. Créer un Channel
         Account testUser = new Account();
+        testUser.setUserName("testUser");
         testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", testUser);
 
         // 3. Récupérer le message créé par createChannel

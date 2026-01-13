@@ -13,6 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/{userName}")
 @AllArgsConstructor
@@ -52,6 +55,16 @@ public class AccountController {
         return ResponseEntity.ok(new UserInfos(account.getFirstName(),
                 account.getLastName()));
     }
+
+
+@GetMapping("/me")
+public ResponseEntity<?> getCurrentUser(Principal principal) {
+    if (principal == null) {
+        return ResponseEntity.status(401).body("Utilisateur non connecté");
+    }
+
+    return ResponseEntity.ok(Map.of("userName", principal.getName()));
+}
 
     @GetMapping("/changePassword/{oldPassword}/{newPassword}")
     @PreAuthorize("#userName == authentication.name")
@@ -110,13 +123,16 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().values()
-                .stream()
-                .filter(ra -> ra.getRecord().getId() == request.getRecordId())
-                .findFirst()
-                .orElse(null);
+        RecordAccount recordAccount = new RecordAccount();
+        int i = 0;
+        while (i < account.getRecordAccounts().size()){
+            if (account.getRecordAccounts().get(i).getId() == request.getRecordId()){
+                recordAccount = account.getRecordAccounts().get(i);
+            }
+            i++;
+        }
 
-        if (recordAccount == null)
+        if (i == account.getRecordAccounts().size())
             return ResponseEntity.badRequest().body("Access not found");
 
         accountService.deleteRecordAccount(account, recordAccount);
