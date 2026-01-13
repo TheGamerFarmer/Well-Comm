@@ -3,11 +3,13 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
+import FilArianne from "@/components/FilArianne";
 import {
     getCurrentUser,
     getRecords,
     getChannels,
     mapCategoryToEnum,
+    createChannel,
     FilResponse,
     DossierResponse
 } from "@/functions/fil-API";
@@ -26,7 +28,14 @@ export default function FilDeTransmission() {
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
     const [channels, setChannels] = useState<FilResponse[]>([]);
 
+    // État du formulaire
+    const [formData, setFormData] = useState({
+        category: mapCategoryToEnum("Santé"),
+        title: "",
+        message: ""
+    });
 
+    // --- INITIALISATION ---
     useEffect(() => {
         const init = async () => {
             const user = await getCurrentUser();
@@ -39,22 +48,72 @@ export default function FilDeTransmission() {
                 }
             }
         };
-        init();
+        init().then();
     }, []);
 
+    // --- CHARGEMENT DES FILS ---
+    const loadChannels = async () => {
+        if (!currentUserName || !activeRecordId) return;
+        setIsLoading(true);
+        const data = await getChannels(currentUserName, activeRecordId, activeCategory);
+        setChannels(data);
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) return;
+        let ignore = false;
 
-        const load = async () => {
-            setIsLoading(true);
-            const data = await getChannels(currentUserName, activeRecordId, activeCategory);
-            setChannels(data);
-            setIsLoading(false);
+        async function startFetching() {
+            if (!currentUserName || !activeRecordId) {
+                return;
+            }
+
+            try {
+                const data = await getChannels(currentUserName, activeRecordId, activeCategory);
+
+                if (!ignore) {
+                    const sortedData = data.sort((a, b) =>
+                        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+                    );
+
+                    setChannels(sortedData);
+                }
+            } catch (err) {
+                if (!ignore) {
+                    console.error("Erreur chargement:", err);
+                }
+            }
+        }
+
+        startFetching().then();
+
+        return () => {
+            ignore = true;
         };
-        load();
     }, [currentUserName, activeRecordId, activeCategory]);
 
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentUserName || !activeRecordId) return;
+
+        const success = await createChannel(
+            currentUserName,
+            activeRecordId,
+            formData.title,
+            formData.category,
+            formData.message
+        );
+
+        if (success) {
+            setIsOpen(false);
+            setFormData({ category: mapCategoryToEnum(activeCategory), title: "", message: "" });
+            loadChannels().then();
+        } else {
+            console.error("Échec de la création");
+        }
+    };
 
     const filteredChannels = channels.filter(c => {
         const query = searchQuery.toLowerCase();
@@ -67,8 +126,9 @@ export default function FilDeTransmission() {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-6 gap-6 w-full pt-2">
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold text-[#0551ab]">Fil de transmission</h1>
-                    <nav className="text-sm text-gray-500 mt-1">
-                        Home / Fil de transmission / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
+                    <nav className="text-sm text-gray-500 mt-1 flex items-center whitespace-nowrap">
+                        <span className="opacity-70"> <FilArianne/></span>
+                        <span className="text-[#26b3a9] font-medium ml-1"> / {activeCategory}</span>
                     </nav>
                 </div>
 
@@ -106,18 +166,37 @@ export default function FilDeTransmission() {
 
             {/* Modal de création */}
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <form className="mx-auto max-w-2xl" onSubmit={(e) => e.preventDefault()}>
+                <form className="mx-auto max-w-2xl" onSubmit={handleSubmit}>
                     <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
+
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Catégorie</label>
-                    <select className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab]">
+                    <select
+                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab]"
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    >
                         {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
                     </select>
+
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Sujet du fil</label>
-                    <input type="text" className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab]" />
+                    <input
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab]"
+                    />
+
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
-                    <textarea className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none"></textarea>
+                    <textarea
+                        required
+                        value={formData.message}
+                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none"
+                    ></textarea>
+
                     <div className="flex gap-4">
-                        <Button variant="primary" onClick={() => setIsOpen(false)}>Annuler</Button>
+                        <Button variant="primary" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
                         <Button type="submit">Créer</Button>
                     </div>
                 </form>
@@ -142,6 +221,8 @@ export default function FilDeTransmission() {
                 <div className="space-y-6">
                     {isLoading ? (
                         <div className="flex justify-center py-20 text-[#26b3a9] font-medium animate-pulse">Chargement...</div>
+                    ) : filteredChannels.length === 0 ? (
+                        <div className="text-center py-20 text-gray-400 font-medium">Aucun fil trouvé dans cette catégorie.</div>
                     ) : filteredChannels.map(channel => (
                         <div key={channel.id} className="bg-gray-100 p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all">
                             <div className="flex items-center gap-6">
@@ -150,12 +231,18 @@ export default function FilDeTransmission() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-black text-xl mb-1">{channel.title}</h3>
-                                    <p className="text-black opacity-80 font-medium line-clamp-1"><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage || "Nouveau fil"}</p>
+                                    <p className="text-black opacity-80 font-medium line-clamp-1">
+                                        {channel.lastMessageAuthor ? (
+                                            <><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>
+                                        ) : "Nouveau fil"}
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-3">
                                 <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
-                                <button className="text-[#f27474] hover:scale-110 transition-transform"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                <button className="text-[#f27474] hover:scale-110 transition-transform">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
                         </div>
                     ))}

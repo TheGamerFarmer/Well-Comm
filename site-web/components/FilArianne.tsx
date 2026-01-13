@@ -8,6 +8,7 @@ const breadcrumbNames: Record<string, string> = {
     mesAides: "Mes aidés",
     calendrier: "Calendrier",
     profil: "Mon profil",
+    fil: "Fil de Transmission",
 };
 
 export default function Breadcrumb() {

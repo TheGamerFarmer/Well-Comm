@@ -18,7 +18,6 @@ export interface DossierResponse {
     name: string;
 }
 
-
 export const mapCategoryToEnum = (cat: string): string => {
     switch (cat) {
         case "Santé": return "Sante";
@@ -30,7 +29,6 @@ export const mapCategoryToEnum = (cat: string): string => {
         default: return "Sante";
     }
 };
-
 
 export async function getCurrentUser(): Promise<string | null> {
     try {
@@ -48,7 +46,6 @@ export async function getCurrentUser(): Promise<string | null> {
     return null;
 }
 
-
 export async function getRecords(userName: string): Promise<DossierResponse[]> {
     try {
         const response = await fetch(`${API_BASE_URL}/api/${userName}/records/`, {
@@ -64,7 +61,6 @@ export async function getRecords(userName: string): Promise<DossierResponse[]> {
     return [];
 }
 
-
 export async function getChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
@@ -77,11 +73,36 @@ export async function getChannels(userName: string, recordId: number, category: 
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data)) return data;
-            // Support du format groupé si nécessaire
             return data.opened_channel || data.opened_channels || data.openedChannels || [];
         }
     } catch (err) {
         console.error("Erreur channels:", err);
     }
     return [];
+}
+
+
+export async function createChannel(
+    userName: string,
+    recordId: number,
+    title: string,
+    category: string,
+    message: string
+): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/new`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: title,
+                category: category, // Déjà mappé en Enum par le composant
+                firstMessage: message
+            })
+        });
+        return response.ok;
+    } catch (err) {
+        console.error("Erreur lors de la création du fil:", err);
+        return false;
+    }
 }
