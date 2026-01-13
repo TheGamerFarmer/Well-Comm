@@ -12,7 +12,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/";
+    const callbackUrl = searchParams.get("callbackUrl") || "/userSpace";
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault(); // Empêche le reload de la page
