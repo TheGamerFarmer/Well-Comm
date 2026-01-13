@@ -38,10 +38,10 @@ const variantStyles = {
         "bg-white text-[#20baa7] border #20baa7 border-solid text-sm",
 
     validate:
-        "w-100% h-100% px-4 py-[12px] rounded-[100px] bg-[#0551ab]" +
+        "w-100% h-100% px-4 py-[12px] rounded-[100px] bg-[#0551ab] text-white" +
         " font-bold font-stretch-normal hover:bg-[#f87c7c]",
 
-    cancel: "w-100% h-12 bg-[#ffffff] text-[#f87c7c] border #f87c7c border-solid  " +
+    cancel: "w-100% h-12 bg-[#ffffff] text-[#f87c7c] border #f87c7c border-solid" +
         "hover:bg-[#f87c7c] hover:text-white ",
 
 };
