@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ButtonMain";
+import FramagendaView from "@/components/FramagendaView";
 
 export default function FilDeTransmission() {
     const [activeCategory] = useState("Calendrier");
@@ -26,7 +27,7 @@ export default function FilDeTransmission() {
             </div>
 
             <div className="bg-white rounded-[2.5rem] shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 md:p-12 w-full min-h-[70vh]">
-
+                <FramagendaView></FramagendaView>
             </div>
         </div>
     );

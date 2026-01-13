@@ -1,6 +1,5 @@
 // mon-site-web/components/HeroSection.tsx
 import Image from 'next/image';
-import Link from 'next/link';
 import {Button} from "@/components/ButtonMain";
 
 export default function HeroSection() {

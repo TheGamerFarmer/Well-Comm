@@ -4,6 +4,7 @@ import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
+import fr.wellcomm.wellcomm.services.CalendarService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ import fr.wellcomm.wellcomm.services.RecordService;
 public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
+    private final CalendarService calendarService;
 
     @Getter
     @Setter
@@ -62,15 +64,16 @@ public class RecordController {
         return ResponseEntity.ok(dossiers);
     }
 
-    @GetMapping("/create/{name}")
+    @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
                                                @PathVariable String name) {
         Record newRecord = recordService.createRecord(name);
+        calendarService.createCalendar(newRecord.getId(), newRecord.getName());
         return ResponseEntity.ok(newRecord);
     }
 
-    @GetMapping("/{recordId}/channels/{category}")
+    @PostMapping("/{recordId}/channels/{category}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable Long recordId,
@@ -124,7 +127,7 @@ public class RecordController {
         ));
     }
 
-    @GetMapping("/{recordId}/channels/{channelId}/archive")
+    @PostMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,

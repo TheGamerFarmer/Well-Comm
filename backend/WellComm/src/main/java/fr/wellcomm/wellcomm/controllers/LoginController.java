@@ -71,7 +71,6 @@ public class LoginController {
     @GetMapping("/isLogin")
     public boolean testLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
 
         return authentication != null
                 && authentication.isAuthenticated()
