@@ -13,30 +13,30 @@ export default function UserSpace() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
-    // Состояния для полей профиля
-    const [prenom, setPrenom] = useState("");
-    const [nom, setNom] = useState("");
-    const [username, setUsername] = useState("");
 
-    // Загружаем данные из localStorage при монтировании компонента
-    useEffect(() => {
-        const storedUsername = localStorage.getItem("username");
-        const storedPrenom = localStorage.getItem("prenom"); // пока пусто, но можно добавить позже
-        const storedNom = localStorage.getItem("nom");       // пока пусто, но можно добавить позже
+//     const [prenom, setPrenom] = useState("");
+//     const [nom, setNom] = useState("");
+//     const [username, setUsername] = useState("");
+//
+//
+//     useEffect(() => {
+//         const storedUsername = localStorage.getItem("username");
+//         const storedPrenom = localStorage.getItem("prenom");
+//         const storedNom = localStorage.getItem("nom");
+//
+// //         if (storedUsername) setUsername(storedUsername);
+// // /*        if (storedPrenom) setPrenom(storedPrenom);
+// //         if (storedNom) setNom(storedNom);*/
+// //     }, []);
 
-        if (storedUsername) setUsername(storedUsername);
-/*        if (storedPrenom) setPrenom(storedPrenom);
-        if (storedNom) setNom(storedNom);*/
-    }, []);
 
-    // Функция обработки сохранения пароля
     const handleSavePassword = () => {
         if (newPassword !== confirmPassword) {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
 
-        // Здесь можно добавить fetch к API для сохранения пароля
+
         alert("Mot de passe enregistré !\n(Current: " + currentPassword +
             ", New: " + newPassword + ")");
 
@@ -79,18 +79,18 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
                             <input
                                 type="text"
-                                value={prenom}
-                                onChange={(e) => setPrenom(e.target.value)}
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                                // value={prenom}
+                                // onChange={(e) => setPrenom(e.target.value)}
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
                             <input
                                 type="text"
-                                value={nom}
-                                onChange={(e) => setNom(e.target.value)}
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                                // value={nom}
+                                // onChange={(e) => setNom(e.target.value)}
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -100,16 +100,16 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
                             <input
                                 type="date"
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div>
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
-                                value={username}
-                                readOnly
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid mb-4 mt-1 p-3 text-black"
+                                // value={username}
+                                // readOnly
+                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -119,10 +119,10 @@ export default function UserSpace() {
                         <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
                     </div>
 
-                    {/* Секция смены пароля */}
+
                     <div className="mt-8">
                         <p
-                            className="text-[#0551ab] font-bold hover:underline p-4 mb-4 lg:mt-16 lg:mb-16 rounded-[10px] bg-[#f6f6f6] h-[60px]"
+                            className="text-[#0551ab] font-bold hover:underline p-4 mb-4 lg:mt-16 lg:mb-16 rounded-[10px] bg-[#f6f6f6] h-[60px] cursor-pointer"
                             onClick={() => setShowPasswordFields(!showPasswordFields)}
                         >
                             Changer le mot de passe
@@ -158,7 +158,7 @@ export default function UserSpace() {
                                     type="button"
                                     variant="primary"
                                     link={""}
-                                    onClick={handleSavePassword}
+                                    // onClick={handleSavePassword}
                                 >
                                     Enregistrer
                                 </Button>
@@ -188,10 +188,10 @@ export default function UserSpace() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl">
 
-                        {/* Крестик */}
+
                         <button
                             onClick={() => setShowDeleteModal(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
                         >
                             ✕
                         </button>
@@ -206,32 +206,30 @@ export default function UserSpace() {
                             />
                         </div>
 
-                        {/* Текст */}
+
                         <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
-                            Voulez-vous supprimer ?
+                            Voulez-vous supprimer?
                         </h2>
                         <p className="text-center text-gray-700 mb-6">
-                            Ceci sera supprimé définitivement.
+                            Ceci sera supprimé définitivement
                         </p>
 
-                        {/* Кнопки */}
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 rounded-full border border-[#0551ab] text-[#0551ab] hover:bg-gray-100"
-                            >
-                                Non
-                            </button>
 
-                            <button
-                                onClick={() => {
-                                    console.log("DELETE ACCOUNT");
-                                    setShowDeleteModal(false);
-                                }}
-                                className="px-6 py-2 rounded-full bg-[#0551ab] text-white hover:bg-blue-700"
-                            >
-                                Oui
-                            </button>
+                        <div className="flex justify-center gap-4">
+
+                            <Button variant={"cancel"} link={""}
+                            // onClick={() => setShowDeleteModal(false)}
+                                >
+                                Non
+                            </Button>
+
+                            <Button variant={"validate"} link={""} // onClick={() => {
+                                                                     //     console.log("DELETE ACCOUNT");
+                                    //     setShowDeleteModal(false);
+                                    // }}
+                            > Oui
+                            </Button>
+
                         </div>
                     </div>
                 </div>
