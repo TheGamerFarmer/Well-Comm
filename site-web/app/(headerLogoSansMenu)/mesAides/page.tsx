@@ -144,7 +144,7 @@ export default function MesAides() {
                     {dossiers.map((dossier) => (
                         <div
                             key={dossier.id}
-                            className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
+                            className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
                         >
                             {/* image plus tard depuis backend */}
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
@@ -186,7 +186,7 @@ export default function MesAides() {
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-
+c
                             <input
                                 type="text"
                                 value={name}
@@ -223,12 +223,12 @@ export default function MesAides() {
                                 <path d="M24 12v16" stroke="#F67A7A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
-                            <p>Ceci sera supprimé définitivement.</p>
+                            <p className="text-[#727272]">Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="submit" onClick={() => { handleDelete(deleteId); setDeleteId(null); }}>
+                                <Button variant="cancel" type="submit" onClick={() => { handleDelete(deleteId); setDeleteId(null); }}>
                                     Oui
                                 </Button>
-                                <Button onClick={() => setDeleteId(null)}>
+                                <Button variant="validate" onClick={() => setDeleteId(null)}>
                                     Non
                                 </Button>
                             </div>
