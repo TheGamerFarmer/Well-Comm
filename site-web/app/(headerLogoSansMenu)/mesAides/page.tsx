@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
@@ -21,6 +21,7 @@ export default function MesAides() {
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpen2, setIsOpen2] = useState(false);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
 
@@ -79,6 +80,7 @@ export default function MesAides() {
             setName("");
             setFile(null);
             setIsOpen(false);
+            setIsOpen2(false);
         } catch (err) {
             console.error(err);
         }
@@ -120,6 +122,12 @@ export default function MesAides() {
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
 
                             {dossier.name}
+
+                            <div className="ml-auto">
+                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setIsOpen2(true)}>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -173,6 +181,27 @@ export default function MesAides() {
                                 </Button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {isOpen2 && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-2xl w-[400px]">
+
+                        <div className="flex justify-center items-center flex-col gap-y-4">
+                            <img src="/images/icon-attention2x.png" alt="Attention" width={50}/>
+                            <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
+                            <p>Ceci sera supprimé définitivement.</p>
+                            <div className="flex gap-4 justify-between mb-4">
+                                <Button variant="secondary" type="submit" onClick={() => setIsOpen2(false)}>
+                                    Oui
+                                </Button>
+                                <Button onClick={() => setIsOpen2(false)}>
+                                    Non
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
