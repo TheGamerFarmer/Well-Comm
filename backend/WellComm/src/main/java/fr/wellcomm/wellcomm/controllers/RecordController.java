@@ -20,6 +20,8 @@ import fr.wellcomm.wellcomm.services.RecordService;
 //pour la création de session
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
+import fr.wellcomm.wellcomm.services.RecordService;
+import fr.wellcomm.wellcomm.repositories.RecordRepository;
 
 @RestController
 @RequestMapping("/api/{userName}/records")
@@ -28,6 +30,7 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
+    private final RecordRepository recordRepository;
 
     @Getter
     @Setter
@@ -156,16 +159,44 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    //création d'une session quand on selectionne un dossier
-        @PostMapping("/records/select/{recordId}")
+    @DeleteMapping("/delete/{id}")
         @PreAuthorize("#userName == authentication.name")
-        public ResponseEntity<?> selectRecord(
-                @PathVariable Long recordId,
-                HttpSession session,
-                Authentication authentication
-        ) {
-            // Optionnel : vérifier que le record appartient bien à l'utilisateur
-            session.setAttribute("currentRecordId", recordId);
-            return ResponseEntity.ok().build();
+        public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long id) {
+            boolean deleted = recordService.deleteRecord(id);
+            if (deleted) {
+                return ResponseEntity.noContent().build(); // 204
+            } else {
+                return ResponseEntity.notFound().build(); // 404
+            }
         }
+
+    //création d'une session quand on selectionne un dossier
+    @PostMapping("/select/{recordId}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> selectRecord(
+            @PathVariable String userName,
+            @PathVariable Long recordId,
+            HttpSession session,
+            Authentication authentication
+    ) {
+        // Optionnel : vérifier que le record appartient bien à l'utilisateur
+        session.setAttribute("currentRecordId", recordId);
+        return ResponseEntity.ok().build();
+    }
+
+    //return current-record
+    @GetMapping("/current-record")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> getCurrentRecord(@PathVariable String userName, HttpSession session) {
+
+        Long recordId = (Long) session.getAttribute("currentRecordId");
+
+        if (recordId == null) {
+            return ResponseEntity.badRequest().body("Aucun dossier sélectionné");//204
+        }
+
+        return recordRepository.findById(recordId)
+                           .map(ResponseEntity::ok)
+                           .orElse(ResponseEntity.notFound().build());
+    }
 }

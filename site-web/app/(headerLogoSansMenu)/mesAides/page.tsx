@@ -5,6 +5,9 @@ import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUser} from "@/functions/fil-API";
+import { useRouter } from "next/navigation";
+import { useCurrentDossier } from "@/hooks/useCurrentDossier";
+
 
 type Dossier = {
     id: number;
@@ -24,6 +27,10 @@ export default function MesAides() {
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const router = useRouter();
+    const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
+
+    const { currentDossier, loading } = useCurrentDossier(userName);
 
     /* =======================
        Chargement des dossiers
@@ -118,8 +125,24 @@ export default function MesAides() {
         }
     };
 
+    //Permet de selectionner un dossier et d'enregistrer dans une session l'ID du dossier
+    const selectDossier = async (recordId: number) => {
+        try {
+            // On envoie le recordId au backend pour l'enregistrer dans la session
+            const res = await fetch(`http://localhost:8080/api/${userName}/records/select/${recordId}`, {
+                method: "POST",
+                credentials: "include",
+            });
 
+            if (!res.ok) throw new Error("Impossible de sélectionner le dossier");
 
+            // Met à jour l'état local pour indiquer le dossier courant
+            setCurrentRecordId(recordId);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <div className="p-10">
@@ -128,6 +151,17 @@ export default function MesAides() {
             </p>
 
             <FilArianne />
+
+            <div className="text-black">
+                {currentRecordId}
+            </div>
+            <div>
+                {currentDossier ? (
+                    <p>Dossier courant : {currentDossier}</p>
+                ) : (
+                    <p>Aucun dossier sélectionné</p>
+                )}
+            </div>
 
             <div className="flex justify-end my-4">
                 <Button variant="validate" type="button" onClick={() => setIsOpen(true)}>
@@ -143,13 +177,13 @@ export default function MesAides() {
                     {dossiers.map((dossier) => (
                         <div
                             key={dossier.id}
+                            onClick={() => selectDossier(dossier.id)}
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
                         >
                             {/* image plus tard depuis backend */}
+
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
-
                             {dossier.name}
-
                             <div className="ml-auto">
                                 <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDeleteId(dossier.id)}>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
