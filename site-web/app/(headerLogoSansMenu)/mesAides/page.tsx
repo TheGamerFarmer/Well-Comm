@@ -228,7 +228,11 @@ export default function MesAides() {
                     <div className="bg-white p-6 rounded-2xl w-[400px]">
 
                         <div className="flex justify-center items-center flex-col gap-y-4">
-                            <img src="/images/icon-attention2x.png" alt="Attention" width={50}/>
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 44a19.939 19.939 0 0 0 14.142-5.858A19.939 19.939 0 0 0 44 24a19.939 19.939 0 0 0-5.858-14.142A19.94 19.94 0 0 0 24 4 19.94 19.94 0 0 0 9.858 9.858 19.94 19.94 0 0 0 4 24a19.94 19.94 0 0 0 5.858 14.142A19.94 19.94 0 0 0 24 44z" stroke="#F67A7A" strokeWidth="4" strokeLinejoin="round"/>
+                                <path fillRule="evenodd" clipRule="evenodd" d="M24 37a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" fill="#F67A7A"/>
+                                <path d="M24 12v16" stroke="#F67A7A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
                             <p>Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
