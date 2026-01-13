@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import encryptPassword from "../../functions/encryptPassword"
-import logUser from "../../functions/logUser"
+import encryptPassword from "../../../functions/encryptPassword"
+import logUser from "../../../functions/logUser"
 import {useSearchParams} from "next/dist/client/components/navigation";
 import {redirect} from "next/dist/client/components/redirect";
 
