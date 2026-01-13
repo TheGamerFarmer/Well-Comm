@@ -137,7 +137,7 @@ public class RecordController {
     }
 
 
-    @GetMapping("/{recordId}/channels/{channelId}/archive")
+    @PostMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,

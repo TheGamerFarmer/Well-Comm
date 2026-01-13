@@ -120,6 +120,43 @@ export default function FilDeTransmission() {
         return (c.title?.toLowerCase().includes(query) || c.lastMessage?.toLowerCase().includes(query));
     });
 
+    const archiveChannel = async (
+        userName: string,
+        recordId: number,
+        channelId: number
+    ) => {
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/records/${recordId}/channels/${channelId}/archive`,
+                {
+                    method: "POST",
+                    credentials: "include", // si tu utilises les cookies/session Spring Security
+                }
+            );
+
+            if (!res.ok) {
+                let errorMessage = "Erreur lors de l'archivage du channel";
+                try {
+                    const text = await res.text();
+                    if (text) errorMessage = text;
+                } catch {}
+                throw new Error(errorMessage);
+            }
+
+            console.log("Channel archivé ✅");
+            alert("Channel archivé avec succès !");
+
+            // Optionnel : mettre à jour le front pour retirer le channel archivé
+            setChannels(prev => prev.filter(ch => ch.id !== channelId));
+
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(message);
+            alert(message);
+        }
+    };
+
+
     return (
         <div className="w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2]">
             {/* Header section */}
@@ -241,7 +278,9 @@ export default function FilDeTransmission() {
                             <div className="flex flex-col items-end gap-3">
                                 <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
                                 <button className="text-[#f27474] hover:scale-110 transition-transform">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => archiveChannel(currentUserName, activeRecordId!, channel.id)}>
+                                        <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
