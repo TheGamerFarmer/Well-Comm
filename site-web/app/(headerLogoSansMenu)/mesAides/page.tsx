@@ -5,6 +5,7 @@ import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUser} from "@/functions/fil-API";
+import { API_BASE_URL } from "@/config";
 
 type Dossier = {
     id: number;
@@ -34,7 +35,7 @@ export default function MesAides() {
         const fetchDossiers = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8080/api/${userName}/records/`,
+                    `${API_BASE_URL}/api/${userName}/records/`,
                     { credentials: "include" }
                 );
 
@@ -59,7 +60,7 @@ export default function MesAides() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/${userName}/records/create/${encodeURIComponent(
+                `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
                     name
                 )}`,
                 {
@@ -99,7 +100,7 @@ export default function MesAides() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/${userName}/records/delete/${id}`,
+                `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
                 {
                     method: "DELETE",
                     credentials: "include",
