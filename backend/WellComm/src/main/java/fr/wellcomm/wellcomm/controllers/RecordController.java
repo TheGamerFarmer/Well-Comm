@@ -72,7 +72,7 @@ public class RecordController {
 
         Record newRecord = recordService.createRecord(name);
         Role aide = Role.AIDANT;
-        RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
+        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
         return newRecord;
     }
 
@@ -98,24 +98,23 @@ public class RecordController {
     @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
-            @PathVariable long recordId,
-            @RequestBody CreateFilRequest request) {
+                                           @PathVariable long recordId,
+                                           @RequestBody CreateFilRequest request) {
+
         Account account = accountService.getUser(userName);
         if (account == null)
-            return ResponseEntity.badRequest().body("Message not found");
-        RecordAccount recordAccount = new RecordAccount();
-        int i = 0;
-        while (i < account.getRecordAccounts().size()){
-            if (account.getRecordAccounts().get(i).getId() == recordId){
-                recordAccount = account.getRecordAccounts().get(i);
-            }
-            i++;
+            return ResponseEntity.badRequest().body("User not found");
+
+        RecordAccount recordAccount = account.getRecordAccounts().stream()
+                .filter(ra -> ra.getRecord().getId() == recordId)
+                .findFirst()
+                .orElse(null);
+
+        if (recordAccount == null) {
+            return ResponseEntity.badRequest().body("L'utilisateur n'a pas accès à ce dossier.");
         }
-        if (i == account.getRecordAccounts().size())
-            return ResponseEntity.badRequest().body("RecordAccount not found");
+
         Record record = recordAccount.getRecord();
-        if (record == null)
-            return ResponseEntity.badRequest().body("Record not found");
 
         OpenChannel newChannel = recordService.createChannel(
                 record,
@@ -136,6 +135,7 @@ public class RecordController {
                 lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
         ));
     }
+
 
     @GetMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
