@@ -84,7 +84,7 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
         }
     }
 
-    @GetMapping("/deleteUser")
+    @DeleteMapping("/deleteUser")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> deleteUser(@PathVariable String userName) {
         Account account = accountService.getUser(userName);
@@ -96,7 +96,7 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/addAccess")
+    @PostMapping("/addAccess")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> addRecordAccount(@PathVariable String userName, @RequestBody addRecordAccountRequest request) {
         Account account = accountService.getUser(userName);
@@ -116,7 +116,7 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/deleteAccess/")
+    @DeleteMapping("/deleteAccess/")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> deleteRecordAccount(@PathVariable String userName, @RequestBody deleteRecordAccountRequest request) {
         Account account = accountService.getUser(userName);
