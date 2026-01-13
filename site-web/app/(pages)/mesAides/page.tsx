@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
+import {getCurrentUser} from "@/functions/fil-API";
 
 type Dossier = {
     id: number;
@@ -11,7 +12,12 @@ type Dossier = {
 };
 
 export default function MesAides() {
-    const userName = "alexis"; // ⚠️ à remplacer par l'utilisateur connecté
+
+    const [userName, setUserName] = useState<string | null>(null);
+
+    useEffect(() => {
+        getCurrentUser().then(setUserName);
+    }, []);
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +28,8 @@ export default function MesAides() {
        Chargement des dossiers
        ======================= */
     useEffect(() => {
+        if (!userName) return;
+
         const fetchDossiers = async () => {
             try {
                 const res = await fetch(
@@ -54,7 +62,7 @@ export default function MesAides() {
                     name
                 )}`,
                 {
-                    method: "GET",
+                    method: "POST",
                     credentials: "include",
                 }
             );
