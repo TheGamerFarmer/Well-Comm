@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {Button} from "@/components/ButtonMain";
+import FilArianne from "@/components/FilArianne";
 
 type Invitation = {
     id: string;
@@ -22,11 +23,11 @@ export default function AssistantsPage() {
     return (
 
         <>
-            <div className=" p-[5%] ">
-                <p className=" mt-10 flex font-montserrat text-2xl font-bold text-left text-[#0551ab]">
-                    Assistans
+            <div className=" w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2] ">
+                <p className="text-3xl font-bold text-[#0551ab]">
+                    Assistants
                 </p>
-                <p className="text-black">(fil d'Arianne)</p>
+                <FilArianne/>
 
                 <div className="flex flex-col items-end my-4">
                     <Button variant="primary" type="button"
@@ -60,7 +61,7 @@ export default function AssistantsPage() {
                                 </ul>
                             </div>
 
-                            <div className=" my-auto flex-1 items-center min-w- justify-center h-0 border border-solid border-gray-400 text-black"></div>
+
 
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
                                 <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)}>
