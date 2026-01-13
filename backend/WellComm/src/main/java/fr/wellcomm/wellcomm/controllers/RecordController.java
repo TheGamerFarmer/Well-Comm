@@ -152,4 +152,15 @@ public class RecordController {
         recordService.archiveChannel(record, channelId);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long id) {
+        boolean deleted = recordService.deleteRecord(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204
+        } else {
+            return ResponseEntity.notFound().build(); // 404
+        }
+    }
 }

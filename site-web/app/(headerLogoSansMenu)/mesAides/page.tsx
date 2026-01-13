@@ -21,7 +21,7 @@ export default function MesAides() {
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [isOpen2, setIsOpen2] = useState(false);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
 
@@ -80,7 +80,7 @@ export default function MesAides() {
             setName("");
             setFile(null);
             setIsOpen(false);
-            setIsOpen2(false);
+            setDeleteId(null);
         } catch (err) {
             console.error(err);
         }
@@ -93,6 +93,44 @@ export default function MesAides() {
         const files = e.target.files;
         setFile(files && files.length > 0 ? files[0] : null);
     };
+
+    const handleDelete = async (id: number) => {
+        if (!id) return;
+
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/records/delete/${id}`,
+                {
+                    method: "DELETE",
+                    credentials: "include",
+                }
+            );
+
+            if (!res.ok) {
+                let errorMessage = "Erreur suppression";
+                try {
+                    const text = await res.text(); // lit le corps
+                    if (text) {
+                        const errorData = JSON.parse(text);
+                        errorMessage = errorData.message || errorMessage;
+                    }
+                } catch {}
+                throw new Error(errorMessage);
+            }
+
+            // Mise à jour côté front
+            setDossiers(prev => prev.filter(d => d.id !== id));
+            console.log("Dossier supprimé ✅");
+        } catch (err: unknown) {
+            // Safe fallback
+            const message = err instanceof Error ? err.message : String(err) || "Erreur inconnue";
+            console.error(message);
+            alert(message);
+        }
+    };
+
+
+
 
     return (
         <div className="p-10">
@@ -124,7 +162,7 @@ export default function MesAides() {
                             {dossier.name}
 
                             <div className="ml-auto">
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setIsOpen2(true)}>
+                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDeleteId(dossier.id)}>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             </div>
@@ -185,7 +223,7 @@ export default function MesAides() {
                 </div>
             )}
 
-            {isOpen2 && (
+            {deleteId !== null && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px]">
 
@@ -194,10 +232,10 @@ export default function MesAides() {
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
                             <p>Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="submit" onClick={() => setIsOpen2(false)}>
+                                <Button variant="secondary" type="submit" onClick={() => { handleDelete(deleteId); setDeleteId(null); }}>
                                     Oui
                                 </Button>
-                                <Button onClick={() => setIsOpen2(false)}>
+                                <Button onClick={() => setDeleteId(null)}>
                                     Non
                                 </Button>
                             </div>
