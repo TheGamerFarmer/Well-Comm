@@ -9,7 +9,7 @@ type ButtonProps = {
     variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel";
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
-    onClickAction?: () => void;
+    onClick?: () => void;
     link: string;
 };
 
@@ -51,19 +51,37 @@ export const Button = ({
                            variant = "primary",
                            type = "button",
                            disabled = false,
-                           onClickAction,
+                           onClick,
                            link,
                        }: ButtonProps) => {
+
+    const className = `${baseStyles} ${variantStyles[variant]}`;
+
+    //Si le bouton comporte un link
+    if (link){
+        return (
+            <Link href={link}>
+                <button
+                    type={type}
+                    disabled={disabled}
+                    onClick={onClick}
+                    className={`${baseStyles} ${variantStyles[variant]}`}
+                >
+                    {children}
+                </button>
+            </Link>
+        );
+    }
+    //Si le bouton ne comporte pas de link
     return (
-        <Link href={link}>
-            <button
-                type={type}
-                disabled={disabled}
-                onClick={onClickAction}
-                className={`${baseStyles} ${variantStyles[variant]}`}
-            >
-                {children}
-            </button>
-        </Link>
+        <button
+            type={type}
+            disabled={disabled}
+            onClick={onClick}
+            className={className}
+        >
+            {children}
+        </button>
     );
+
 };
