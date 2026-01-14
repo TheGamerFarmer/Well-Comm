@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import {hmrRefreshReducer} from "next/dist/client/components/router-reducer/reducers/hmr-refresh-reducer";
 import Link from "next/link";
 
 type ButtonProps = {
@@ -9,8 +8,8 @@ type ButtonProps = {
     variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel";
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
-    onClick?: () => void;
-    link: string;
+    onClickAction?: () => void;
+    link?: string;
 };
 
 const baseStyles =
@@ -51,7 +50,7 @@ export const Button = ({
                            variant = "primary",
                            type = "button",
                            disabled = false,
-                           onClick,
+                           onClickAction,
                            link,
                        }: ButtonProps) => {
 
@@ -64,7 +63,7 @@ export const Button = ({
                 <button
                     type={type}
                     disabled={disabled}
-                    onClick={onClick}
+                    onClick={onClickAction}
                     className={`${baseStyles} ${variantStyles[variant]}`}
                 >
                     {children}
@@ -77,7 +76,7 @@ export const Button = ({
         <button
             type={type}
             disabled={disabled}
-            onClick={onClick}
+            onClick={onClickAction}
             className={className}
         >
             {children}

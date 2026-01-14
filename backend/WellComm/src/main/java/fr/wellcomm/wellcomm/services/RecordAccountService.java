@@ -6,7 +6,6 @@ import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
-    private final RecordRepository recordRepository;
     private final AccountRepository accountRepository;
 
     public RecordAccount getReccordAccount(long id) {
@@ -30,7 +28,8 @@ public class RecordAccountService {
                 role.getTitre(),
                 role.getPermission());
 
-        account.getRecordAccounts().add(recordAccount);
+        recordAccountRepository.save(recordAccount);
+        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
         //record.getRecordAccounts().add(recordAccount);
         //recordRepository.save(record);

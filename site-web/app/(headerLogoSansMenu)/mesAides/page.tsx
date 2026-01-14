@@ -131,7 +131,7 @@ export default function MesAides() {
             <FilArianne />
 
             <div className="flex justify-end my-4">
-                <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
+                <Button variant="validate" type="button" onClickAction={() => setIsOpen(true)} link={""}>
                     Ajouter un aidé
                 </Button>
             </div>
@@ -198,7 +198,7 @@ export default function MesAides() {
                                 <Button
                                     variant="cancel"
                                     type="button"
-                                    onClick={() => setIsOpen(false)} link={""}>
+                                    onClickAction={() => setIsOpen(false)} link={""}>
                                     Annuler
                                 </Button>
 
@@ -224,13 +224,13 @@ export default function MesAides() {
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
                             <p className="text-[#727272]">Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="cancel" type="submit" onClick={() => {
+                                <Button variant="cancel" type="submit" onClickAction={() => {
                                     handleDelete(deleteId);
                                     setDeleteId(null);
                                 }} link={""}>
                                     Oui
                                 </Button>
-                                <Button variant="validate" onClick={() => setDeleteId(null)}
+                                <Button variant="validate" onClickAction={() => setDeleteId(null)}
                                         link={""}>
                                     Non
                                 </Button>

@@ -13,5 +13,6 @@ public class EventDTO {
     private String end;
     private String location;
     private String description;
-    private List<String> attendees;
+    private List<String> partners;
+    private String color;
 }

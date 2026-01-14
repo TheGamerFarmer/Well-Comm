@@ -3,7 +3,6 @@ package fr.wellcomm.wellcomm.services;
 import com.github.sardine.Sardine;
 import fr.wellcomm.wellcomm.config.FramagendaConfig;
 import fr.wellcomm.wellcomm.domain.EventDTO;
-import fr.wellcomm.wellcomm.entities.Record;
 import lombok.AllArgsConstructor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -74,7 +73,7 @@ public class CalendarService {
 
     public List<EventDTO> getEvents(long id) {
         List<EventDTO> events = new ArrayList<>();
-        List<String> attendees = new ArrayList<>();
+        List<String> partners = new ArrayList<>();
 
         try {
             String url = "https://framagenda.org/remote.php/dav/calendars/WellComm/" + id + "/?export";
@@ -83,9 +82,10 @@ public class CalendarService {
             String line;
             String title = "";
             String start = "";
+            String end = "";
             String location = "";
             String description = "";
-            String end = "";
+            String color = "";
 
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("SUMMARY:")) {
@@ -98,20 +98,23 @@ public class CalendarService {
                     location = line.substring(9);
                 } else if (line.startsWith("DESCRIPTION:")) {
                     description = line.substring(12);
+                } else if (line.startsWith("COLOR:")) {
+                    color = line.substring(6);
                 } else if (line.startsWith("ATTENDEE")) {
-                    String attendee = line.contains("CN=")
+                    String partner = line.contains("CN=")
                             ? line.split("CN=")[1].split(";")[0].replace("\"", "")
                             : line.split(":")[1].replace("mailto:", "");
 
-                    attendees.add(attendee);
+                    partners.add(partner);
                 } else if (line.startsWith("END:VEVENT")) {
-                    events.add(new EventDTO(title, start, end, location, description, new ArrayList<>(attendees)));
+                    events.add(new EventDTO(title, start, end, location, description, new ArrayList<>(partners), color));
                     title = "";
                     start = "";
                     end = "";
                     location = "";
                     description = "";
-                    attendees.clear();
+                    color = "";
+                    partners.clear();
                 }
             }
 

@@ -1,12 +1,10 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.domain.EventDTO;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.CalendarService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +24,6 @@ import fr.wellcomm.wellcomm.services.RecordService;
 public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
-    private final RecordAccountService recordAccountService;
     private final CalendarService calendarService;
 
     @Getter
@@ -148,9 +145,10 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{recordId}/delete/")
+    @DeleteMapping("/{recordId}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long recordId) {
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
+                                              @PathVariable Long recordId) {
         boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
             return ResponseEntity.noContent().build(); // 204
@@ -160,8 +158,8 @@ public class RecordController {
     }
 
     @GetMapping("/{recordId}/calendar")
-    @PreAuthorize("#userName == authentication.name and" +
-            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
+    @PreAuthorize("#userName == authentication.name")
+            //"@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
     public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId) {
         return ResponseEntity.ok(calendarService.getEvents(recordId));

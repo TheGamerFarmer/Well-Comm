@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
+import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final SessionRepository sessionRepository;
+    private final RecordAccountService recordAccountService;
+    private final RecordAccountRepository recordAccountRepository;
 
     public Account getUser(String username) {
         return accountRepository.findById(username)
@@ -32,12 +35,13 @@ public class AccountService {
 
     public void addRecordAccount(Account account, @NotNull RecordAccount recordAccount) {
         recordAccount.setAccount(account);
-        account.getRecordAccounts().add(recordAccount);
+        recordAccountRepository.save(recordAccount);
+        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
     }
 
     public void deleteRecordAccount(@NotNull Account account, @NotNull RecordAccount recordAccount) {
-        account.getRecordAccounts().remove(recordAccount);
+        account.getRecordAccounts().remove(recordAccount.getId());
         accountRepository.save(account);
     }
 }
