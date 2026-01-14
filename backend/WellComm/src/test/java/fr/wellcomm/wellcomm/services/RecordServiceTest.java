@@ -1,5 +1,7 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +31,9 @@ public class RecordServiceTest {
         testRecord = recordService.createRecord("Dossier Global");
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
-        RecordAccount access = new RecordAccount(testUser, testRecord, "ADMIN");
+        List<Permission> permissionList = new ArrayList<>();
+        permissionList.add(Permission.AssignerPermissions);
+        RecordAccount access = new RecordAccount(testUser, testRecord, "ADMIN",permissionList);
 
         // 4. On l'ajoute à l'utilisateur
         accountService.addRecordAccount(testUser, access);
@@ -44,29 +49,37 @@ public class RecordServiceTest {
 
     @Test
     void testCreateChannel() {
+        Account user = new Account();
+        user.setUserName("userTest");
+        accountService.saveUser(user);
         // Teste la création d'un channel et vérifie si le rôle "ADMIN" est bien récupéré
         OpenChannel channel = recordService.createChannel(
                 testRecord,
                 "Mal de dos",
                 Category.Menage,
                 "il a mal au dos",
-                "userTest"
+                user
         );
 
         assertNotNull(channel);
         assertEquals(1, channel.getMessages().size());
 
         // Vérification du rôle récupéré dynamiquement via RecordAccount
-        Message firstMsg = channel.getMessages().getFirst();
-        assertEquals("ADMIN", firstMsg.getAuthorRole());
+        Message firstMsg = channel.getMessages().values().stream()
+                .findFirst()
+                .orElse(null);
+        assert firstMsg != null;
+        assertEquals("ADMIN", firstMsg.getAuthorTitle());
         assertEquals("il a mal au dos", firstMsg.getContent());
     }
 
     @Test
     void testGetChannelsOfCategory() {
         // On crée deux canaux de catégories différentes
-        recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", "userTest");
-        recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", "userTest");
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
+        recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
 
         // On teste le filtre par catégorie
         List<OpenChannel> commChannels = recordService.getChannelsOfCategory(testRecord.getId(), Category.Menage);
@@ -78,7 +91,9 @@ public class RecordServiceTest {
     @Test
     void testArchiveChannel() {
         // 1. Création du channel
-        OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", "userTest");
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", testUser);
         long channelId = channel.getId();
 
         // 2. Archivage
@@ -86,15 +101,21 @@ public class RecordServiceTest {
 
         // 3. Vérifications
         // Le channel ne doit plus être dans les "Open"
-        assertTrue(testRecord.getOpenChannels().stream().noneMatch(c -> c.getId() == channelId));
-
+        assertFalse(testRecord.getOpenChannels().containsKey(channelId));
         // Il doit être dans les "Close"
         assertEquals(1, testRecord.getCloseChannels().size());
-        CloseChannel archived = testRecord.getCloseChannels().getFirst();
+        CloseChannel archived = testRecord.getCloseChannels().values().stream()
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Aucun channel archivé trouvé"));
         assertEquals("A Archiver", archived.getTitle());
 
         // Les messages doivent être présents dans le channel archivé
         assertFalse(archived.getMessages().isEmpty());
-        assertEquals("probleme regle", archived.getMessages().getFirst().getContent());
+        String firstMessageContent = archived.getMessages().values().stream()
+                .findFirst()
+                .map(Message::getContent)
+                .orElse("");
+
+        assertEquals("probleme regle", firstMessageContent);
     }
 }

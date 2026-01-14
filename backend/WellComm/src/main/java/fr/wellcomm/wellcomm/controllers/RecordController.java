@@ -1,10 +1,11 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.ChannelService;
+import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,8 @@ import fr.wellcomm.wellcomm.services.RecordService;
 @AllArgsConstructor
 public class RecordController {
     private final RecordService recordService;
-    private final ChannelService channelService;
     private final AccountService accountService;
+    private final RecordAccountService recordAccountService;
 
     @Getter
     @Setter
@@ -64,12 +65,15 @@ public class RecordController {
         return ResponseEntity.ok(dossiers);
     }
 
-    @GetMapping("/create/{name}")
+    @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
+    public Record createRecord(@PathVariable @SuppressWarnings("unused") String userName,
                                                @PathVariable String name) {
+
         Record newRecord = recordService.createRecord(name);
-        return ResponseEntity.ok(newRecord);
+        Role aide = Role.AIDANT;
+        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
+        return newRecord;
     }
 
     @GetMapping("/{recordId}/channels/{category}")
@@ -84,7 +88,7 @@ public class RecordController {
                     return new FilResponse(
                             f.getId(), f.getTitle(), f.getCategory(), f.getCreationDate(),
                             lastMsg != null ? lastMsg.getContent() : "Aucun message",
-                            lastMsg != null ? lastMsg.getAuthorName() : ""
+                            lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
                     );
                 }).collect(Collectors.toList());
 
@@ -94,17 +98,23 @@ public class RecordController {
     @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
-            @PathVariable long recordId,
-            @RequestBody CreateFilRequest request) {
+                                           @PathVariable long recordId,
+                                           @RequestBody CreateFilRequest request) {
+
         Account account = accountService.getUser(userName);
         if (account == null)
-            return ResponseEntity.badRequest().body("Message not found");
-        RecordAccount recordAccount = account.getRecordAccounts().get(recordId);
-        if (recordAccount == null)
-            return ResponseEntity.badRequest().body("RecordAccount not found");
+            return ResponseEntity.badRequest().body("User not found");
+
+        RecordAccount recordAccount = account.getRecordAccounts().stream()
+                .filter(ra -> ra.getRecord().getId() == recordId)
+                .findFirst()
+                .orElse(null);
+
+        if (recordAccount == null) {
+            return ResponseEntity.badRequest().body("L'utilisateur n'a pas accès à ce dossier.");
+        }
+
         Record record = recordAccount.getRecord();
-        if (record == null)
-            return ResponseEntity.badRequest().body("Record not found");
 
         OpenChannel newChannel = recordService.createChannel(
                 record,
@@ -122,11 +132,12 @@ public class RecordController {
                 newChannel.getCategory(),
                 newChannel.getCreationDate(),
                 lastMsg != null ? lastMsg.getContent() : "",
-                lastMsg != null ? lastMsg.getAuthorName() : ""
+                lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
         ));
     }
 
-    @GetMapping("/{recordId}/channels/{channelId}/archive")
+
+    @PostMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,
@@ -140,5 +151,16 @@ public class RecordController {
 
         recordService.archiveChannel(record, channelId);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long id) {
+        boolean deleted = recordService.deleteRecord(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204
+        } else {
+            return ResponseEntity.notFound().build(); // 404
+        }
     }
 }

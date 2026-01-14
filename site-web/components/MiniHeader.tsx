@@ -1,15 +1,14 @@
 // mon-site-web/components/Header.tsx
 import Link from 'next/link';
 import Image from 'next/image';
-import {Button} from "@/components/ButtonMain";
 
 export default function Header() {
     // Ici, on utiliserait un état React (useState) pour gérer l'ouverture/fermeture du menu sur mobile, mais nous allons garder le prototype simple.
 
     return (
         // La barre de navigation principale
-        <header className="bg-white shadow-md">
-            <div className=" container mx-auto px-4 py-3 flex justify-between items-center">
+        <header className="bg-white shadow-md relative z-10">
+            <div className="w-full mx-auto px-4 py-3 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-2">
                     <Image
                         src="/images/logo.svg" //  Assurez-vous que ce nom de fichier est exact
@@ -20,16 +19,7 @@ export default function Header() {
                     />
                 </Link>
 
-                <div className="sm:space-x-4 hidden lg:flex items-center space-x-2">
 
-                    <Button variant="secondary" link="/login" >
-                        Se connecter
-                    </Button>
-                    <Button variant="primary" link="/register" >
-                        S&#39;inscrire
-                    </Button>
-
-                </div>
             </div>
         </header>
     );

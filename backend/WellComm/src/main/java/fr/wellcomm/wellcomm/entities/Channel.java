@@ -5,9 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity
@@ -21,17 +21,22 @@ public abstract class Channel {
     protected long id;
     protected String title;
     protected Date creationDate;
+    @Enumerated(EnumType.STRING)
     protected Category category;
     @ManyToOne
     @JoinColumn(name = "record_id")
     protected Record record;
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
-    protected Map<Long, Message> messages;
+    @MapKey(name = "id")
+    protected Map<Long, Message> messages = new HashMap<>();
 
     public Message getLastMessage() {
+        if (messages == null || messages.isEmpty()) {
+            return null;
+        }
         return messages.values()
                 .stream()
-                .max(Comparator.comparingLong(message -> message.getDate().getTime()))
+                .max(Comparator.comparing(Message::getDate))
                 .orElse(null);
     }
 }

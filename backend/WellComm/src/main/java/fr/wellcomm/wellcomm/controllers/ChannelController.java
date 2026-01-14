@@ -29,7 +29,7 @@ public class ChannelController {
         private Long id;
         private String content;
         private Date date;
-        private String authorName;
+        private String authorUserName;
         private String authorTitle;
     }
 
@@ -44,14 +44,15 @@ public class ChannelController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") String userName,
                                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                                           @PathVariable Long channelId) {
         OpenChannel channel = channelService.getChannel(channelId);
 
         List<MessageInfos> messages = channel.getMessages().values().stream()
-                .map(m -> new MessageInfos(m.getId(), m.getContent(), m.getDate(), m.getAuthorName(), m.getAuthorRole()))
+                .map(m -> new MessageInfos(m.getId(), m.getContent(), m.getDate(), m.getAuthor().getUserName(), m.getAuthorTitle()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new ChannelInfos(
@@ -83,7 +84,8 @@ public class ChannelController {
                 msg.getId(),
                 msg.getContent(),
                 msg.getDate(),
-                msg.getAuthorName(),
-                msg.getAuthorRole()
-        ));}
+                msg.getAuthor().getUserName(),
+                msg.getAuthorTitle()
+        ));
+    }
 }

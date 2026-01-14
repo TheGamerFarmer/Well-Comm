@@ -12,6 +12,9 @@ import java.util.Date;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import lombok.AllArgsConstructor;
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.data.util.ClassUtils.ifPresent;
 
 @Service
 @Transactional
@@ -42,6 +45,17 @@ public class RecordService {
         return recordRepository.save(new Record(name));
     }
 
+    @Transactional
+    public boolean deleteRecord(Long id) {
+        Optional<Record> recordOpt = recordRepository.findById(String.valueOf(id));
+
+        if (recordOpt.isEmpty()) {
+            return false;
+        }
+
+        recordRepository.delete(recordOpt.get()); // cascade JPA supprime les enfants
+        return true;
+    }
     public void archiveChannel(Record record, long channelId) {
         OpenChannel channel = channelRepository.findById(channelId).orElse(null);
         if (channel == null)

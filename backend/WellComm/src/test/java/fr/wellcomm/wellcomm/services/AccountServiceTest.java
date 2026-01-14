@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -27,7 +30,9 @@ public class AccountServiceTest {
 
         // 2. Test RecordAccount
         Record record = recordService.createRecord("Dossier A");
-        RecordAccount ra = new RecordAccount(user, record, "Manager");
+        List<Permission> permissionList = new ArrayList<>();
+        permissionList.add(Permission.AssignerPermissions);
+        RecordAccount ra = new RecordAccount(user, record, "Manager", permissionList);
 
         accountService.addRecordAccount(user, ra);
         assertEquals(1, found.getRecordAccounts().size());
