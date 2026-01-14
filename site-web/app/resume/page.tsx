@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 
 export default function Resume() {
     const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
@@ -20,6 +20,14 @@ export default function Resume() {
             setActiveCategories([...activeCategories, cat]); // ajouter sinon
         }
     };
+
+    useEffect(() => {
+        if (activeCategories.length > 0) {
+            setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
+        } else {
+            setActiveCategory(""); // ou un texte par défaut
+        }
+    }, [activeCategories]);
 
 
     return (

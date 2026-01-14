@@ -91,6 +91,14 @@ export default function FilDeTransmission() {
         }
     };
 
+    useEffect(() => {
+        if (activeCategories.length > 0) {
+            setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
+        } else {
+            setActiveCategory(""); // ou un texte par défaut
+        }
+    }, [activeCategories]);
+
 
 
     const handleSubmit = async (e: React.FormEvent) => {
