@@ -22,7 +22,7 @@ export default function MesAides() {
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
 
@@ -81,7 +81,6 @@ export default function MesAides() {
             setName("");
             setFile(null);
             setIsOpen(false);
-            setDeleteId(null);
         } catch (err) {
             console.error(err);
         }
@@ -136,9 +135,9 @@ export default function MesAides() {
                 </Button>
             </div>
 
-            {/* =======================
-          Liste des dossiers
-          ======================= */}
+    {/* =======================
+         Liste des dossiers
+        ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
                 <div className="flex flex-col gap-4">
                     {dossiers.map((dossier) => (
@@ -152,7 +151,7 @@ export default function MesAides() {
                             {dossier.name}
 
                             <div className="ml-auto">
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDeleteId(dossier.id)}>
+                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDossierToDelete(dossier)}>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             </div>
@@ -161,7 +160,7 @@ export default function MesAides() {
                 </div>
             </div>
 
-            {/* =======================
+      {/* =======================
           Modal création
           ======================= */}
             {isOpen && (
@@ -186,7 +185,7 @@ export default function MesAides() {
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-c
+
                             <input
                                 type="text"
                                 value={name}
@@ -212,7 +211,7 @@ c
                 </div>
             )}
 
-            {deleteId !== null && (
+            {dossierToDelete && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px]">
 
@@ -223,18 +222,14 @@ c
                                 <path d="M24 12v16" stroke="#F67A7A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
-                            <p className="text-[#727272]">Ceci sera supprimé définitivement.</p>
+                            <p>
+                                <strong>{dossierToDelete.name}</strong> sera supprimé définitivement.
+                            </p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="cancel" type="submit" onClick={() => {
-                                    handleDelete(deleteId);
-                                    setDeleteId(null);
-                                }} link={""}>
+                                <Button variant="secondary" type="button" onClick={() => {handleDelete(dossierToDelete.id);setDossierToDelete(null);}}>
                                     Oui
                                 </Button>
-                                <Button variant="validate" onClick={() => setDeleteId(null)}
-                                        link={""}>
-                                    Non
-                                </Button>
+                                <Button onClick={() => setDossierToDelete(null)}>Non</Button>
                             </div>
                         </div>
                     </div>
