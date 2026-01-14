@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
+import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
+    private final ChannelService ChannelService;
+    private final ChannelService channelService;
+
 
     @Getter
     @Setter
@@ -95,6 +99,25 @@ public class RecordController {
         return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{recordId}/closechannels/{category}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
+                                                                 @PathVariable Long recordId,
+                                                                 @PathVariable Category category) {
+
+        List<FilResponse> response = recordService.getChannelsOfCategoryClose(recordId, category).stream()
+                .map(f -> {
+                    Message lastMsg = f.getLastMessage();
+                    return new FilResponse(
+                            f.getId(), f.getTitle(), f.getCategory(), f.getCreationDate(),
+                            lastMsg != null ? lastMsg.getContent() : "Aucun message",
+                            lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
+                    );
+                }).collect(Collectors.toList());
+
+        return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
@@ -150,6 +173,29 @@ public class RecordController {
 
 
         recordService.archiveChannel(record, channelId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{recordId}/deletechannels/{channelId}/archive")
+    @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
+    public ResponseEntity<?> deleteChannel(@PathVariable("userName") @SuppressWarnings("unused") String userName,
+                                            @PathVariable("recordId") long recordId,
+                                            @PathVariable("channelId") long channelId) {
+
+        Record record = recordService.getRecord(recordId);
+        if (record == null) {
+            return ResponseEntity.badRequest().body("Record not found");
+        }
+        Channel channel = channelService.getChannel(channelId);
+        if (channel == null) {
+            return ResponseEntity.badRequest().body("Channel not found");
+        }
+
+        if (!(channel.getRecord().getId() == recordId)) {
+            return ResponseEntity.status(403).body("Channel does not belong to this record");
+        }
+
+        channelService.deleteChannel(channel);
         return ResponseEntity.ok().build();
     }
 

@@ -61,11 +61,11 @@ public class RecordService {
         return true;
     }
     public void archiveChannel(Record record, long channelId) {
-        OpenChannel channel = channelRepository.findById(channelId).orElse(null);
+        Channel channel = channelRepository.findById(channelId).orElse(null);
         if (channel == null)
             return;
 
-        CloseChannel closeChannel = new CloseChannel(channel);
+        CloseChannel closeChannel = new CloseChannel((OpenChannel) channel);
 
         channel.getMessages().values().forEach(message -> message.setChannel(closeChannel));
 

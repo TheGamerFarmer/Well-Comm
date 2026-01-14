@@ -1,9 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.entities.Account;
-import fr.wellcomm.wellcomm.entities.OpenChannel;
-import fr.wellcomm.wellcomm.entities.RecordAccount;
-import fr.wellcomm.wellcomm.entities.Message;
+import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
@@ -24,7 +21,7 @@ public class ChannelService {
     private final AccountRepository accountRepository;
 
     public OpenChannel getChannel(long id) {
-        return channelRepository.findById(id).orElse(null);
+        return (OpenChannel) channelRepository.findById(id).orElse(null);
     }
 
     public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
@@ -53,5 +50,10 @@ public class ChannelService {
         channelRepository.save(channel);
 
         return message;
+    }
+
+    @Transactional
+    public void deleteChannel(Channel channel) {
+        channelRepository.deleteById(channel.getId());
     }
 }
