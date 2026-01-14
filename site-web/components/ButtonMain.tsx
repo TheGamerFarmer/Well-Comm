@@ -6,7 +6,7 @@ import Link from "next/link";
 
 type ButtonProps = {
     children: React.ReactNode;
-    variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel";
+    variant?: "primary" | "secondary" | "start" | "start1" | "categoryTab" | "validate" | "cancel" | "retourFil";
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
     onClick?: () => void;
@@ -43,6 +43,10 @@ const variantStyles = {
 
     cancel: "w-100% h-12 bg-[#ffffff] text-[#f87c7c] border #f87c7c border-solid" +
         " hover:bg-[#f87c7c] hover:text-white ",
+
+    retourFil:
+        "w-40 h-12 border-2 border-[#0551ab] text-[#0551ab] " +
+        "hover:bg-[#f87c7c] hover:border-[#f87c7c] hover:text-white",
 
 };
 

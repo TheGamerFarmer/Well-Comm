@@ -173,8 +173,10 @@ export default function Archive() {
                         <div key={channel.id} className="bg-gray-100 p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all">
                             <div className="flex items-center gap-6">
                                 <div className="bg-[#26b3a9] p-4 rounded-full text-white shadow-md">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" /></svg>
-                                </div>
+                                    <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4.833 21.75H7.25v4.931l6.164-4.93h5.92a2.42 2.42 0 0 0 2.416-2.418V9.668a2.42 2.42 0 0 0-2.417-2.417h-14.5a2.42 2.42 0 0 0-2.416 2.417v9.667a2.42 2.42 0 0 0 2.416 2.416z" fill="#fff"/>
+                                        <path d="M24.167 2.417h-14.5A2.42 2.42 0 0 0 7.25 4.834h14.5a2.42 2.42 0 0 1 2.417 2.416v9.667a2.419 2.419 0 0 0 2.416-2.417V4.834a2.419 2.419 0 0 0-2.416-2.417z" fill="#fff"/>
+                                    </svg>                                </div>
                                 <div>
                                     <h3 className="font-bold text-black text-xl mb-1">{channel.title}</h3>
                                     <p className="text-black opacity-80 font-medium line-clamp-1">
