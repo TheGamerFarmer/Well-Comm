@@ -186,7 +186,6 @@ export default function MesAides() {
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-c
                             <input
                                 type="text"
                                 value={name}
