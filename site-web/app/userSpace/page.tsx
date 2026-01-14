@@ -1,4 +1,3 @@
-
 import HeaderLoged from "@/components/HeaderLoged";
 
 export default function Page() {

@@ -49,6 +49,19 @@ public class SecurityService {
         return hasPermission(account, record, permission);
     }
 
+    public boolean hasRecordPermission(Permission permission) {
+        Map<String, String> params = getPathVars();
+        Account account = accountService.getUser(params.get("userName"));
+        if (account == null)
+            return false;
+
+        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
+        if (record == null)
+            return false;
+
+        return hasPermission(account, record, permission);
+    }
+
     public boolean hasMessagePermission(Permission permission) {
         Map<String, String> params = getPathVars();
         Account account = accountService.getUser(params.get("userName"));

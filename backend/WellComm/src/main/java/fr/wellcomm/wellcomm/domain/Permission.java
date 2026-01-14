@@ -8,4 +8,5 @@ public enum Permission {
     SEND_MESSAGE,
     MODIFY_MESSAGE,
     DELETE_MESSAGE,
+    SEE_CALENDAR,
 }

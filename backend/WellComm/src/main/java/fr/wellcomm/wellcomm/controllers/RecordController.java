@@ -1,6 +1,7 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.EventDTO;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
@@ -132,7 +133,6 @@ public class RecordController {
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,
             @PathVariable long channelId) {
-
         Record record = recordService.getRecord(recordId);
         if (record == null) {
             return ResponseEntity.badRequest().body("Record not found");
@@ -141,5 +141,13 @@ public class RecordController {
 
         recordService.archiveChannel(record, channelId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{recordId}/calendar")
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
+    public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") String userName,
+                                                       @PathVariable long recordId) {
+        return ResponseEntity.ok(calendarService.getEvents(recordId));
     }
 }

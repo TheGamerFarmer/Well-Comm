@@ -3,6 +3,7 @@ package fr.wellcomm.wellcomm.services;
 import com.github.sardine.Sardine;
 import fr.wellcomm.wellcomm.config.FramagendaConfig;
 import fr.wellcomm.wellcomm.domain.EventDTO;
+import fr.wellcomm.wellcomm.entities.Record;
 import lombok.AllArgsConstructor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -14,14 +15,15 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.stereotype.Service;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Calendar;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -70,20 +72,54 @@ public class CalendarService {
         }
     }
 
-    public List<EventDTO> getEvents(long id) throws Exception {
-        String url = "https://framagenda.org/remote.php/dav/calendars/USER/" + id + "/?export";
+    public List<EventDTO> getEvents(long id) {
+        List<EventDTO> events = new ArrayList<>();
+        List<String> attendees = new ArrayList<>();
 
-        InputStream is = sardine.get(url);
-        Calendar calendar = new CalendarBuilder().build(is);
+        try {
+            String url = "https://framagenda.org/remote.php/dav/calendars/WellComm/" + id + "/?export";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(sardine.get(url), StandardCharsets.UTF_8));
 
-        // On convertit les VEVENT en un DTO simple pour le JSON
-        return calendar.getComponents(VEvent.VEVENT).stream().map(component -> {
-            VEvent event = (VEvent) component;
-            return new EventDTO(
-                    event.getSummary().getValue(),
-                    event.getStartDate().getDate(),
-                    event.getEndDate().getDate()
-            );
-        }).collect(Collectors.toList());
+            String line;
+            String title = "";
+            String start = "";
+            String location = "";
+            String description = "";
+            String end = "";
+
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("SUMMARY:")) {
+                    title = line.substring(8);
+                } else if (line.startsWith("DTSTART")) {
+                    start = line.split(":")[1];
+                } else if (line.startsWith("DTEND")) {
+                    end = line.split(":")[1];
+                } else if (line.startsWith("LOCATION:")) {
+                    location = line.substring(9);
+                } else if (line.startsWith("DESCRIPTION:")) {
+                    description = line.substring(12);
+                } else if (line.startsWith("ATTENDEE")) {
+                    String attendee = line.contains("CN=")
+                            ? line.split("CN=")[1].split(";")[0].replace("\"", "")
+                            : line.split(":")[1].replace("mailto:", "");
+
+                    attendees.add(attendee);
+                } else if (line.startsWith("END:VEVENT")) {
+                    events.add(new EventDTO(title, start, end, location, description, new ArrayList<>(attendees)));
+                    title = "";
+                    start = "";
+                    end = "";
+                    location = "";
+                    description = "";
+                    attendees.clear();
+                }
+            }
+
+            reader.close();
+        } catch (Exception ex) {
+            Logger.getGlobal().log(Level.SEVERE, "Cannot read calendar", ex);
+        }
+
+        return events;
     }
 }
