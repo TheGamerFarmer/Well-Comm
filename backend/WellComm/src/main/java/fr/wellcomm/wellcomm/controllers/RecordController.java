@@ -19,9 +19,14 @@ import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
 //pour la création de session
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.core.Authentication;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.repositories.RecordRepository;
+import fr.wellcomm.wellcomm.entities.Session;
+import fr.wellcomm.wellcomm.repositories.SessionRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+
 
 @RestController
 @RequestMapping("/api/{userName}/records")
@@ -31,6 +36,8 @@ public class RecordController {
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
     private final RecordRepository recordRepository;
+
+    private final SessionRepository sessionRepository;
 
     @Getter
     @Setter
@@ -175,28 +182,40 @@ public class RecordController {
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> selectRecord(
             @PathVariable String userName,
-            @PathVariable Long recordId,
-            HttpSession session,
-            Authentication authentication
+            @CookieValue("token") String token,
+            @PathVariable Long recordId
     ) {
-        // Optionnel : vérifier que le record appartient bien à l'utilisateur
-        session.setAttribute("currentRecordId", recordId);
-        return ResponseEntity.ok().build();
-    }
+          // Vérifie que la session existe pour ce token
+          Session session = sessionRepository.findById(token)
+                  .orElseThrow(() -> new RuntimeException("Session invalide"));
+
+
+          // Enregistre le recordId sélectionné
+          session.setCurrentRecordId(recordId);
+          sessionRepository.save(session);
+
+          System.out.println("Session token = " + token);
+          System.out.println("Record sélectionné = " + recordId);
+
+          return ResponseEntity.ok().build();
+      }
 
     //return current-record
     @GetMapping("/current-record")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> getCurrentRecord(@PathVariable String userName, HttpSession session) {
+    public ResponseEntity<?> getCurrentRecord(
+            @PathVariable String userName,
+            @CookieValue("token") String token
+    ) {
+          // Récupère la session par le token
+          Session session = sessionRepository.findById(token)
+                            .orElseThrow(() -> new RuntimeException("Session invalide"));
 
-        Long recordId = (Long) session.getAttribute("currentRecordId");
+          Long currentRecordId = session.getCurrentRecordId();
+          if (currentRecordId == null) {
+              return ResponseEntity.noContent().build(); // 204 si aucun dossier sélectionné
+          }
 
-        if (recordId == null) {
-            return ResponseEntity.badRequest().body("Aucun dossier sélectionné");//204
-        }
-
-        return recordRepository.findById(recordId)
-                           .map(ResponseEntity::ok)
-                           .orElse(ResponseEntity.notFound().build());
-    }
+          return ResponseEntity.ok(currentRecordId); // Retourne juste l'ID du dossier courant
+      }
 }

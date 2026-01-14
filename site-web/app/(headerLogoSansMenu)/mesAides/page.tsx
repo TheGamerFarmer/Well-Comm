@@ -8,7 +8,6 @@ import {getCurrentUser} from "@/functions/fil-API";
 import { useRouter } from "next/navigation";
 import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 
-
 type Dossier = {
     id: number;
     name: string;

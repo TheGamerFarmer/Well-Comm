@@ -1,3 +1,4 @@
+// hooks/useCurrentDossier.ts
 import { useEffect, useState } from "react";
 
 export function useCurrentDossier(userName: string | null) {
@@ -11,17 +12,19 @@ export function useCurrentDossier(userName: string | null) {
             try {
                 const res = await fetch(
                     `http://localhost:8080/api/${userName}/records/current-record`,
-                    {   method: "GET",
-                        credentials: "include" }
+                    { credentials: "include" } // inclut le cookie httpOnly
                 );
 
                 if (res.status === 204) {
                     setCurrentDossier(null);
                 } else if (res.ok) {
-                    setCurrentDossier(await res.json());
+                    const recordId = await res.json();
+                    setCurrentDossier(recordId);
+                } else {
+                    setCurrentDossier(null);
                 }
-            } catch (e) {
-                console.error(e);
+            } catch (err) {
+                console.error(err);
                 setCurrentDossier(null);
             } finally {
                 setLoading(false);

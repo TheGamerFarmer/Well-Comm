@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import jakarta.persistence.Column;
 
 @Entity
 @Getter
@@ -22,4 +23,6 @@ public class Session {
     @JoinColumn(name = "user_name", nullable = false)
     private Account account;
     private LocalDateTime expirationDate;
+    @Column(name = "current_record_id")
+    private Long currentRecordId;
 }
