@@ -176,29 +176,6 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{recordId}/deletechannels/{channelId}/archive")
-    @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
-    public ResponseEntity<?> deleteChannel(@PathVariable("userName") @SuppressWarnings("unused") String userName,
-                                            @PathVariable("recordId") long recordId,
-                                            @PathVariable("channelId") long channelId) {
-
-        Record record = recordService.getRecord(recordId);
-        if (record == null) {
-            return ResponseEntity.badRequest().body("Record not found");
-        }
-        Channel channel = channelService.getChannel(channelId);
-        if (channel == null) {
-            return ResponseEntity.badRequest().body("Channel not found");
-        }
-
-        if (!(channel.getRecord().getId() == recordId)) {
-            return ResponseEntity.status(403).body("Channel does not belong to this record");
-        }
-
-        channelService.deleteChannel(channel);
-        return ResponseEntity.ok().build();
-    }
-
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long id) {

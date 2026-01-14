@@ -21,7 +21,7 @@ public class ChannelService {
     private final AccountRepository accountRepository;
 
     public OpenChannel getChannel(long id) {
-        return (OpenChannel) channelRepository.findById(id).orElse(null);
+        return channelRepository.findById(id).orElse(null);
     }
 
     public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
@@ -50,10 +50,5 @@ public class ChannelService {
         channelRepository.save(channel);
 
         return message;
-    }
-
-    @Transactional
-    public void deleteChannel(Channel channel) {
-        channelRepository.deleteById(channel.getId());
     }
 }
