@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, Suspense } from "react";
 import encryptPassword from "../../../functions/encryptPassword";
 import logUser from "../../../functions/logUser";
-// Utilisation des imports standards
 import { useSearchParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "../../../config";
 
@@ -17,7 +16,7 @@ function RegisterForm() {
     const [errorMessage, setErrorMessage] = useState("");
 
     const searchParams = useSearchParams();
-    const router = useRouter(); // Utilisation de useRouter pour la redirection client
+    const router = useRouter();
     const callbackUrl = searchParams.get("callbackUrl") || "/";
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -39,6 +38,7 @@ function RegisterForm() {
             const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
                 body: JSON.stringify({
                     userName: userName,
                     password: hashedPwd,
@@ -49,7 +49,7 @@ function RegisterForm() {
 
             if (response.ok) {
                 await logUser(userName, hashedPwd);
-                router.push(callbackUrl); // Redirection côté client
+                router.push(callbackUrl);
             } else {
                 setErrorMessage("L'utilisateur existe déjà");
             }
@@ -97,7 +97,6 @@ function RegisterForm() {
     );
 }
 
-// Composant principal exporté par défaut
 export default function RegisterPage() {
     return (
         <Suspense fallback={<div className="text-center p-10">Chargement...</div>}>
