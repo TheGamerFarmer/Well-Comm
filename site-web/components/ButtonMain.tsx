@@ -42,7 +42,7 @@ const variantStyles = {
         " font-bold font-stretch-normal hover:bg-[#f87c7c]",
 
     cancel: "w-100% h-12 bg-[#ffffff] text-[#f87c7c] border #f87c7c border-solid" +
-        "hover:bg-[#f87c7c] hover:text-white ",
+        " hover:bg-[#f87c7c] hover:text-white ",
 
 };
 

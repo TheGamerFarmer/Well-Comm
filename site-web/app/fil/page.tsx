@@ -120,6 +120,43 @@ export default function FilDeTransmission() {
         return (c.title?.toLowerCase().includes(query) || c.lastMessage?.toLowerCase().includes(query));
     });
 
+    const archiveChannel = async (
+        userName: string,
+        recordId: number,
+        channelId: number
+    ) => {
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/records/${recordId}/channels/${channelId}/archive`,
+                {
+                    method: "POST",
+                    credentials: "include", // si tu utilises les cookies/session Spring Security
+                }
+            );
+
+            if (!res.ok) {
+                let errorMessage = "Erreur lors de l'archivage du channel";
+                try {
+                    const text = await res.text();
+                    if (text) errorMessage = text;
+                } catch {}
+                throw new Error(errorMessage);
+            }
+
+            console.log("Channel archivé ✅");
+            alert("Channel archivé avec succès !");
+
+            // Optionnel : mettre à jour le front pour retirer le channel archivé
+            setChannels(prev => prev.filter(ch => ch.id !== channelId));
+
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(message);
+            alert(message);
+        }
+    };
+
+
     return (
         <div className="w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2]">
             {/* Header section */}
@@ -144,7 +181,7 @@ export default function FilDeTransmission() {
                         </select>
                     </div>
                     <div className="w-full sm:w-60">
-                        <Button onClick={() => setIsOpen(true)}>Créer un fil</Button>
+                        <Button variant="primary" onClick={() => setIsOpen(true)} >Créer un fil</Button>
                     </div>
                 </div>
             </div>
@@ -155,7 +192,7 @@ export default function FilDeTransmission() {
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
+                        className={` flex-1 min-w-[130px] py-3 mr:px-5 rounded-xl border-2 font-bold text-lg transition-all ${
                             activeCategory === cat ? "bg-[#26b3a9] text-white border-[#26b3a9]" : "text-[#26b3a9] border-[#26b3a9]"
                         }`}
                     >
@@ -166,12 +203,12 @@ export default function FilDeTransmission() {
 
             {/* Modal de création */}
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <form className="mx-auto max-w-2xl" onSubmit={handleSubmit}>
+                <form className="mx-auto max-w-2xl " onSubmit={handleSubmit}>
                     <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
 
-                    <label className="text-sm font-bold text-[#727272] mb-2 block">Catégorie</label>
+                    <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
                     <select
-                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab]"
+                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
@@ -184,7 +221,7 @@ export default function FilDeTransmission() {
                         required
                         value={formData.title}
                         onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab]"
+                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab] text-black border-gray-300"
                     />
 
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
@@ -192,12 +229,12 @@ export default function FilDeTransmission() {
                         required
                         value={formData.message}
                         onChange={(e) => setFormData({...formData, message: e.target.value})}
-                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none"
+                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none text-black border-gray-300"
                     ></textarea>
 
                     <div className="flex gap-4">
-                        <Button variant="primary" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
-                        <Button type="submit">Créer</Button>
+                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
+                        <Button variant="validate" type="submit">Créer le fil</Button>
                     </div>
                 </form>
             </Modal>
@@ -205,7 +242,7 @@ export default function FilDeTransmission() {
             {/* Zone de contenu principale */}
             <div className="bg-white rounded-[2.5rem] shadow-sm p-8 md:p-12 min-h-[70vh] border border-gray-50">
                 <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight">{activeCategory}</h2>
-                <div className="relative mb-10">
+                <div className="relative mb-10 text-black">
                     <input
                         type="text"
                         placeholder="Recherche"
@@ -227,7 +264,12 @@ export default function FilDeTransmission() {
                         <div key={channel.id} className="bg-gray-100 p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all">
                             <div className="flex items-center gap-6">
                                 <div className="bg-[#26b3a9] p-4 rounded-full text-white shadow-md">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" /></svg>
+                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 30 30">
+
+                                        <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" fill="white"/>
+                                        <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" fill="white"/>
+
+                                    </svg>
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-black text-xl mb-1">{channel.title}</h3>
@@ -241,7 +283,9 @@ export default function FilDeTransmission() {
                             <div className="flex flex-col items-end gap-3">
                                 <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
                                 <button className="text-[#f27474] hover:scale-110 transition-transform">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => archiveChannel(currentUserName, activeRecordId!, channel.id)}>
+                                        <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
+                                    </svg>
                                 </button>
                             </div>
                         </div>

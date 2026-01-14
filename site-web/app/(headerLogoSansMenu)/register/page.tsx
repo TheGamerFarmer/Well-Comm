@@ -6,6 +6,7 @@ import encryptPassword from "../../../functions/encryptPassword"
 import logUser from "../../../functions/logUser"
 import {redirect} from "next/dist/client/components/redirect";
 import {useSearchParams} from "next/dist/client/components/navigation";
+import { API_BASE_URL } from "../../../config";
 
 export default function RegisterPage() {
 
@@ -46,7 +47,7 @@ export default function RegisterPage() {
         const hashedPwd = encryptPassword(password);
 
         try {
-            const response = await fetch("http://localhost:8080/api/register", {
+            const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
