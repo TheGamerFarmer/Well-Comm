@@ -2,7 +2,7 @@
  * Logique de communication avec le backend pour les fils de transmission
  */
 
-const API_BASE_URL = "http://localhost:8080";
+import { API_BASE_URL } from "@/config";
 
 export interface FilResponse {
     id: number;
@@ -32,7 +32,7 @@ export const mapCategoryToEnum = (cat: string): string => {
 
 export async function getCurrentUser(): Promise<string | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/accounts/me`, {
+        const response = await fetch(`${API_BASE_URL}/api/me`, {
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         });
