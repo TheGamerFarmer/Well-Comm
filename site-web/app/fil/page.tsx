@@ -191,7 +191,7 @@ export default function FilDeTransmission() {
                     <button
                         key={cat}
                         onClick={() => toggleCategory(cat)}
-                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
+                        className={`flex-1 min-w-[130px] py-3 rounded-xl border-2 font-bold text-lg transition-all ${
                             activeCategories.includes(cat)
                                 ? "bg-[#26b3a9] text-white border-[#26b3a9]"
                                 : "text-[#26b3a9] border-[#26b3a9]"
