@@ -193,10 +193,6 @@ public class RecordController {
           // Enregistre le recordId sélectionné
           session.setCurrentRecordId(recordId);
           sessionRepository.save(session);
-
-          System.out.println("Session token = " + token);
-          System.out.println("Record sélectionné = " + recordId);
-
           return ResponseEntity.ok().build();
       }
 

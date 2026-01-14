@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
+import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 
 import {
     getCurrentUser,
@@ -33,6 +34,51 @@ export default function AssistantsPage() {
     const [username, setUsername] = useState("");
     const [role, setRole] = useState<Invitation["role"]>("Aidant");
 
+    const [userName, setUserName] = useState<string | null>(null);
+
+    const handleInvite = (e: React.FormEvent) => {
+        e.preventDefault();
+        addAccessToCurrentRecord("Aidant");
+    };
+
+    useEffect(() => {
+        getCurrentUser().then(setUserName);
+    }, []);
+
+    const { currentDossier, loading } = useCurrentDossier(userName);
+    
+//ajouter un assitant au dossier
+    const addAccessToCurrentRecord = async (title: string) => {
+        if (!userName || !currentDossier) {
+            console.error("Aucun dossier sélectionné");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/addAccess`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        recordId: currentDossier,
+                        title: title,
+                    }),
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error("Impossible d'ajouter l'accès");
+            }
+
+            console.log("Accès ajouté au dossier", currentDossier);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
 
@@ -43,10 +89,18 @@ export default function AssistantsPage() {
                 </p>
                 <FilArianne/>
 
+                <div className="text-black">
+                    {currentDossier ? (
+                        <p>Dossier courant : {currentDossier}</p>
+                    ) : (
+                        <p>Aucun dossier sélectionné</p>
+                    )}
+                </div>
+
                 <div className="flex flex-col items-end my-4">
-                    <Button variant="primary" type="button"
+                    <Button variant="validate" type="button"
                             onClick={() => setIsOpen(true)}>
-                        Inviter Assistant
+                        Ajouter un(e) Assistant(e)
                     </Button>
                 </div>
 
@@ -65,9 +119,6 @@ export default function AssistantsPage() {
                                 <ul>
                                     <li>
                                         <span className="font-bold text-black ">{inv.username}</span>
-                                    </li>
-                                    <li>
-                                        <span className="text-gray-500 whitespace-nowrap">téléphone : </span>
                                     </li>
                                     <li>
                                         <span className="text-gray-500 ">ajouté le : </span>
@@ -164,7 +215,7 @@ export default function AssistantsPage() {
                                             Annuler
                                         </Button>
 
-                                        <Button variant="primary" type="submit">
+                                        <Button variant="primary" type="submit" onClick={() => addAccessToCurrentRecord("Aide")}>
                                             Ajouter
                                         </Button>
                                     </div>
