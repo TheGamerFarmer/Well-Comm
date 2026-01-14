@@ -1,132 +1,296 @@
 "use client";
 
-import { useState } from "react";
-import Modal from './Modal'
+import React, { useState, useEffect } from "react";
+import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
+import FilArianne from "@/components/FilArianne";
+import {
+    getCurrentUser,
+    getRecords,
+    getChannels,
+    mapCategoryToEnum,
+    createChannel,
+    FilResponse,
+    DossierResponse
+} from "@/functions/fil-API";
 
 export default function FilDeTransmission() {
     const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
+    // --- ÉTATS ---
     const [activeCategory, setActiveCategory] = useState("Santé");
     const [searchQuery, setSearchQuery] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const aideNom = "userTemp";
-    const archiveCount = 0;
-    const channels = [];
+    const [currentUserName, setCurrentUserName] = useState<string>("");
+    const [records, setRecords] = useState<DossierResponse[]>([]);
+    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
+    const [channels, setChannels] = useState<FilResponse[]>([]);
 
-    const [isOpen, setIsOpen] = useState(false)
+    // État du formulaire
+    const [formData, setFormData] = useState({
+        category: mapCategoryToEnum("Santé"),
+        title: "",
+        message: ""
+    });
+
+    // --- INITIALISATION ---
+    useEffect(() => {
+        const init = async () => {
+            const user = await getCurrentUser();
+            if (user) {
+                setCurrentUserName(user);
+                const userRecords = await getRecords(user);
+                setRecords(userRecords);
+                if (userRecords.length > 0) {
+                    setActiveRecordId(userRecords[0].id);
+                }
+            }
+        };
+        init().then();
+    }, []);
+
+    // --- CHARGEMENT DES FILS ---
+    const loadChannels = async () => {
+        if (!currentUserName || !activeRecordId) return;
+        setIsLoading(true);
+        const data = await getChannels(currentUserName, activeRecordId, activeCategory);
+        setChannels(data);
+        setIsLoading(false);
+    };
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function startFetching() {
+            if (!currentUserName || !activeRecordId) {
+                return;
+            }
+
+            try {
+                const data = await getChannels(currentUserName, activeRecordId, activeCategory);
+
+                if (!ignore) {
+                    const sortedData = data.sort((a, b) =>
+                        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+                    );
+
+                    setChannels(sortedData);
+                }
+            } catch (err) {
+                if (!ignore) {
+                    console.error("Erreur chargement:", err);
+                }
+            }
+        }
+
+        startFetching().then();
+
+        return () => {
+            ignore = true;
+        };
+    }, [currentUserName, activeRecordId, activeCategory]);
+
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentUserName || !activeRecordId) return;
+
+        const success = await createChannel(
+            currentUserName,
+            activeRecordId,
+            formData.title,
+            formData.category,
+            formData.message
+        );
+
+        if (success) {
+            setIsOpen(false);
+            setFormData({ category: mapCategoryToEnum(activeCategory), title: "", message: "" });
+            loadChannels().then();
+        } else {
+            console.error("Échec de la création");
+        }
+    };
+
+    const filteredChannels = channels.filter(c => {
+        const query = searchQuery.toLowerCase();
+        return (c.title?.toLowerCase().includes(query) || c.lastMessage?.toLowerCase().includes(query));
+    });
+
+    const archiveChannel = async (
+        userName: string,
+        recordId: number,
+        channelId: number
+    ) => {
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/records/${recordId}/channels/${channelId}/archive`,
+                {
+                    method: "POST",
+                    credentials: "include", // si tu utilises les cookies/session Spring Security
+                }
+            );
+
+            if (!res.ok) {
+                let errorMessage = "Erreur lors de l'archivage du channel";
+                try {
+                    const text = await res.text();
+                    if (text) errorMessage = text;
+                } catch {}
+                throw new Error(errorMessage);
+            }
+
+            console.log("Channel archivé ✅");
+            alert("Channel archivé avec succès !");
+
+            // Optionnel : mettre à jour le front pour retirer le channel archivé
+            setChannels(prev => prev.filter(ch => ch.id !== channelId));
+
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(message);
+            alert(message);
+        }
+    };
+
 
     return (
-        <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6 w-full pt-12 md:pt-8">
+        <div className="w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2]">
+            {/* Header section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-6 gap-6 w-full pt-2">
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold text-[#0551ab]">Fil de transmission</h1>
-                    <nav className="text-sm text-gray-500 mt-1">
-                        Home / Fil de transmission / Catégories / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
+                    <nav className="text-sm text-gray-500 mt-1 flex items-center whitespace-nowrap">
+                        <span className="opacity-70"> <FilArianne/></span>
+                        <span className="text-[#26b3a9] font-medium ml-1"> / {activeCategory}</span>
                     </nav>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
                     <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
-                        <span className="font-bold text-lg whitespace-nowrap">L&#39;aidé</span>
-                        <select className="bg-white text-black rounded-lg px-4 py-2 outline-none flex-1 text-base font-medium cursor-pointer">
-                            <option value="">{aideNom}</option>
+                        <span className="font-bold text-lg whitespace-nowrap tracking-tight">L&#39;aidé</span>
+                        <select
+                            value={activeRecordId || ""}
+                            onChange={(e) => setActiveRecordId(Number(e.target.value))}
+                            className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
+                        >
+                            {records.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                         </select>
                     </div>
-
-                    <div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold rounded-xl overflow-hidden">
-                        <Button variant="primary" onClick={() => setIsOpen(true)}>
-                            Créer un fil
-                        </Button>
-
-                        <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+                    <div className="w-full sm:w-60">
+                        <Button variant="primary" onClick={() => setIsOpen(true)} link={""} >Créer un fil</Button>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.05)] mb-8 flex flex-wrap justify-between gap-4 w-full">
+            {/* Navigation Catégories */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm mb-8 flex flex-wrap justify-between gap-4 w-full border border-gray-100">
                 {categories.map((cat) => (
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
-                            activeCategory === cat
-                                ? "bg-[#26b3a9] text-white border-[#26b3a9] shadow-md"
-                                : "text-[#26b3a9] border-[#26b3a9] hover:bg-[#26b3a9]/5"
+                        className={` flex-1 min-w-[130px] py-3 mr:px-5 rounded-xl border-2 font-bold text-lg transition-all ${
+                            activeCategory === cat ? "bg-[#26b3a9] text-white border-[#26b3a9]" : "text-[#26b3a9] border-[#26b3a9]"
                         }`}
                     >
                         {cat}
                     </button>
                 ))}
             </div>
-            {isOpen && (
-                <div className="flex justify-center items-center fixed inset-0 bg-black/50 z-50">
-                    <div className="bg-white md:w-[55%] rounded-xl p-5">
-                        <form className="mx-auto max-w-132">
-                            <label className="text-xl font-bold text-blue-800 mb-2 flex font-montserrat  font-bold text-left text-[#727272]">Créer un Fil de transmission</label>
-                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sélectionner une catégorie</label>
-                            <div className="mb-2 relative inline-block w-64">
-                                <select
-                                    className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1">Santé</option>
-                                    <option value="2">Alimentation</option>
-                                    <option value="3">Maison/terrain</option>
-                                    <option value="4">Hygiène</option>
-                                    <option value="5">Ménage</option>
-                                    <option value="6">Autres</option>
-                                </select>
-                            </div>
-                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Sujet du fil</label>
-                            <input type="text" className="h-[50px] mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                            <label className="mb-2 flex font-montserrat text-sm font-bold text-left text-[#727272]">Description du fil</label>
-                            <textarea className="h-[100px] w-full mb-2 self-stretch flex flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"></textarea>
-                            <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="" onClick={() => setIsOpen(false)}>
-                                    Annuler
-                                </Button>
-                                <Button type="submit">
-                                    Créer
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-            <div className="bg-white rounded-[2.5rem] shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 md:p-12 w-full min-h-[70vh]">
-                <h2 className="text-[#26b3a9] font-bold text-3xl mb-8">{activeCategory}</h2>
 
-                <div className="relative mb-10">
-                    <span className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                        <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </span>
+            {/* Modal de création */}
+            <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                <form className="mx-auto max-w-2xl " onSubmit={handleSubmit}>
+                    <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
+
+                    <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
+                    <select
+                        className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    >
+                        {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
+                    </select>
+
+                    <label className="text-sm font-bold text-[#727272] mb-2 block">Sujet du fil</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab] text-black border-gray-300"
+                    />
+
+                    <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
+                    <textarea
+                        required
+                        value={formData.message}
+                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none text-black border-gray-300"
+                    ></textarea>
+
+                    <div className="flex gap-4">
+                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)}
+                                link={""}>Annuler</Button>
+                        <Button variant="validate" type="submit" link={""}>Créer le fil</Button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Zone de contenu principale */}
+            <div className="bg-white rounded-[2.5rem] shadow-sm p-8 md:p-12 min-h-[70vh] border border-gray-50">
+                <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight">{activeCategory}</h2>
+                <div className="relative mb-10 text-black">
                     <input
                         type="text"
                         placeholder="Recherche"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-gray-50/50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 transition-all text-lg shadow-sm"
+                        className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
                     />
-                </div>
-
-                {/* Archives */}
-                <div className="flex items-center gap-4 mb-10 text-gray-700">
-                    <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M20 7H4M20 7L19 19H5L4 7M20 7L18 3H6L4 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg className="absolute left-5 top-4 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <span className="text-lg font-semibold">Dans Les Archives :</span>
-                    <span className="bg-[#f27474] text-white text-sm font-black px-3 py-1.5 rounded-full shadow-md">
-                        {archiveCount}
-                    </span>
                 </div>
 
                 <div className="space-y-6">
-                    {channels.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-24 text-gray-300">
-                            <p className="text-xl font-medium italic">Aucune transmission enregistrée pour la catégorie {activeCategory}.</p>
+                    {isLoading ? (
+                        <div className="flex justify-center py-20 text-[#26b3a9] font-medium animate-pulse">Chargement...</div>
+                    ) : filteredChannels.length === 0 ? (
+                        <div className="text-center py-20 text-gray-400 font-medium">Aucun fil trouvé dans cette catégorie.</div>
+                    ) : filteredChannels.map(channel => (
+                        <div key={channel.id} className="bg-gray-100 p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all">
+                            <div className="flex items-center gap-6">
+                                <div className="bg-[#26b3a9] p-4 rounded-full text-white shadow-md">
+                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 30 30">
+
+                                        <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" fill="white"/>
+                                        <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" fill="white"/>
+
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-black text-xl mb-1">{channel.title}</h3>
+                                    <p className="text-black opacity-80 font-medium line-clamp-1">
+                                        {channel.lastMessageAuthor ? (
+                                            <><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>
+                                        ) : "Nouveau fil"}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-3">
+                                <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
+                                <button className="text-[#f27474] hover:scale-110 transition-transform">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => archiveChannel(currentUserName, activeRecordId!, channel.id)}>
+                                        <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                    )}
+                    ))}
                 </div>
             </div>
         </div>

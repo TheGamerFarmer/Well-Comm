@@ -1,10 +1,12 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.domain.EventDTO;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
+import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.CalendarService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +26,7 @@ import fr.wellcomm.wellcomm.services.RecordService;
 public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
+    private final RecordAccountService recordAccountService;
     private final CalendarService calendarService;
 
     @Getter
@@ -68,7 +71,7 @@ public class RecordController {
     @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
-                                               @PathVariable String name) {
+            @PathVariable String name) {
         Record newRecord = recordService.createRecord(name);
         calendarService.createCalendar(newRecord.getId(), newRecord.getName());
         return ResponseEntity.ok(newRecord);
@@ -100,10 +103,12 @@ public class RecordController {
             @RequestBody CreateFilRequest request) {
         Account account = accountService.getUser(userName);
         if (account == null)
-            return ResponseEntity.badRequest().body("Message not found");
+            return ResponseEntity.badRequest().body("User not found");
+
         RecordAccount recordAccount = account.getRecordAccounts().get(recordId);
         if (recordAccount == null)
             return ResponseEntity.badRequest().body("RecordAccount not found");
+
         Record record = recordAccount.getRecord();
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
@@ -143,11 +148,22 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{recordId}/delete/")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long recordId) {
+        boolean deleted = recordService.deleteRecord(recordId);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204
+        } else {
+            return ResponseEntity.notFound().build(); // 404
+        }
+    }
+
     @GetMapping("/{recordId}/calendar")
     @PreAuthorize("#userName == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
     public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") String userName,
-                                                       @PathVariable long recordId) {
+            @PathVariable long recordId) {
         return ResponseEntity.ok(calendarService.getEvents(recordId));
     }
 }

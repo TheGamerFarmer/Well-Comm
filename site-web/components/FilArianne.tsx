@@ -7,7 +7,8 @@ const breadcrumbNames: Record<string, string> = {
     home: "Accueil",
     mesAides: "Mes aidés",
     calendrier: "Calendrier",
-    profil: "Mon profil",
+    userSpace: "Mon profil",
+    fil: "Fil de Transmission",
 };
 
 export default function Breadcrumb() {
@@ -17,10 +18,10 @@ export default function Breadcrumb() {
     const segments = pathname.split("/").filter(Boolean);
 
     return (
-        <nav aria-label="Breadcrumb" className="text-sm text-gray-600">
+        <nav aria-label="Breadcrumb" className="text-sm text-[#6b7280]">
             <ol className="flex items-center space-x-2 my-4">
                 <li>
-                    <Link href="/" className="text-blue-600 hover:underline font-bold">
+                    <Link href="/" className="text-[#223f81] hover:underline font-medium">
                         Accueil
                     </Link>
                 </li>
@@ -35,11 +36,11 @@ export default function Breadcrumb() {
                             <span>/</span>
 
                             {isLast ? (
-                                <span className="font-bold text-gray">{name}</span>
+                                <span className="font-medium text-gray">{name}</span>
                             ) : (
                                 <Link
                                     href={href}
-                                    className="text-blue-600 hover:underline"
+                                    className="text-[#223f81] hover:underline"
                                 >
                                     {name}
                                 </Link>

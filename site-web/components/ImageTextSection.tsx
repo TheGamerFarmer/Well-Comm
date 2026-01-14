@@ -8,7 +8,7 @@ export default function ImageTextSection() {
                 <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
 
                     {/* 1. Bloc Image à gauche */}
-                    <div className="w-full">
+                    <div className="w-full hidden lg:block">
                         <div className="relative w-[650px] h-[570px]">
                             <Image
                                 src="/images/woman_laptop.png"
@@ -20,9 +20,9 @@ export default function ImageTextSection() {
                     </div>
 
                     {/* 2. Bloc Texte à droite (Plus de contenu, pas de bouton) */}
-                    <div className="w-full text-gray-700">
+                    <div className="w-full text-gray-700 p-8">
                         <h2 className="text-3xl md:text-4xl font-bold text-[#1e40af] mb-6">
-                            Qu'est-ce que WellComm?
+                            Qu&#39;est-ce que WellComm?
                         </h2>
 
                         <div className="space-y-5 text-base md:text-lg leading-relaxed">
@@ -35,7 +35,7 @@ export default function ImageTextSection() {
                             </p>
 
                             <p>
-                                C'est un assistant simple et fiable qui facilite le quotidien et vous apporte sérénité, jour après jour.
+                                C&#39;est un assistant simple et fiable qui facilite le quotidien et vous apporte sérénité, jour après jour.
                             </p>
                         </div>
                     </div>

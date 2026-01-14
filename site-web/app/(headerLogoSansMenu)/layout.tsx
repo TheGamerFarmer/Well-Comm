@@ -1,13 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function LoginLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
     return (
 
-        <div className="flex flex-col min-h-screen ">
+        <div className="flex flex-col min-h-screen bg-[#fafafa]">
             <header className="bg-white shadow-md relative z-10">
 
-                <div className="w-full mx-auto px-4 py-3 flex justify-between items-center ">
+                <div className=" w-full mx-auto px-4 py-3 flex justify-between items-center ">
 
                     {/* 1. Logo/Titre (Image dans la maquette) */}
                     <Link href="/"
@@ -27,6 +27,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                 </div>
             </header>
             <main className="bg-[#fafafa] flex-1">{children}</main>
+
         </div>
     )
 }

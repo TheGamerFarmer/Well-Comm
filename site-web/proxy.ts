@@ -1,5 +1,6 @@
 import {NextRequest} from "next/dist/server/web/spec-extension/request";
 import {NextResponse} from "next/dist/server/web/spec-extension/response";
+import { API_BASE_URL } from "./config";
 
 export async function proxy(request: NextRequest) {
     const logPages = ["/login", "/register"];
@@ -13,7 +14,7 @@ export async function proxy(request: NextRequest) {
 
     const cookieHeader = request.headers.get('cookie');
 
-    const response = await fetch("http://localhost:8080/api/isLogin", {
+    const response = await fetch(`${API_BASE_URL}/api/isLogin`, {
         method: "GET",
         headers: {
             "Cookie": cookieHeader || ""
