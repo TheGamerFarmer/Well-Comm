@@ -41,6 +41,10 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorie(recordId, category);
     }
 
+    public List<CloseChannel> getChannelsOfCategoryClose(long recordId, Category category) {
+        return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
+    }
+
     public Record createRecord(String name) {
         return recordRepository.save(new Record(name));
     }
