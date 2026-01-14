@@ -71,13 +71,13 @@ public class RecordController {
 
     @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
-    public Record createRecord(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
                                                @PathVariable String name) {
 
         Record newRecord = recordService.createRecord(name);
         Role aide = Role.AIDANT;
-        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
-        return newRecord;
+        RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
+        return ResponseEntity.ok(newRecord);
     }
 
     @GetMapping("/{recordId}/channels/{category}")
@@ -178,7 +178,7 @@ public class RecordController {
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Void> deleteDossier(@PathVariable String userName, @PathVariable Long id) {
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long id) {
         boolean deleted = recordService.deleteRecord(id);
         if (deleted) {
             return ResponseEntity.noContent().build(); // 204
