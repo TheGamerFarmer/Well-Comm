@@ -19,6 +19,7 @@ export default function Archive() {
 
     // --- ÉTATS ---
     const [activeCategory, setActiveCategory] = useState("Santé");
+    const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -62,37 +63,45 @@ export default function Archive() {
     };
 
     useEffect(() => {
-        let ignore = false;
+        if (!currentUserName || !activeRecordId) return;
 
-        async function startFetching() {
-            if (!currentUserName || !activeRecordId) {
-                return;
+        const fetchChannels = async () => {
+            let allChannels: FilResponse[] = [];
+            for (const cat of activeCategories) {
+                const data = await getCloseChannels(currentUserName, activeRecordId, cat);
+                allChannels = [...allChannels, ...data];
             }
 
-            try {
-                const data = await getCloseChannels(currentUserName, activeRecordId, activeCategory);
+            const sortedData = allChannels.sort(
+                (a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+            );
 
-                if (!ignore) {
-                    const sortedData = data.sort((a, b) =>
-                        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
-                    );
-
-                    setChannels(sortedData);
-                    console.log("Channels chargés :", data);
-                }
-            } catch (err) {
-                if (!ignore) {
-                    console.error("Erreur chargement:", err);
-                }
-            }
-        }
-
-        startFetching().then();
-
-        return () => {
-            ignore = true;
+            setChannels(sortedData);
         };
-    }, [currentUserName, activeRecordId, activeCategory]);
+
+        fetchChannels().then();
+    }, [currentUserName, activeRecordId, activeCategories]);
+
+    const toggleCategory = (cat: string) => {
+        if (activeCategories.includes(cat)) {
+            // si déjà sélectionnée, on retire
+            setActiveCategories(activeCategories.filter(c => c !== cat));
+        } else {
+            // sinon, on ajoute
+            setActiveCategories([...activeCategories, cat]);
+        }
+    };
+
+    //met à jour l'affichage des catégories actives
+    useEffect(() => {
+        if (activeCategories.length > 0) {
+            setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
+        } else {
+            setActiveCategory(""); // ou un texte par défaut
+        }
+    }, [activeCategories]);
+
+
 
 
     const filteredChannels = channels.filter(c => {
@@ -168,9 +177,11 @@ export default function Archive() {
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        onClick={() => setActiveCategory(cat)}
-                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
-                            activeCategory === cat ? "bg-[#26b3a9] text-white border-[#26b3a9]" : "text-[#26b3a9] border-[#26b3a9]"
+                        onClick={() => toggleCategory(cat)}
+                        className={`flex-1 min-w-[130px] py-3 rounded-xl border-2 font-bold text-lg transition-all ${
+                            activeCategories.includes(cat)
+                                ? "bg-[#26b3a9] text-white border-[#26b3a9]"
+                                : "text-[#26b3a9] border-[#26b3a9]"
                         }`}
                     >
                         {cat}
