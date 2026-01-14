@@ -181,7 +181,7 @@ export default function FilDeTransmission() {
                         </select>
                     </div>
                     <div className="w-full sm:w-60">
-                        <Button variant="primary" onClick={() => setIsOpen(true)} >Créer un fil</Button>
+                        <Button variant="primary" onClick={() => setIsOpen(true)} link={""} >Créer un fil</Button>
                     </div>
                 </div>
             </div>
@@ -233,8 +233,9 @@ export default function FilDeTransmission() {
                     ></textarea>
 
                     <div className="flex gap-4">
-                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)}>Annuler</Button>
-                        <Button variant="validate" type="submit">Créer le fil</Button>
+                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)}
+                                link={""}>Annuler</Button>
+                        <Button variant="validate" type="submit" link={""}>Créer le fil</Button>
                     </div>
                 </form>
             </Modal>

@@ -131,7 +131,7 @@ export default function MesAides() {
             <FilArianne />
 
             <div className="flex justify-end my-4">
-                <Button variant="validate" type="button" onClick={() => setIsOpen(true)}>
+                <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
                     Ajouter un aidé
                 </Button>
             </div>
@@ -199,11 +199,11 @@ c
                                 <Button
                                     variant="cancel"
                                     type="button"
-                                    onClick={() => setIsOpen(false)}>
+                                    onClick={() => setIsOpen(false)} link={""}>
                                     Annuler
                                 </Button>
 
-                                <Button variant="primary" type="submit">
+                                <Button variant="primary" type="submit" link={""}>
                                     Créer
                                 </Button>
                             </div>
@@ -225,10 +225,14 @@ c
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
                             <p className="text-[#727272]">Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="cancel" type="submit" onClick={() => { handleDelete(deleteId); setDeleteId(null); }}>
+                                <Button variant="cancel" type="submit" onClick={() => {
+                                    handleDelete(deleteId);
+                                    setDeleteId(null);
+                                }} link={""}>
                                     Oui
                                 </Button>
-                                <Button variant="validate" onClick={() => setDeleteId(null)}>
+                                <Button variant="validate" onClick={() => setDeleteId(null)}
+                                        link={""}>
                                     Non
                                 </Button>
                             </div>
