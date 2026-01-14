@@ -18,7 +18,7 @@ export default function Archive() {
     const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
     // --- ÉTATS ---
-    const [activeCategory, setActiveCategory] = useState("Santé");
+    const [activeCategory, setActiveCategory] = useState("");
     const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
