@@ -26,6 +26,7 @@ public class TokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain)
             throws ServletException, IOException {
+
         String token = null;
 
         if (request.getCookies() != null) {
@@ -45,10 +46,9 @@ public class TokenFilter extends OncePerRequestFilter {
                             session.getAccount().getUserName(), null, new ArrayList<>()
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+		}
             });
-        }
-
+	}
         filterChain.doFilter(request, response);
     }
 }
