@@ -144,7 +144,6 @@ export default function FilDeTransmission() {
             }
 
             console.log("Channel archivé ✅");
-            alert("Channel archivé avec succès !");
 
             // Optionnel : mettre à jour le front pour retirer le channel archivé
             setChannels(prev => prev.filter(ch => ch.id !== channelId));
@@ -277,8 +276,8 @@ export default function FilDeTransmission() {
                             </div>
                             <div className="flex flex-col items-end gap-3">
                                 <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
-                                <button className="text-[#f27474] hover:scale-110 transition-transform">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => archiveChannel(currentUserName, activeRecordId!, channel.id)}>
+                                <button className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => archiveChannel(currentUserName, activeRecordId!, channel.id)}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
                                     </svg>
                                 </button>
