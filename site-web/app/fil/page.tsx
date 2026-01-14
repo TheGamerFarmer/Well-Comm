@@ -19,6 +19,7 @@ export default function FilDeTransmission() {
 
     // --- ÉTATS ---
     const [activeCategory, setActiveCategory] = useState("Santé");
+    const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -61,36 +62,34 @@ export default function FilDeTransmission() {
     };
 
     useEffect(() => {
-        let ignore = false;
+        if (!currentUserName || !activeRecordId) return;
 
-        async function startFetching() {
-            if (!currentUserName || !activeRecordId) {
-                return;
+        const fetchChannels = async () => {
+            let allChannels: FilResponse[] = [];
+            for (const cat of activeCategories) {
+                const data = await getChannels(currentUserName, activeRecordId, cat);
+                allChannels = [...allChannels, ...data];
             }
 
-            try {
-                const data = await getChannels(currentUserName, activeRecordId, activeCategory);
+            const sortedData = allChannels.sort(
+                (a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+            );
 
-                if (!ignore) {
-                    const sortedData = data.sort((a, b) =>
-                        new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
-                    );
-
-                    setChannels(sortedData);
-                }
-            } catch (err) {
-                if (!ignore) {
-                    console.error("Erreur chargement:", err);
-                }
-            }
-        }
-
-        startFetching().then();
-
-        return () => {
-            ignore = true;
+            setChannels(sortedData);
         };
-    }, [currentUserName, activeRecordId, activeCategory]);
+
+        fetchChannels().then();
+    }, [currentUserName, activeRecordId, activeCategories]);
+
+    const toggleCategory = (cat: string) => {
+        if (activeCategories.includes(cat)) {
+            // si déjà sélectionnée, on retire
+            setActiveCategories(activeCategories.filter(c => c !== cat));
+        } else {
+            // sinon, on ajoute
+            setActiveCategories([...activeCategories, cat]);
+        }
+    };
 
 
 
@@ -144,7 +143,6 @@ export default function FilDeTransmission() {
             }
 
             console.log("Channel archivé ✅");
-            alert("Channel archivé avec succès !");
 
             // Optionnel : mettre à jour le front pour retirer le channel archivé
             setChannels(prev => prev.filter(ch => ch.id !== channelId));
@@ -187,13 +185,16 @@ export default function FilDeTransmission() {
             </div>
 
             {/* Navigation Catégories */}
+            <p className="ml-7 mb-2 text-[#727272]">Sélectionner les catégories souhaitées :</p>
             <div className="bg-white p-5 rounded-2xl shadow-sm mb-8 flex flex-wrap justify-between gap-4 w-full border border-gray-100">
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        onClick={() => setActiveCategory(cat)}
-                        className={` flex-1 min-w-[130px] py-3 mr:px-5 rounded-xl border-2 font-bold text-lg transition-all ${
-                            activeCategory === cat ? "bg-[#26b3a9] text-white border-[#26b3a9]" : "text-[#26b3a9] border-[#26b3a9]"
+                        onClick={() => toggleCategory(cat)}
+                        className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
+                            activeCategories.includes(cat)
+                                ? "bg-[#26b3a9] text-white border-[#26b3a9]"
+                                : "text-[#26b3a9] border-[#26b3a9]"
                         }`}
                     >
                         {cat}

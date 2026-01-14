@@ -6,11 +6,21 @@ export default function Resume() {
     const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
     const [activeCategory, setActiveCategory] = useState("Santé");
+    const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     const aideNom = "userTemp";
     const archiveCount = 0;
     const channels = [];
+
+    const toggleCategory = (cat: string) => {
+        if (activeCategories.includes(cat)) {
+            setActiveCategories(activeCategories.filter(c => c !== cat)); // retirer si déjà sélectionnée
+        } else {
+            setActiveCategories([...activeCategories, cat]); // ajouter sinon
+        }
+    };
+
 
     return (
         <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
@@ -34,13 +44,14 @@ export default function Resume() {
                 </div>
             </div>
 
+            <p className="ml-7 mb-2 text-[#727272]">Sélectionner les catégories souhaitées :</p>
             <div className="bg-white p-5 rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.05)] mb-8 flex flex-wrap justify-between gap-4 w-full">
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        onClick={() => setActiveCategory(cat)}
+                        onClick={() => toggleCategory(cat)}
                         className={`flex-1 min-w-[130px] py-3 px-5 rounded-xl border-2 font-bold text-lg transition-all ${
-                            activeCategory === cat
+                            activeCategories.includes(cat)
                                 ? "bg-[#26b3a9] text-white border-[#26b3a9] shadow-md"
                                 : "text-[#26b3a9] border-[#26b3a9] hover:bg-[#26b3a9]/5"
                         }`}
