@@ -32,6 +32,19 @@ public class SecurityService {
         return recordAccount.getPermissions().contains(permission);
     }
 
+    public boolean hasRecordPermission(Permission permission) {
+        Map<String, String> params = getPathVars();
+        Account account = accountService.getUser(params.get("userName"));
+        if (account == null)
+            return false;
+
+        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
+        if (record == null)
+            return false;
+
+        return hasPermission(account, record, permission);
+    }
+
     public boolean hasChannelPermission(Permission permission) {
         Map<String, String> params = getPathVars();
         Account account = accountService.getUser(params.get("userName"));
@@ -83,13 +96,13 @@ public class SecurityService {
         return message.getAuthor().getUserName().equals(account.getUserName());
     }
 
-    public boolean isAdmin(){
+    public boolean isAdmin() {
         Map<String, String> params = getPathVars();
         Account account = accountService.getUser(params.get("userName"));
         if (account == null)
             return false;
 
-        Record record = recordService.getRecord(Long.parseLong(params.get("id")));
+        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
         if (record == null)
             return false;
 

@@ -119,7 +119,8 @@ public class RecordController {
     }
 
     @PostMapping("/{recordId}/channels/new")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).OPEN_CHANNEL)")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
                                            @PathVariable long recordId,
                                            @RequestBody CreateFilRequest request) {
@@ -176,10 +177,10 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{recordId}")
     @PreAuthorize("#userName == authentication.name and @securityService.isAdmin()")
-    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long id) {
-        boolean deleted = recordService.deleteRecord(id);
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long recordId) {
+        boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
             return ResponseEntity.noContent().build(); // 204
         } else {
