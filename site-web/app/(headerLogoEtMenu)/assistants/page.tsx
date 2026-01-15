@@ -18,7 +18,7 @@ import {
 type Invitation = {
     id: string;
     username: string;
-    role: "Aidant" | "Infirmier(e)" | "Médecin" | "Aide soignant(e)" | "Aide à domicile";
+    role: "Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile";
 };
 
 export default function AssistantsPage() {
@@ -31,9 +31,8 @@ export default function AssistantsPage() {
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [username, setUsername] = useState("");
     const [role, setRole] = useState<Invitation["role"]>("Aidant");
-
+    const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
 
     const handleInvite = (e: React.FormEvent) => {
@@ -46,6 +45,27 @@ export default function AssistantsPage() {
     }, []);
 
     const { currentDossier, loading } = useCurrentDossier(userName);
+
+    //afficher la liste d'assistants
+    useEffect(() => {
+        if (!userName) return;
+
+        const fetchAssistants = async () => {
+            try {
+                const res = await fetch(
+                    `http://localhost:8080/api/${userName}/recordacount`,
+                    { credentials: "include" }
+                );
+                if (!res.ok) throw new Error("Erreur chargement assistants");
+
+                const data: Invitation[] = await res.json();
+                setInvitations(data);
+            }catch (err) {
+                console.error(err);
+            }
+        };
+        fetchAssistants();
+    }, [userName]);
     
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
@@ -56,7 +76,9 @@ export default function AssistantsPage() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/${userName}/addAccess`,
+                `http://localhost:8080/api/${userName}/addAccess/current_record/${encodeURIComponent(
+                    username
+                )}`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -73,6 +95,19 @@ export default function AssistantsPage() {
             if (!res.ok) {
                 throw new Error("Impossible d'ajouter l'accès");
             }
+
+            setInvitations((prev) => [
+                ...prev,
+                {
+                    id: crypto.randomUUID(),
+                    username,
+                    role,
+                },
+            ]);
+
+            setUsername("");
+            setRole("Aidant");
+            setIsOpen(false);
 
             console.log("Accès ajouté au dossier", currentDossier);
         } catch (err) {
@@ -121,7 +156,7 @@ export default function AssistantsPage() {
                                         <span className="font-bold text-black ">{inv.username}</span>
                                     </li>
                                     <li>
-                                        <span className="text-gray-500 ">ajouté le : </span>
+                                        <span className="text-gray-500 ">ajouté le :  </span>
                                     </li>
                                 </ul>
                             </div>
@@ -146,7 +181,6 @@ export default function AssistantsPage() {
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option>Aidant</option>
                                     <option>Infirmier(e)</option>
-                                    <option>Médecin</option>
                                     <option>Aide soignant(e)</option>
                                     <option>Aide à domicile</option>
                                 </select>
@@ -172,21 +206,8 @@ export default function AssistantsPage() {
                                 <form
                                     onSubmit={(e) => {
                                         e.preventDefault();
-
                                         if (!username.trim()) return;
-
-                                        setInvitations((prev) => [
-                                            ...prev,
-                                            {
-                                                id: crypto.randomUUID(),
-                                                username,
-                                                role,
-                                            },
-                                        ]);
-
-                                        setUsername("");
-                                        setRole("Aidant");
-                                        setIsOpen(false);
+                                        addAccessToCurrentRecord(role);
                                     }}
                                     className="flex flex-col gap-4"
                                 >
@@ -215,7 +236,7 @@ export default function AssistantsPage() {
                                             Annuler
                                         </Button>
 
-                                        <Button variant="primary" type="submit" onClick={() => addAccessToCurrentRecord("Aide")}>
+                                        <Button variant="primary" type="submit" onClick={() => setIsOpen(false)}>
                                             Ajouter
                                         </Button>
                                     </div>

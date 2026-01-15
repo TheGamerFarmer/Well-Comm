@@ -116,6 +116,27 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
         return ResponseEntity.ok().build();
     }
 
+    //ajouter un assistant autre que la personne connecté à un dossier
+    @PostMapping("/addAccess/current_record/{name}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> addRecordAccountCurrebtRecord(@PathVariable String userName, @RequestBody addRecordAccountRequest request, @PathVariable String name) {
+        Account account = accountService.getUser(name);
+        if (account == null)
+            return ResponseEntity.badRequest().body("User not found");
+
+        Record record = recordService.getRecord(request.getRecordId());
+        if (record == null)
+            return ResponseEntity.badRequest().body("Record not found");
+
+        RecordAccount newAccess = new RecordAccount();
+        newAccess.setRecord(record);
+        newAccess.setTitle(request.getTitle());
+
+        accountService.addRecordAccount(account, newAccess);
+
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/deleteAccess/")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> deleteRecordAccount(@PathVariable String userName, @RequestBody deleteRecordAccountRequest request) {

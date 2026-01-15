@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Date;
 
 @Service
 @Transactional
@@ -19,6 +21,10 @@ public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
     private final RecordRepository recordRepository;
     private final AccountRepository accountRepository;
+
+    public List<RecordAccount> getByRecordId(Long recordId) {
+        return recordAccountRepository.findByRecordId(recordId);
+    }
 
     public RecordAccount getReccordAccount(long id) {
         return recordAccountRepository.findById(id).orElse(null);
@@ -36,4 +42,8 @@ public class RecordAccountService {
         //recordRepository.save(record);
         return recordAccount;
     }
+
+    public List<Record> getRecordAccounts(String userName, Long id) {
+            return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id);
+        }
 }
