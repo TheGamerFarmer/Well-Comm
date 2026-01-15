@@ -89,7 +89,7 @@ public class SecurityService {
         if (account == null)
             return false;
 
-        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
+        Record record = recordService.getRecord(Long.parseLong(params.get("id")));
         if (record == null)
             return false;
 

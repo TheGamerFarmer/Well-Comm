@@ -104,7 +104,7 @@ public class ChannelControllerTest {
         recordRepository.save(record);
 
         // On donne une autre permission, mais pas SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.IsMedecin);
+        List<Permission> permissions = List.of(Permission.IS_MEDECIN);
         RecordAccount ra = new RecordAccount(userTest, record, "LECTEUR", permissions);
         recordAccountRepository.save(ra);
 
