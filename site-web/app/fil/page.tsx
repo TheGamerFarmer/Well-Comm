@@ -348,7 +348,7 @@ export default function FilDeTransmission() {
                             </Button>
 
                             <Button variant={"validate"} link={""}  onClick={() => {
-                                confirmArchive();
+                                confirmArchive().then();
                                 setSelectedChannel(null);
                             }}>
                                 Oui

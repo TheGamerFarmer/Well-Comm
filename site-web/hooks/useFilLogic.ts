@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import {
@@ -63,7 +63,7 @@ export function useFilLogic() {
                 }
             }
         };
-        init();
+        init().then();
         return () => { isMounted = false; };
     }, []);
 
@@ -85,7 +85,7 @@ export function useFilLogic() {
     }, [currentUserName, activeRecordId, selectedCategories]);
 
     useEffect(() => {
-        loadChannels();
+        loadChannels().then();
     }, [loadChannels]);
 
     // 3. Chargement des messages quand un fil est sélectionné
@@ -100,7 +100,7 @@ export function useFilLogic() {
                 }
             }
         };
-        loadMessages();
+        loadMessages().then();
         return () => { ignore = true; };
     }, [selectedChannel, activeRecordId, currentUserName]);
 
@@ -138,7 +138,7 @@ export function useFilLogic() {
         stompClient.current = client;
 
         return () => {
-            if (stompClient.current) stompClient.current.deactivate();
+            if (stompClient.current) stompClient.current.deactivate().then();
         };
     }, [selectedChannel]);
 
@@ -157,7 +157,7 @@ export function useFilLogic() {
         if (success) {
             setIsOpen(false);
             setFormData({ category: mapCategoryToEnum("Santé"), title: "", message: "" });
-            loadChannels();
+            loadChannels().then();
         }
     };
 
