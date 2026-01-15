@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from 'sockjs-client';
 import {
     getCurrentUser,
     getRecords,
@@ -14,6 +16,10 @@ import {
 } from "@/functions/fil-API";
 
 const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
+
+interface SockJSOptions extends SockJS.Options {
+    withCredentials?: boolean;
+}
 
 export function useFilLogic() {
 
@@ -33,6 +39,7 @@ export function useFilLogic() {
     const [newMessage, setNewMessage] = useState("");
     const [showArchiveModal, setShowArchiveModal] = useState(false);
     const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
+    const stompClient = useRef<Client | null>(null);
 
     // --- ÉTAT FORMULAIRE ---
     const [formData, setFormData] = useState({
@@ -97,6 +104,44 @@ export function useFilLogic() {
         return () => { ignore = true; };
     }, [selectedChannel, activeRecordId, currentUserName]);
 
+    useEffect(() => {
+        if (!selectedChannel) return;
+
+        // Configuration du client STOMP
+        const options: SockJSOptions = {
+            sessionId: 10,
+            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            withCredentials: true
+        };
+
+        const client = new Client({
+            webSocketFactory: () => new SockJS('http://localhost:8080/ws', null, options),
+            reconnectDelay: 5000,
+        });
+
+        client.onConnect = () => {
+            // S'abonner au topic diffusé par le ChannelController
+            client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
+                const newMessage: MessageResponse = JSON.parse(payload.body);
+
+                // --- FILTRE ANTI-DOUBLON ---
+                setMessages((prev) => {
+                    // On vérifie si le message (par son ID) est déjà dans la liste
+                    const exists = prev.some(m => m.id === newMessage.id);
+                    if (exists) return prev; // Si oui, on ne change rien
+                    return [...prev, newMessage]; // Sinon, on l'ajoute
+                });
+            });
+        };
+
+        client.activate();
+        stompClient.current = client;
+
+        return () => {
+            if (stompClient.current) stompClient.current.deactivate();
+        };
+    }, [selectedChannel]);
+
     // --- ACTIONS ---
 
     const toggleCategory = (category: string) => {
@@ -122,7 +167,6 @@ export function useFilLogic() {
 
         const sentMsg = await addMessage(currentUserName, activeRecordId, selectedChannel.id, newMessage);
         if (sentMsg) {
-            setMessages(prev => [...prev, sentMsg]);
             setNewMessage("");
         }
     };
