@@ -93,6 +93,7 @@ export default function Archive() {
     //met à jour l'affichage des catégories actives
     useEffect(() => {
         if (activeCategories.length > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
         } else {
             setActiveCategory(""); // ou un texte par défaut
@@ -131,7 +132,7 @@ export default function Archive() {
                         </select>
                     </div>
                     <div className="w-full sm:w-60">
-                        <Button variant="validate">Retour</Button>
+                        <Button variant="validate" link={""}>Retour</Button>
                     </div>
                 </div>
             </div>
