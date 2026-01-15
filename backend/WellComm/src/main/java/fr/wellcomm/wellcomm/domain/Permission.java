@@ -1,11 +1,14 @@
 package fr.wellcomm.wellcomm.domain;
 
 public enum Permission {
-    IsMedecin,
-    ModifierAgenda,
-    AssignerPermissions,
-    Inviter,
+    IS_MEDECIN,
+    MODIFIER_AGENDA,
+    ASSIGNER_PERMISSIONS,
+    INVITER,
     SEND_MESSAGE,
     MODIFY_MESSAGE,
     DELETE_MESSAGE,
+    OPEN_CHANNEL,
+    CLOSE_CHANNEL,
+    IS_ADMIN,
 }

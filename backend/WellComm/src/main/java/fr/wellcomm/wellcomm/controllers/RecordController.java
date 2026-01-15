@@ -177,7 +177,7 @@ public class RecordController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userName == authentication.name and @securityService.isAdmin()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long id) {
         boolean deleted = recordService.deleteRecord(id);
         if (deleted) {

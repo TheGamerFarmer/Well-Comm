@@ -83,6 +83,19 @@ public class SecurityService {
         return message.getAuthor().getUserName().equals(account.getUserName());
     }
 
+    public boolean isAdmin(){
+        Map<String, String> params = getPathVars();
+        Account account = accountService.getUser(params.get("userName"));
+        if (account == null)
+            return false;
+
+        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
+        if (record == null)
+            return false;
+
+        return hasPermission(account, record, Permission.IS_ADMIN);
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, String> getPathVars() {
         return (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);

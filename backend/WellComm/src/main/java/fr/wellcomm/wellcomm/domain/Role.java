@@ -9,14 +9,15 @@ import java.util.List;
 @Getter
 public enum Role {
     AIDANT("Aidant",
-            Permission.ModifierAgenda,
-            Permission.AssignerPermissions,
-            Permission.Inviter),
+            Permission.MODIFIER_AGENDA,
+            Permission.ASSIGNER_PERMISSIONS,
+            Permission.INVITER,
+            Permission.IS_ADMIN),
     EMPLOYEE("Employée",
-            Permission.AssignerPermissions,
-            Permission.Inviter),
+            Permission.ASSIGNER_PERMISSIONS,
+            Permission.INVITER),
     MEDECIN("Médecin",
-            Permission.IsMedecin);
+            Permission.IS_MEDECIN);
 
     private final String titre;
     private final List<Permission> permission;
