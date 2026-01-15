@@ -75,7 +75,7 @@ public class RecordController {
                                                @PathVariable String name) {
 
         Record newRecord = recordService.createRecord(name);
-        Role aide = Role.AIDANT;
+        Role aide = Role.AIDANT_CREATEUR;
         RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
         return ResponseEntity.ok(newRecord);
     }
@@ -162,7 +162,8 @@ public class RecordController {
 
 
     @PostMapping("/{recordId}/channels/{channelId}/archive")
-    @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).CLOSE_CHANNEL)")
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,
             @PathVariable long channelId) {
