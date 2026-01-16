@@ -10,16 +10,35 @@ import {
     mapCategoryToEnum,
     createChannel,
     FilResponse,
-    DossierResponse
+    DossierResponse, getPermissions
 } from "@/functions/fil-API";
 import {API_BASE_URL} from "@/config";
+import {useFilLogic} from "@/hooks/useFilLogic";
+import {Permission} from "@/app/fil/page";
+
+export enum Permission {
+    SEND_MESSAGE = "SEND_MESSAGE",
+    DELETE_MESSAGE = "DELETE_MESSAGE",
+    OPEN_CHANNEL = "OPEN_CHANNEL",
+    CLOSE_CHANNEL = "CLOSE_CHANNEL",
+    IS_ADMIN = "IS_ADMIN",
+    MODIFY_MESSAGE = "MODIFY_MESSAGE",
+    IS_MEDECIN = "IS_MEDECIN",
+    MODIFIER_AGENDA = "MODIFIER_AGENDA",
+    ASSIGNER_PERMISSIONS = "ASSIGNER_PERMISSIONS",
+    INVITER = "INVITER",
+}
+
+export type RecordAccount = {
+    record: { id: number };
+    title: string;
+    permissions: Permission[];
+};
 
 export default function Archive() {
-    const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
+    const {categories, selectedCategories, toggleCategory}= useFilLogic();
 
     // --- ÉTATS ---
-    const [activeCategory, setActiveCategory] = useState("");
-    const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -27,6 +46,7 @@ export default function Archive() {
     const [records, setRecords] = useState<DossierResponse[]>([]);
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
     const [channels, setChannels] = useState<FilResponse[]>([]);
+    const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
     // État du formulaire
     const [formData, setFormData] = useState({
@@ -64,8 +84,17 @@ export default function Archive() {
         if (!currentUserName || !activeRecordId) return;
 
         const fetchChannels = async () => {
+            setIsLoading(true);
+
             let allChannels: FilResponse[] = [];
-            for (const cat of activeCategories) {
+
+            // 🔹 même logique que la page des fils
+            const catsToFetch =
+                selectedCategories.length === 0 || selectedCategories.length === categories.length
+                    ? categories
+                    : selectedCategories;
+
+            for (const cat of catsToFetch) {
                 const data = await getCloseChannels(currentUserName, activeRecordId, cat);
                 allChannels = [...allChannels, ...data];
             }
@@ -75,38 +104,37 @@ export default function Archive() {
             );
 
             setChannels(sortedData);
+            setIsLoading(false);
         };
 
-        fetchChannels().then();
-    }, [currentUserName, activeRecordId, activeCategories]);
+        fetchChannels();
+    }, [currentUserName, activeRecordId, selectedCategories, categories]);
 
-    const toggleCategory = (cat: string) => {
-        if (activeCategories.includes(cat)) {
-            // si déjà sélectionnée, on retire
-            setActiveCategories(activeCategories.filter(c => c !== cat));
-        } else {
-            // sinon, on ajoute
-            setActiveCategories([...activeCategories, cat]);
-        }
-    };
-
-    //met à jour l'affichage des catégories actives
     useEffect(() => {
-        if (activeCategories.length > 0) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
-        } else {
-            setActiveCategory(""); // ou un texte par défaut
+        if (!currentUserName || !activeRecordId) {
+            setRecordAccount(null);
+            return;
         }
-    }, [activeCategories]);
 
+        getPermissions(currentUserName, activeRecordId)
+            .then((permissions) => {
+                setRecordAccount({ permissions });
+            })
+            .catch(() => {
+                setRecordAccount({ permissions: [] });
+            });
+    }, [currentUserName, activeRecordId]);
 
-
+    const permissions = recordAccount?.permissions ?? [];
 
     const filteredChannels = channels.filter(c => {
         const query = searchQuery.toLowerCase();
         return (c.title?.toLowerCase().includes(query) || c.lastMessage?.toLowerCase().includes(query));
     });
+
+    const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
+        ? categories.filter(c => c === "Santé") // ne montre que celle-ci
+        : categories; // sinon toutes les catégories
 
     return (
         <div className="w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2]">
@@ -116,7 +144,13 @@ export default function Archive() {
                     <h1 className="text-3xl font-bold text-[#0551ab]">Archives</h1>
                     <nav className="text-sm text-gray-500 mt-1 flex items-center whitespace-nowrap">
                         <span className="opacity-70"> <FilArianne/></span>
-                        <span className="text-[#26b3a9] font-medium ml-1"> / {activeCategory}</span>
+                        <span className="ml-1">
+                                 {
+                                     selectedCategories.length === 0 || selectedCategories.length === categories.length
+                                         ? ""
+                                         : " / Catégories / " + selectedCategories.join(", ")
+                                 }
+                            </span>
                     </nav>
                 </div>
 
@@ -139,11 +173,16 @@ export default function Archive() {
 
             {/* Navigation Catégories */}
             <div className="bg-white p-5 rounded-2xl shadow-sm mb-8 flex flex-wrap justify-between gap-4 w-full border border-gray-100">
-                {categories.map((cat) => (
+                {filteredCategories.map((cat) => (
                     <button
                         key={cat}
                         onClick={() => toggleCategory(cat)}
-                        className={`flex-1 min-w-[130px] py-3 rounded-xl hover:cursor-pointer border-2 font-bold text-lg transition-all ${activeCategories.includes(cat) ? "bg-[#26b3a9] text-white border-[#26b3a9]" : "text-[#26b3a9] border-[#26b3a9]"}`}>
+                        className={` flex-1 min-w-[130px] py-3 hover:cursor-pointer rounded-xl border-2 font-bold text-lg transition-all ${
+                            selectedCategories.includes(cat)
+                                ? "bg-[#26b3a9] text-white border-[#26b3a9]"
+                                : "text-[#26b3a9] border-[#26b3a9] hover:bg-gray-50 shadow-sm"
+                        }`}
+                    >
                         {cat}
                     </button>
                 ))}
@@ -151,8 +190,9 @@ export default function Archive() {
 
             {/* Zone de contenu principale */}
             <div className="bg-white rounded-[2.5rem] shadow-sm p-8 md:p-12 min-h-[70vh] border border-gray-50">
-                <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight">{activeCategory}</h2>
-                <div className="relative mb-10 text-black">
+                <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight flex-none">
+                    {selectedCategories.length === 0 || selectedCategories.length === categories.length ? "Toutes les transmissions" : selectedCategories.join(" + ")}
+                </h2>                <div className="relative mb-10 text-black">
                     <input
                         type="text"
                         placeholder="Recherche"

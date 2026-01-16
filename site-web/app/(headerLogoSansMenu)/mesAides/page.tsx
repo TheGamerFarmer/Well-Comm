@@ -233,6 +233,7 @@ export default function MesAides() {
                             </p>
                             <div className="flex gap-4 justify-between mb-4">
                                 <Button variant="secondary" type="button" onClick={() => {
+                                    if(!dossierToDelete?.id)return;
                                     handleDelete(dossierToDelete.id);
                                     setDossierToDelete(null);
                                 }} link={""}>
