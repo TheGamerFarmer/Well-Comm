@@ -115,7 +115,7 @@ export function useFilLogic() {
         };
 
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://152.77.90.131/ws', null, options),
+            webSocketFactory: () => new SockJS('https://152.77.90.131/ws', null, options),
             reconnectDelay: 5000,
         });
 

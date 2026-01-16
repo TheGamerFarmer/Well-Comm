@@ -44,8 +44,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://152.77.90.131/", 
-            "http://152.77.90.131:3000/"
+            "https://152.77.90.131/", 
+            "https://152.77.90.131:3000/",
+	    "http://152.77.90.131/",
+	    "http://152.77.90.131:3000/"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
