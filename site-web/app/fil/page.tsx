@@ -229,6 +229,7 @@ export default function FilDeTransmission() {
                         </div>
 
                         {/* Zone de saisie (flex-none) */}
+                        {permissions.includes(Permission.SEND_MESSAGE) &&(
                         <div className="p-4 md:p-8 bg-white border-t w-full flex-none">
                             <form onSubmit={handleSendChatMessage} className="w-full flex items-center gap-2 md:gap-4">
                                 <div className="flex-1">
@@ -241,11 +242,10 @@ export default function FilDeTransmission() {
                                     />
                                 </div>
                                 <div className="w-auto ">
-                                    {permissions.includes(Permission.SEND_MESSAGE) &&(
-                                    <Button variant="validate" type="submit" link={""}>Envoyer</Button>)}
+                                    <Button variant="validate" type="submit" link={""}>Envoyer</Button>
                                 </div>
                             </form>
-                        </div>
+                        </div>)}
                     </div>
                 ) : (
                     /* VUE LISTE */
