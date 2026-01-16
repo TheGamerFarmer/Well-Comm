@@ -3,6 +3,7 @@
  */
 
 import { API_BASE_URL } from "@/config";
+import {Permission} from "@/app/fil/page";
 
 export interface FilResponse {
     id: number;
@@ -222,4 +223,30 @@ export async function addMessage(userName: string, recordId: number, channelId: 
         console.error("Erreur envoi message:", err);
     }
     return null;
+}
+
+export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
+    if (!userName || !recordId) return [];
+
+    try {
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${recordId}/permissions`,
+            {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store",
+            }
+        );
+
+        if (!res.ok) {
+            console.error("Erreur HTTP:", res.status);
+            return [];
+        }
+
+        const data = await res.json();
+        return Array.isArray(data) ? data : data.permissions ?? [];
+    } catch (err) {
+        console.error("Erreur permissions:", err);
+        return [];
+    }
 }

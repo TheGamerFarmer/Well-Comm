@@ -1,12 +1,32 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, {useRef, useEffect, useState} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
-import {mapCategoryToEnum, capitalizeWords, MessageResponse} from "@/functions/fil-API";
+import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions} from "@/functions/fil-API";
 import Image from "next/image";
+import { API_BASE_URL } from "@/config";
+
+export enum Permission {
+    SEND_MESSAGE = "SEND_MESSAGE",
+    DELETE_MESSAGE = "DELETE_MESSAGE",
+    OPEN_CHANNEL = "OPEN_CHANNEL",
+    CLOSE_CHANNEL = "CLOSE_CHANNEL",
+    IS_ADMIN = "IS_ADMIN",
+    MODIFY_MESSAGE = "MODIFY_MESSAGE",
+    IS_MEDECIN = "IS_MEDECIN",
+    MODIFIER_AGENDA = "MODIFIER_AGENDA",
+    ASSIGNER_PERMISSIONS = "ASSIGNER_PERMISSIONS",
+    INVITER = "INVITER",
+}
+
+export type RecordAccount = {
+    record: { id: number };
+    title: string;
+    permissions: Permission[];
+};
 
 export default function FilDeTransmission() {
     const {
@@ -19,6 +39,25 @@ export default function FilDeTransmission() {
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
+
+    useEffect(() => {
+        if (!currentUserName || !activeRecordId) {
+            setRecordAccount(null);
+            return;
+        }
+
+        getPermissions(currentUserName, activeRecordId)
+            .then((permissions) => {
+                setRecordAccount({ permissions });
+            })
+            .catch(() => {
+                setRecordAccount({ permissions: [] });
+            });
+    }, [currentUserName, activeRecordId]);
+
+    const permissions = recordAccount?.permissions ?? [];
 
     useEffect(() => {
         if (selectedChannel) {
@@ -86,7 +125,11 @@ export default function FilDeTransmission() {
                         </select>
                     </div>
                     <div className="w-full sm:w-60">
-                        {!selectedChannel && <Button variant="primary" onClick={() => setIsOpen(true)} link={""} >Créer un fil</Button>}
+                        {!selectedChannel && permissions.includes(Permission.OPEN_CHANNEL) && (
+                            <Button variant="primary" onClick={() => setIsOpen(true)} link={""}>
+                                Créer un fil
+                            </Button>
+                        )}
                         {selectedChannel && (
                             <Button
                                 variant="retourFil"
