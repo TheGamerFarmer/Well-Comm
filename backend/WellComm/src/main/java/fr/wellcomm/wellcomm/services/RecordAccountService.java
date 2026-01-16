@@ -43,9 +43,5 @@ public class RecordAccountService {
         //recordRepository.save(record);
         return recordAccount;
     }
-/*
-    public recordAccount getRecordAccounts(String userName, Long id) {
-            return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id);
-        }
-        */
+
 }

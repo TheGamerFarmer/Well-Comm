@@ -15,10 +15,13 @@ import {
     DossierResponse
 } from "@/functions/fil-API";
 
+//"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
 type Invitation = {
-    id: string;
-    username: string;
-    role: "Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile";
+    id: number;
+    title: string;
+    accountUserName: string;
+    dateCreation: string;
+    recordId: number;
 };
 
 export default function AssistantsPage() {
@@ -31,7 +34,7 @@ export default function AssistantsPage() {
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [role, setRole] = useState<Invitation["role"]>("Aidant");
+    const [title, setTitle] = useState<Invitation["role"]>("Aidant");
     const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
 
@@ -46,26 +49,30 @@ export default function AssistantsPage() {
 
     const { currentDossier, loading } = useCurrentDossier(userName);
 
-    //afficher la liste d'assistants
+    //afficher la liste d'assistants quand on charge la page
     useEffect(() => {
-        if (!userName) return;
-
-        const fetchAssistants = async () => {
-            try {
-                const res = await fetch(
-                    `http://localhost:8080/api/${userName}/recordacount/${currentDossier}`,
-                    { credentials: "include" }
-                );
-                if (!res.ok) throw new Error("Erreur chargement assistants");
-
-                const data: Invitation[] = await res.json();
-                setInvitations(data);
-            }catch (err) {
-                console.error(err);
-            }
-        };
         fetchAssistants();
-    }, [userName]);
+    }, [userName, currentDossier]);
+
+    //récupérer les assistans de currentDossier
+    const fetchAssistants = async () => {
+        if (!userName || !currentDossier) return;
+
+        try {
+            const res = await fetch(
+                `http://localhost:8080/api/${userName}/recordsaccount/${currentDossier}`,
+                {credentials: "include"}
+            );
+
+            if (!res.ok) throw new Error("Erreur chargement assistants");
+
+            const data: Invitation[] = await res.json();
+            setInvitations(data);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
     
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
@@ -96,22 +103,27 @@ export default function AssistantsPage() {
                 throw new Error("Impossible d'ajouter l'accès");
             }
 
-            setInvitations((prev) => [
-                ...prev,
-                {
-                    id: crypto.randomUUID(),
-                    username,
-                    role,
-                },
-            ]);
-
-            setUsername("");
-            setRole("Aidant");
-            setIsOpen(false);
+            await fetchAssistants();
+            setIsOpen(false)
 
             console.log("Accès ajouté au dossier", currentDossier);
         } catch (err) {
             console.error(err);
+        }
+    };
+
+//supprimer un assistant
+    const removeAccessFromCurrentRecord = async (name: string, id: number ) => {
+        if (!userName || !currentDossier) {
+            console.error("Aucun dossier sélectionné");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/${userName}/deleteAccess/${name}/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
         }
     };
 
@@ -147,16 +159,16 @@ export default function AssistantsPage() {
                             className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex flex-nowrap items-center gap-4 m-4">
                                 <img
-                                    src={`https://ui-avatars.com/api/?name=${inv.username}&background=0551ab&color=fff`}
+                                    src={`https://ui-avatars.com/api/?name=${inv.accountUserName}&background=0551ab&color=fff`}
                                     alt="avatar"
                                     className="w-12 h-12 rounded-full"
                                 />
                                 <ul>
                                     <li>
-                                        <span className="font-bold text-black ">{inv.username}</span>
+                                        <span className="font-bold text-black ">{inv.accountUserName}</span>
                                     </li>
                                     <li>
-                                        <span className="text-gray-500 ">ajouté le :  </span>
+                                        <span className="text-gray-500 ">ajouté le : {new Date(inv.dateCreation).toLocaleDateString()} </span>
                                     </li>
                                 </ul>
                             </div>
@@ -168,12 +180,12 @@ export default function AssistantsPage() {
                                     Permissions
                                 </Button>
                                 <select
-                                    value={inv.role}
+                                    value={inv.title}
                                     onChange={(e) =>
                                         setInvitations((prev) =>
                                             prev.map((i) =>
                                                 i.id === inv.id
-                                                    ? { ...i, role: e.target.value as Invitation["role"] }
+                                                    ? { ...i, role: e.target.value as Invitation["title"] }
                                                     : i
                                             )
                                         )
@@ -203,11 +215,12 @@ export default function AssistantsPage() {
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                             <div className="bg-white p-6 rounded-2xl w-[400px]">
                                 <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
+
                                 <form
                                     onSubmit={(e) => {
                                         e.preventDefault();
                                         if (!username.trim()) return;
-                                        addAccessToCurrentRecord(role);
+                                        addAccessToCurrentRecord(title);
                                     }}
                                     className="flex flex-col gap-4"
                                 >
@@ -221,12 +234,13 @@ export default function AssistantsPage() {
                                     />
 
                                     <select
-                                        value={role}
-                                        onChange={(e) => setRole(e.target.value as Invitation["role"])}
-                                        className="border rounded-lg p-2 text-black">
+                                        id="title"
+                                        name="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
                                         <option>Aidant</option>
                                         <option>Infirmier(e)</option>
-                                        <option>Médecin</option>
                                         <option>Aide soignant(e)</option>
                                         <option>Aide à domicile</option>
                                     </select>
@@ -236,7 +250,7 @@ export default function AssistantsPage() {
                                             Annuler
                                         </Button>
 
-                                        <Button variant="primary" type="submit" onClick={() => setIsOpen(false)}>
+                                        <Button variant="primary" type="submit">
                                             Ajouter
                                         </Button>
                                     </div>
@@ -260,7 +274,7 @@ export default function AssistantsPage() {
                             Voulez-vous supprimer l’invitation de
                             <br />
                             <span className="font-bold">
-                    {invitationToDelete.username}
+                    {invitationToDelete.accountUserName}
                 </span>
                             ?
                         </p>

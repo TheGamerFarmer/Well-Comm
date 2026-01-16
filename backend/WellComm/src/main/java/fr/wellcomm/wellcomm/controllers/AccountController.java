@@ -160,4 +160,29 @@ public ResponseEntity<?> getCurrentUser(Principal principal) {
 
         return ResponseEntity.ok().build();
     }
+
+    //retirer un assistant autre que la personne connecté
+    @DeleteMapping("/deleteAccess/{name}/{id}")
+        @PreAuthorize("#userName == authentication.name")
+        public ResponseEntity<?> deleteRecordAccount(@PathVariable String userName, @RequestBody deleteRecordAccountRequest request, @PathVariable String name, @PathVariable String id) {
+            Account account = accountService.getUser(name);
+            if (account == null)
+                return ResponseEntity.badRequest().body("User not found");
+
+            RecordAccount recordAccount = new RecordAccount();
+            int i = 0;
+            while (i < account.getRecordAccounts().size()){
+                if (account.getRecordAccounts().get(i).getId() == request.getRecordId()){
+                    recordAccount = account.getRecordAccounts().get(i);
+                }
+                i++;
+            }
+
+            if (i == account.getRecordAccounts().size())
+                return ResponseEntity.badRequest().body("Access not found");
+
+            accountService.deleteRecordAccount(account, recordAccount);
+
+            return ResponseEntity.ok().build();
+        }
 }

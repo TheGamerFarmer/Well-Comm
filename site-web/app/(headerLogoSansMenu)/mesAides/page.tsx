@@ -99,7 +99,7 @@ export default function MesAides() {
         const files = e.target.files;
         setFile(files && files.length > 0 ? files[0] : null);
     };
-
+//supprimer un dossier
     const handleDelete = async (id: number) => {
         if (!id) return;
 
@@ -178,7 +178,7 @@ export default function MesAides() {
                             key={dossier.id}
                             onClick={() => selectDossier(dossier.id)}
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
-                        >
+                            >
                             {/* image plus tard depuis backend */}
 
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
