@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class ChannelController {
     private final ChannelService channelService;
     private final AccountService accountService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Getter
     @Setter
@@ -68,24 +70,33 @@ public class ChannelController {
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<?> addMessage(
             @PathVariable String userName,
-            @PathVariable @SuppressWarnings("unused") long recordId,
+            @PathVariable long recordId,
             @PathVariable long channelId,
             @RequestBody String content) {
-        Account account = accountService.getUser(userName);
-        if (account == null)
-            return ResponseEntity.badRequest().body("Message not found");
-        OpenChannel channel = channelService.getChannel(channelId);
-        if (channel == null)
-            return ResponseEntity.badRequest().body("Channel not found");
 
+        Account account = accountService.getUser(userName);
+        if (account == null) return ResponseEntity.badRequest().body("User not found");
+
+        OpenChannel channel = channelService.getChannel(channelId);
+        if (channel == null) return ResponseEntity.badRequest().body("Channel not found");
+
+        // 1. Sauvegarde classique en base via ton service existant
         Message msg = channelService.addMessage(channel, content, account);
 
-        return ResponseEntity.ok(new MessageInfos(
+        // 2. Création de l'objet de réponse (Format attendu par le Front)
+        MessageInfos response = new MessageInfos(
                 msg.getId(),
                 msg.getContent(),
                 msg.getDate(),
                 msg.getAuthor().getUserName(),
                 msg.getAuthorTitle()
-        ));
+        );
+
+        // 3. DIFFUSION WEBSOCKET (Temps réel)
+        // On envoie le message à tous les abonnés du canal spécifique
+        String destination = "/topic/messages/" + channelId;
+        messagingTemplate.convertAndSend(destination, response);
+
+        return ResponseEntity.ok(response);
     }
 }

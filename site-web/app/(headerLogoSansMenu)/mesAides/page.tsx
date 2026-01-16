@@ -5,12 +5,16 @@ import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUser} from "@/functions/fil-API";
+import { API_BASE_URL } from "@/config";
+import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 
 type Dossier = {
     id: number;
     name: string;
+    admin: string;
 };
 
 export default function MesAides() {
@@ -23,7 +27,7 @@ export default function MesAides() {
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const router = useRouter();
@@ -40,13 +44,14 @@ export default function MesAides() {
         const fetchDossiers = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8080/api/${userName}/records/`,
+                    `${API_BASE_URL}/api/${userName}/records/`,
                     { credentials: "include" }
                 );
 
                 if (!res.ok) throw new Error("Erreur chargement dossiers");
 
                 const data: Dossier[] = await res.json();
+                console.log("API dossiers =", data);
                 setDossiers(data);
             } catch (err) {
                 console.error(err);
@@ -65,7 +70,7 @@ export default function MesAides() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/${userName}/records/create/${encodeURIComponent(
+                `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
                     name
                 )}`,
                 {
@@ -80,13 +85,12 @@ export default function MesAides() {
 
             setDossiers((prev) => [
                 ...prev,
-                { id: newRecord.id, name: newRecord.name },
+                { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
             ]);
 
             setName("");
             setFile(null);
             setIsOpen(false);
-            setDeleteId(null);
         } catch (err) {
             console.error(err);
         }
@@ -105,7 +109,7 @@ export default function MesAides() {
 
         try {
             const res = await fetch(
-                `http://localhost:8080/api/${userName}/records/delete/${id}`,
+                `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
                 {
                     method: "DELETE",
                     credentials: "include",
@@ -163,37 +167,43 @@ export default function MesAides() {
             </div>
 
             <div className="flex justify-end my-4">
-                <Button variant="validate" type="button" onClick={() => setIsOpen(true)}>
+                <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
                     Ajouter un aidé
                 </Button>
             </div>
 
-            {/* =======================
-          Liste des dossiers
-          ======================= */}
+    {/* =======================
+         Liste des dossiers
+        ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
                 <div className="flex flex-col gap-4">
-                    {dossiers.map((dossier) => (
+                    {dossiers.map((dossier) =>{
+                        return(
+
+                            <Link key={dossier.id} href={"/fil"} style={{ textDecoration: "none" }}>
                         <div
                             key={dossier.id}
                             onClick={() => selectDossier(dossier.id)}
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
                             >
                             {/* image plus tard depuis backend */}
-
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
+
                             {dossier.name}
+
                             <div className="ml-auto">
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDeleteId(dossier.id)}>
+                                {userName && dossier.admin === userName && (
+                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDossierToDelete(dossier)}>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
+                                </button>)}
                             </div>
                         </div>
-                    ))}
+                            </Link>
+                    )})}
                 </div>
             </div>
 
-            {/* =======================
+      {/* =======================
           Modal création
           ======================= */}
             {isOpen && (
@@ -231,11 +241,11 @@ export default function MesAides() {
                                 <Button
                                     variant="cancel"
                                     type="button"
-                                    onClick={() => setIsOpen(false)}>
+                                    onClick={() => setIsOpen(false)} link={""}>
                                     Annuler
                                 </Button>
 
-                                <Button variant="primary" type="submit">
+                                <Button variant="primary" type="submit" link={""}>
                                     Créer
                                 </Button>
                             </div>
@@ -244,7 +254,7 @@ export default function MesAides() {
                 </div>
             )}
 
-            {deleteId !== null && (
+            {dossierToDelete && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px]">
 
@@ -255,16 +265,18 @@ export default function MesAides() {
                                 <path d="M24 12v16" stroke="#F67A7A" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
-                            <p>Ceci sera supprimé définitivement.</p>
+                            <p>
+                                <strong>{dossierToDelete.name}</strong> sera supprimé définitivement.
+                            </p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="submit" onClick={() => {
-                                    handleDelete(deleteId); setDeleteId(null); }}>
+                                <Button variant="secondary" type="button" onClick={() => {
+                                    if(!dossierToDelete?.id)return;
+                                    handleDelete(dossierToDelete.id);
+                                    setDossierToDelete(null);
+                                }} link={""}>
                                     Oui
                                 </Button>
-
-                                <Button onClick={() => setDeleteId(null)}>
-                                    Non
-                                </Button>
+                                <Button onClick={() => setDossierToDelete(null)} link={""}>Non</Button>
                             </div>
                         </div>
                     </div>

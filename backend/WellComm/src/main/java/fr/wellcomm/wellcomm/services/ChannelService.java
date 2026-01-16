@@ -1,9 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.entities.Account;
-import fr.wellcomm.wellcomm.entities.OpenChannel;
-import fr.wellcomm.wellcomm.entities.RecordAccount;
-import fr.wellcomm.wellcomm.entities.Message;
+import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;

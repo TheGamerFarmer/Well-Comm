@@ -21,7 +21,7 @@ public class MessageServiceTest {
     @BeforeEach
     void setUp() {
         // 1. Créer un Record pour l'arborescence
-        Record record = recordService.createRecord("Dossier de Test");
+        Record record = recordService.createRecord("Dossier de Test", "testUser");
 
         // 2. Créer un Channel
         Account testUser = new Account();
