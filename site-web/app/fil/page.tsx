@@ -33,8 +33,8 @@ export default function FilDeTransmission() {
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
-        newMessage, setNewMessage, handleSendChatMessage,
-        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive
+        newMessage, setNewMessage, handleSendChatMessage,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
+        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -94,7 +94,7 @@ export default function FilDeTransmission() {
         : categories; // sinon toutes les catégories
 
     return (
-        <div className="w-full min-h-screen p-4 md:p-10 font-sans bg-[#f1f2f2] flex flex-col">
+        <div className={`w-full p-4 md:p-10 font-sans bg-[#f1f2f2] flex flex-col ${selectedChannel ? "h-screen overflow-hidden" : "min-h-screen"}`}>
 
             {/* --- HEADER (flex-none) --- */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-6 gap-6 w-full pt-2 flex-none">
@@ -146,13 +146,12 @@ export default function FilDeTransmission() {
             </div>
 
             {/* --- ZONE DE CONTENU VARIABLE --- */}
-            <div className="flex flex-col">
-                {selectedChannel ? (
+            <div className={`flex flex-col ${selectedChannel ? "flex-1 min-h-0 overflow-hidden" : ""}`}>
+            {selectedChannel ? (
                     /* VUE DISCUSSION */
-                    /* FIX : flex-1 et min-h-0 pour que le conteneur du chat respecte la taille restante */
                     <div className="bg-white rounded-[2.5rem] shadow-sm flex-1 border border-gray-100 flex flex-col overflow-hidden min-h-0">
 
-                        {/* Header interne (flex-none) */}
+                        {/* Header interne */}
                         <div className="px-8 py-4 flex items-center justify-between bg-[#26b3a9] text-white w-full flex-none">
                             <div className="flex items-center gap-6">
                                 <div className="bg-white p-4 rounded-full text-[#26b3a9] flex items-center justify-center shadow-md">
@@ -182,7 +181,6 @@ export default function FilDeTransmission() {
                             </div>
                         </div>
 
-                        {/* FIX : overflow-y-auto ici pour que seul le chat défile */}
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
@@ -205,7 +203,19 @@ export default function FilDeTransmission() {
                                                 <div className="flex-1 h-px bg-gray-200"></div>
                                             </div>
                                         )}
-                                        <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                                            {isMe && permissions.includes(Permission.DELETE_MESSAGE) && (<Image
+                                                src="/images/icons/icons-delete.svg"
+                                                alt="delete"
+                                                width={24}
+                                                height={24}
+                                                priority
+                                                className="mb-2 cursor-pointer"
+                                                onClick={() => {
+                                                    setMessageToDelete(msg.id);
+                                                    setShowDeleteMessageModal(true);
+                                                }}
+                                            />)}
                                             <div className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-sm relative ${
                                                 isMe ? 'bg-[#0551ab] text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                                             }`}>
@@ -217,6 +227,7 @@ export default function FilDeTransmission() {
                                                         </span>
                                                     </div>
                                                 )}
+
                                                 <p className="text-sm md:text-base font-semibold leading-relaxed">{msg.content}</p>
                                                 <div className={`text-[10px] mt-3 flex items-center gap-1 font-bold ${isMe ? 'text-blue-200 justify-end' : 'text-gray-400'}`}>
                                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -407,6 +418,41 @@ export default function FilDeTransmission() {
                             <Button variant={"validate"} link={""}  onClick={() => {
                                 confirmArchive().then();
                                 setSelectedChannel(null);
+                            }}>
+                                Oui
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDeleteMessageModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteMessageModal(false)}>
+                    <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-center mb-4">
+                            <Image
+                                src="/images/icons/attention.svg"
+                                alt="attention"
+                                width={48}
+                                height={48}
+                                priority
+                            />
+                        </div>
+                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
+                            Voulez-vous supprimer ce message?
+                        </h2>
+                        <p className="text-center text-gray-700 mb-6">
+                            Ce message sera supprimé définitivement
+                        </p>
+                        <div className="flex justify-center gap-4">
+
+                            <Button variant={"cancel"} link={""} onClick={() => setShowDeleteMessageModal(false)}>
+                                Non
+                            </Button>
+
+                            <Button variant={"validate"} link={""}  onClick={() => {
+                                handleDeleteChatMessage(messageToDelete).then()
+                                setShowDeleteMessageModal(false)
                             }}>
                                 Oui
                             </Button>

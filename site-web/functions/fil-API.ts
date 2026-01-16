@@ -225,6 +225,20 @@ export async function addMessage(userName: string, recordId: number, channelId: 
     return null;
 }
 
+export async function deleteMessage(userName: string, recordId: number, channelId: number, messageId: number): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+            method: 'DELETE',
+            credentials: 'include',
+            cache: 'no-store',
+        });
+        return response.ok;
+    } catch (err) {
+        console.error("Erreur suppression message:", err);
+    }
+    return false;
+}
+
 export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
     if (!userName || !recordId) return [];
 

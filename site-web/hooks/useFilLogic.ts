@@ -10,6 +10,7 @@ import {
     archiveChannel,
     getChannelContent,
     addMessage,
+    deleteMessage,
     FilResponse,
     DossierResponse,
     MessageResponse
@@ -38,7 +39,9 @@ export function useFilLogic() {
     const [selectedChannel, setSelectedChannel] = useState<FilResponse | null>(null);
     const [newMessage, setNewMessage] = useState("");
     const [showArchiveModal, setShowArchiveModal] = useState(false);
+    const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
     const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
+    const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
     const stompClient = useRef<Client | null>(null);
 
     // --- ÉTAT FORMULAIRE ---
@@ -122,15 +125,21 @@ export function useFilLogic() {
         client.onConnect = () => {
             // S'abonner au topic diffusé par le ChannelController
             client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
-                const newMessage: MessageResponse = JSON.parse(payload.body);
+                const data = JSON.parse(payload.body);
 
-                // --- FILTRE ANTI-DOUBLON ---
-                setMessages((prev) => {
-                    // On vérifie si le message (par son ID) est déjà dans la liste
-                    const exists = prev.some(m => m.id === newMessage.id);
-                    if (exists) return prev; // Si oui, on ne change rien
-                    return [...prev, newMessage]; // Sinon, on l'ajoute
-                });
+                // --- CORRECTION ICI ---
+                if (data.type === 'DELETE' || data.deletedMessageId) {
+                    // C'est une suppression : on retire le message de la liste
+                    const idToRemove = data.deletedMessageId;
+                    setMessages((prev) => prev.filter(m => m.id !== idToRemove));
+                }
+                else if (data.id) {
+                    // C'est un nouvel ajout : on vérifie l'ID avant d'ajouter
+                    setMessages((prev) => {
+                        if (prev.some(m => m.id === data.id)) return prev;
+                        return [...prev, data];
+                    });
+                }
             });
         };
 
@@ -171,6 +180,16 @@ export function useFilLogic() {
         }
     };
 
+    const handleDeleteChatMessage = async (messageId: number | null) => {
+        if (!selectedChannel || !activeRecordId || messageId==null) return;
+
+        const success = await deleteMessage(currentUserName, activeRecordId, selectedChannel.id, messageId);
+        if (success) {
+            // Pas besoin de setMessages ici, le WebSocket s'en chargera pour tout le monde
+            console.log("Message envoyé pour suppression");
+        }
+    };
+
     // Filtrage local (Recherche par titre)
     const filteredChannels = channels.filter(c =>
         c.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -197,7 +216,7 @@ export function useFilLogic() {
         // Modale & Formulaire
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,showArchiveModal,
         // Chat
-        newMessage, setNewMessage, handleSendChatMessage,
+        newMessage, setNewMessage, handleSendChatMessage,showDeleteMessageModal,setShowDeleteMessageModal,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
         // Actions
         confirmArchive
     };
