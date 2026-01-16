@@ -30,7 +30,7 @@ public class RecordAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "permission_name")
     private List<Permission> permissions;
-    @Column(nullable = false, updatable = false)
+    @Column(name = "date_creation",nullable = false, updatable = false)
     private LocalDateTime createdAt;
     @PrePersist
         public void onCreate() {

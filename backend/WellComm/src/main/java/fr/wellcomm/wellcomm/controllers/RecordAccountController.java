@@ -19,6 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.*;
+import fr.wellcomm.wellcomm.entities.Account;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/{userName}/recordsaccount")
@@ -29,19 +31,21 @@ public class RecordAccountController {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class AssistantResponse {
+    public static class RecordAccountResponse {
         private Long id;
-        private Date date_creation;
+        private LocalDateTime dateCreation;
         private String title;
-        private String account_user_name;
-        private Long record_id;
+        private String accountUserName;
+        private Long recordId;
     }
 
     @GetMapping("/{recordId}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<AssistantResponse>> getRecordAccounts(@PathVariable String userName, @PathVariable Long id) {
-            List<AssistantResponse> assistants = recordAccountService.getRecordAccounts(id).stream()
-                    .map(d -> new AssistantResponse(d.getId(), d.getDateCreation(), d.getTitle(), d.getAccount.getUserName(), d.getRecord().getId()))
+    public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
+        @PathVariable String userName,
+        @PathVariable Long recordId) {
+            List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
+                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(assistants);

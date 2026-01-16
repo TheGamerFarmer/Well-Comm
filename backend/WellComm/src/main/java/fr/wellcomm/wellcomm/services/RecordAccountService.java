@@ -22,6 +22,7 @@ public class RecordAccountService {
     private final RecordRepository recordRepository;
     private final AccountRepository accountRepository;
 
+
     public List<RecordAccount> getByRecordId(Long recordId) {
         return recordAccountRepository.findByRecordId(recordId);
     }
@@ -42,8 +43,9 @@ public class RecordAccountService {
         //recordRepository.save(record);
         return recordAccount;
     }
-
-    public List<Record> getRecordAccounts(String userName, Long id) {
+/*
+    public recordAccount getRecordAccounts(String userName, Long id) {
             return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id);
         }
+        */
 }

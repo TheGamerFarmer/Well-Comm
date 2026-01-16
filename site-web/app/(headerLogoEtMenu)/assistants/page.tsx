@@ -53,7 +53,7 @@ export default function AssistantsPage() {
         const fetchAssistants = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8080/api/${userName}/recordacount`,
+                    `http://localhost:8080/api/${userName}/recordacount/${currentDossier}`,
                     { credentials: "include" }
                 );
                 if (!res.ok) throw new Error("Erreur chargement assistants");

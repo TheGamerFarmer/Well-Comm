@@ -14,9 +14,6 @@ public interface RecordAccountRepository extends JpaRepository<RecordAccount, Lo
 
     Optional<RecordAccount> findByAccountUserNameAndRecordId(String userName, long recordId);
 
-    public interface RecordAccountRepository extends JpaRepository<RecordAccount, Long> {
-
-        List<RecordAccount> findByRecordId(Long recordId);
-    }
+    List<RecordAccount> findByRecordId(Long recordId);
 
 }
