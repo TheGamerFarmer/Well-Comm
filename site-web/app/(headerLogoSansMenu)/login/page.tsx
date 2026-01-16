@@ -15,7 +15,7 @@ function LoginForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const callbackUrl = searchParams.get("callbackUrl") || "/userSpace";
+    const callbackUrl = searchParams.get("callbackUrl") || "/mesAides";
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

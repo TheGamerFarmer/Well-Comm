@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -10,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -34,5 +37,9 @@ public class RecordAccountService {
         //record.getRecordAccounts().add(recordAccount);
         //recordRepository.save(record);
         return recordAccount;
+    }
+
+    public RecordAccount getRecordAccounts(String userName, long id) {
+        return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
     }
 }

@@ -1,7 +1,13 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecordAccountController {
     private final RecordAccountService recordAccountService;
 
+    @GetMapping("/{recordId}/permissions")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") String userName,
+                                                                                 @PathVariable Long recordId
+    ) {
+        RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
+        return ResponseEntity.ok(ra.getPermissions());
+    }
 }

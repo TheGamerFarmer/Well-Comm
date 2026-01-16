@@ -13,9 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/{userName}")
 @AllArgsConstructor
@@ -55,16 +52,6 @@ public class AccountController {
         return ResponseEntity.ok(new UserInfos(account.getFirstName(),
                 account.getLastName()));
     }
-
-
-@GetMapping("/me")
-public ResponseEntity<?> getCurrentUser(Principal principal) {
-    if (principal == null) {
-        return ResponseEntity.status(401).body("Utilisateur non connecté");
-    }
-
-    return ResponseEntity.ok(Map.of("userName", principal.getName()));
-}
 
     @GetMapping("/changePassword/{oldPassword}/{newPassword}")
     @PreAuthorize("#userName == authentication.name")

@@ -4,14 +4,19 @@ import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.services.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/{userName}/records/{recordId}/channels/{channelId}/messages/{messageId}")
 @AllArgsConstructor
 public class MessageController {
     private final MessageService messageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/modify")
     @PreAuthorize("#userName == authentication.name and" +
@@ -30,7 +35,7 @@ public class MessageController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/delete")
+    @DeleteMapping("/delete")
     @PreAuthorize("#userName == authentication.name and" +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
                     "@securityService.ownMessage())")
@@ -39,10 +44,21 @@ public class MessageController {
                                            @PathVariable @SuppressWarnings("unused") long channelId,
                                            @PathVariable Long messageId) {
         Message message = messageService.getMessage(messageId);
-        if (message == null)
-            return ResponseEntity.badRequest().body("Message not found");
+        if (message == null) return ResponseEntity.badRequest().body("Message not found");
 
-        messageService.deleteMessage(message);
+
+        String deletedContent = "Ce message a été supprimé\u200B";
+        messageService.modifyContent(message, deletedContent);
+
+
+        String destination = "/topic/messages/" + channelId;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", messageId);
+        payload.put("content", deletedContent);
+        payload.put("type", "UPDATE");
+
+        messagingTemplate.convertAndSend(destination, (Object) payload);
+
         return ResponseEntity.ok().build();
     }
 }

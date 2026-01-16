@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import HeaderLoged from "@/components/HeaderLoged";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
@@ -78,47 +77,47 @@ export default function UserSpace() {
 
                 <form className="mx-auto max-w-200">
                     {/* Поля профиля */}
-                    <div className="flex flex-col md:flex-row md:gap-4">
-                        <div>
+                    <div className=" flex flex-col md:flex-row md:gap-4">
+                        <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
                             <input
                                 type="text"
                                 // value={prenom}
                                 // onChange={(e) => setPrenom(e.target.value)}
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
-                        <div>
+                        <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
                             <input
                                 type="text"
                                 // value={nom}
                                 // onChange={(e) => setNom(e.target.value)}
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
-                        <div>
+                        <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
                             <input
                                 type="date"
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
-                        <div>
+                        <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
                                 // value={username}
                                 // readOnly
-                                className="w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
 
-                    <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16">
+                    <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
                         <Button variant="cancel" link={""}>Annuler</Button>
                         <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
                     </div>
@@ -126,7 +125,7 @@ export default function UserSpace() {
 
                     <div className="mt-8">
                         <p
-                            className="text-[#0551ab] font-bold hover:underline p-4 mb-4 lg:mt-16 lg:mb-16 rounded-[10px] bg-[#f6f6f6] h-[60px] cursor-pointer"
+                            className="self-center text-[#0551ab] font-bold hover:underline p-4 mb-4 lg:mt-16 lg:mb-16 rounded-[10px] bg-[#f6f6f6] h-[60px] cursor-pointer"
                             onClick={() => setShowPasswordFields(!showPasswordFields)}
                         >
                             Changer le mot de passe

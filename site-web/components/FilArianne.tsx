@@ -8,6 +8,7 @@ const breadcrumbNames: Record<string, string> = {
     mesAides: "Mes aidés",
     calendrier: "Calendrier",
     userSpace: "Mon profil",
+    ProfilAide: "L'Aidé",
     fil: "Fil de Transmission",
 };
 
