@@ -44,17 +44,21 @@ public class MessageController {
                                            @PathVariable @SuppressWarnings("unused") long channelId,
                                            @PathVariable Long messageId) {
         Message message = messageService.getMessage(messageId);
-        if (message == null)
-            return ResponseEntity.badRequest().body("Message not found");
+        if (message == null) return ResponseEntity.badRequest().body("Message not found");
 
-        messageService.deleteMessage(message);
+
+        String deletedContent = "Ce message a été supprimé\u200B";
+        messageService.modifyContent(message, deletedContent);
+
 
         String destination = "/topic/messages/" + channelId;
         Map<String, Object> payload = new HashMap<>();
-        payload.put("deletedMessageId", messageId);
-        payload.put("type", "DELETE");
+        payload.put("id", messageId);
+        payload.put("content", deletedContent);
+        payload.put("type", "UPDATE");
 
         messagingTemplate.convertAndSend(destination, (Object) payload);
+
         return ResponseEntity.ok().build();
     }
 }

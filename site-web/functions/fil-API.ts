@@ -38,6 +38,7 @@ export interface MessageResponse {
     date: string;
     authorTitle?: string;
     authorUserName?: string;
+    isDeleted?: boolean;
 }
 
 export interface ChannelContentResponse {

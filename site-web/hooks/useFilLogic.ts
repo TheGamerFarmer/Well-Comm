@@ -123,18 +123,17 @@ export function useFilLogic() {
         });
 
         client.onConnect = () => {
-            // S'abonner au topic diffusé par le ChannelController
             client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
                 const data = JSON.parse(payload.body);
 
-                // --- CORRECTION ICI ---
-                if (data.type === 'DELETE' || data.deletedMessageId) {
-                    // C'est une suppression : on retire le message de la liste
-                    const idToRemove = data.deletedMessageId;
-                    setMessages((prev) => prev.filter(m => m.id !== idToRemove));
+                if (data.type === 'UPDATE' || data.type === 'DELETE') {
+                    setMessages((prev) => prev.map(m =>
+                        m.id === data.id || m.id === data.deletedMessageId
+                            ? { ...m, content: data.content || "Ce message a été supprimé", isDeleted: true }
+                            : m
+                    ));
                 }
                 else if (data.id) {
-                    // C'est un nouvel ajout : on vérifie l'ID avant d'ajouter
                     setMessages((prev) => {
                         if (prev.some(m => m.id === data.id)) return prev;
                         return [...prev, data];

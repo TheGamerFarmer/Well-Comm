@@ -32,6 +32,7 @@ export default function FilDeTransmission() {
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setRecordAccount(null);
             return;
         }
@@ -173,6 +174,7 @@ export default function FilDeTransmission() {
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
+                                const isDeleted = msg.isDeleted || msg.content === "Ce message a été supprimé\u200B";
                                 const msgDate = new Date(msg.date);
                                 const prevMsg = index > 0 ? sortedMessages[index - 1] : null;
                                 const prevDate = prevMsg ? new Date(prevMsg.date) : null;
@@ -180,6 +182,10 @@ export default function FilDeTransmission() {
                                     msgDate.getFullYear() !== prevDate.getFullYear() ||
                                     msgDate.getMonth() !== prevDate.getMonth() ||
                                     msgDate.getDate() !== prevDate.getDate();
+
+                                const bubbleStyles = isMe
+                                    ? (isDeleted ? "bg-gray-200 text-gray-500 rounded-tr-none" : "bg-[#0551ab] text-white rounded-tr-none")
+                                    : (isDeleted ? "bg-gray-100 text-gray-400 border border-gray-200 rounded-tl-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none");
 
                                 return (
                                     <React.Fragment key={msg.id}>
@@ -193,7 +199,7 @@ export default function FilDeTransmission() {
                                             </div>
                                         )}
                                         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                            {isMe && permissions.includes(Permission.DELETE_MESSAGE) && (<Image
+                                            {isMe && !isDeleted && permissions.includes(Permission.DELETE_MESSAGE) && (<Image
                                                 src="/images/icons/icons-delete.svg"
                                                 alt="delete"
                                                 width={24}
@@ -205,10 +211,8 @@ export default function FilDeTransmission() {
                                                     setShowDeleteMessageModal(true);
                                                 }}
                                             />)}
-                                            <div className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-sm relative ${
-                                                isMe ? 'bg-[#0551ab] text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
-                                            }`}>
-                                                {!isMe && (
+                                            <div className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-sm relative ${bubbleStyles}`}>
+                                                {!isMe && !isDeleted && (
                                                     <div className="flex items-center gap-2 mb-3">
                                                         <span className="font-black text-xs text-[#26b3a9]">{msg.authorUserName}</span>
                                                         <span className="bg-gray-100 text-gray-500 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">
@@ -217,8 +221,17 @@ export default function FilDeTransmission() {
                                                     </div>
                                                 )}
 
-                                                <p className="text-sm md:text-base font-semibold leading-relaxed">{msg.content}</p>
-                                                <div className={`text-[10px] mt-3 flex items-center gap-1 font-bold ${isMe ? 'text-blue-200 justify-end' : 'text-gray-400'}`}>
+                                                <div className="flex items-center gap-2">
+                                                    {isDeleted && (
+                                                        <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                        </svg>
+                                                    )}
+                                                    <p className={`text-sm md:text-base font-semibold leading-relaxed ${isDeleted ? 'italic opacity-80' : ''}`}>
+                                                        {msg.content}
+                                                    </p>
+                                                </div>
+                                                <div className={`text-[10px] mt-3 flex items-center gap-1 font-bold ${isMe && !isDeleted ? 'text-blue-200 justify-end' : 'text-gray-400'}`}>
                                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                     {new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
