@@ -113,17 +113,29 @@ export default function AssistantsPage() {
     };
 
 //supprimer un assistant
-    const removeAccessFromCurrentRecord = async (name: string, id: number ) => {
+    const removeAccess = async (name: string, id: number ) => {
         if (!userName || !currentDossier) {
             console.error("Aucun dossier sélectionné");
             return;
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/${userName}/deleteAccess/${name}/${id}`, {
+            const res = await fetch(`http://localhost:8080/api/${userName}/deleteAccess/current_record/${name}/${id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
+
+            if (!res.ok) throw new Error("Erreur suppression");
+
+            // Mise à jour de la liste côté front
+            setInvitations(invitations.filter(d => d.id !== id));
+
+            await fetchAssistants();
+            console.log("recordAccount supprimé ✅");
+
+        }catch (err: any) {
+            console.error(err.message);
+            alert(err.message);
         }
     };
 
@@ -284,25 +296,19 @@ export default function AssistantsPage() {
                         </p>
 
                         <div className="flex gap-4">
+
                             <Button
                                 variant="secondary"
                                 onClick={() => {
-                                    if (!invitationToDelete) return;
+                                    if (!invitationToDelete?.accountUserName || !currentDossier) return;
+                                    removeAccess(invitationToDelete.accountUserName, currentDossier); setInvitationToDelete(null);
 
-                                    setInvitations((prev) =>
-                                        prev.filter((inv) => inv.id !== invitationToDelete.id)
-                                    );
-
-                                    setInvitationToDelete(null);
-                                }}
-
-                            >
+                                }}>
                                 Oui
                             </Button>
 
                             <Button
-                                onClick={() => setInvitationToDelete(null)}
-                            >
+                                onClick={() => setInvitationToDelete(null)}>
                                 Non
                             </Button>
                         </div>

@@ -257,9 +257,11 @@ export default function MesAides() {
                             <p className="font-bold text-blue-800 text-xl">Voulez-vous supprimer ?</p>
                             <p>Ceci sera supprimé définitivement.</p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="submit" onClick={() => { handleDelete(deleteId); setDeleteId(null); }}>
+                                <Button variant="secondary" type="submit" onClick={() => {
+                                    handleDelete(deleteId); setDeleteId(null); }}>
                                     Oui
                                 </Button>
+
                                 <Button onClick={() => setDeleteId(null)}>
                                     Non
                                 </Button>
