@@ -127,9 +127,6 @@ export default function AssistantsPage() {
 
             if (!res.ok) throw new Error("Erreur suppression");
 
-            // Mise à jour de la liste côté front
-            setInvitations(invitations.filter(d => d.id !== id));
-
             await fetchAssistants();
             console.log("recordAccount supprimé ✅");
 
@@ -301,6 +298,7 @@ export default function AssistantsPage() {
                                 variant="secondary"
                                 onClick={() => {
                                     if (!invitationToDelete?.accountUserName || !currentDossier) return;
+
                                     removeAccess(invitationToDelete.accountUserName, currentDossier); setInvitationToDelete(null);
 
                                 }}>

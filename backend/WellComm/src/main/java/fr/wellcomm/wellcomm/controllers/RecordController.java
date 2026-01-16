@@ -199,7 +199,7 @@ public class RecordController {
         } else {
             return ResponseEntity.notFound().build(); // 404
         }
-
+    }
     //création d'une session quand on selectionne un dossier
     @PostMapping("/select/{recordId}")
     @PreAuthorize("#userName == authentication.name")
