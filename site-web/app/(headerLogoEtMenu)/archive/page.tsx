@@ -10,24 +10,10 @@ import {
     mapCategoryToEnum,
     createChannel,
     FilResponse,
-    DossierResponse, getPermissions
+    DossierResponse, getPermissions,Permission
 } from "@/functions/fil-API";
 import {API_BASE_URL} from "@/config";
 import {useFilLogic} from "@/hooks/useFilLogic";
-import {Permission} from "@/app/fil/page";
-
-export enum Permission {
-    SEND_MESSAGE = "SEND_MESSAGE",
-    DELETE_MESSAGE = "DELETE_MESSAGE",
-    OPEN_CHANNEL = "OPEN_CHANNEL",
-    CLOSE_CHANNEL = "CLOSE_CHANNEL",
-    IS_ADMIN = "IS_ADMIN",
-    MODIFY_MESSAGE = "MODIFY_MESSAGE",
-    IS_MEDECIN = "IS_MEDECIN",
-    MODIFIER_AGENDA = "MODIFIER_AGENDA",
-    ASSIGNER_PERMISSIONS = "ASSIGNER_PERMISSIONS",
-    INVITER = "INVITER",
-}
 
 export type RecordAccount = {
     record: { id: number };

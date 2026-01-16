@@ -5,21 +5,10 @@ import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
-import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions} from "@/functions/fil-API";
+import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
 import Image from "next/image";
 
-export enum Permission {
-    SEND_MESSAGE = "SEND_MESSAGE",
-    DELETE_MESSAGE = "DELETE_MESSAGE",
-    OPEN_CHANNEL = "OPEN_CHANNEL",
-    CLOSE_CHANNEL = "CLOSE_CHANNEL",
-    IS_ADMIN = "IS_ADMIN",
-    MODIFY_MESSAGE = "MODIFY_MESSAGE",
-    IS_MEDECIN = "IS_MEDECIN",
-    MODIFIER_AGENDA = "MODIFIER_AGENDA",
-    ASSIGNER_PERMISSIONS = "ASSIGNER_PERMISSIONS",
-    INVITER = "INVITER",
-}
+
 
 export type RecordAccount = {
     record: { id: number };
