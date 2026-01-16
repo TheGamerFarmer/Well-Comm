@@ -166,6 +166,7 @@ export default function FilDeTransmission() {
                             </div>
                             <div className="flex flex-col items-end justify-between self-stretch py-1">
                                 <span className="px-2 py-2 font-bold">{new Date(selectedChannel.creationDate).toLocaleDateString()}</span>
+                                {permissions.includes(Permission.CLOSE_CHANNEL) &&(
                                 <Button
                                     variant="archiver" link={""} onClick={() => {
                                     setChannelToArchive(selectedChannel);
@@ -175,7 +176,7 @@ export default function FilDeTransmission() {
                                         <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="currentColor"/>
                                     </svg>
                                     Archiver
-                                </Button>
+                                </Button>)}
                             </div>
                         </div>
 
@@ -240,7 +241,8 @@ export default function FilDeTransmission() {
                                     />
                                 </div>
                                 <div className="w-auto ">
-                                    <Button variant="validate" type="submit" link={""}>Envoyer</Button>
+                                    {permissions.includes(Permission.SEND_MESSAGE) &&(
+                                    <Button variant="validate" type="submit" link={""}>Envoyer</Button>)}
                                 </div>
                             </form>
                         </div>
