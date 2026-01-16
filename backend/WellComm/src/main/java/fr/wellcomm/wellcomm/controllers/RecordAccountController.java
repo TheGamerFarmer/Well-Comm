@@ -27,7 +27,6 @@ public class RecordAccountController {
                                                                                  @PathVariable Long recordId
     ) {
         RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
-        System.out.println("Permissions " + ra.getPermissions());
         return ResponseEntity.ok(ra.getPermissions());
     }
 }
