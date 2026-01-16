@@ -6,6 +6,7 @@ import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
+import { fetchWithCert} from "@/functions/fetchWithCert";
 
 type Dossier = {
     id: number;
@@ -34,7 +35,7 @@ export default function MesAides() {
 
         const fetchDossiers = async () => {
             try {
-                const res = await fetch(
+                const res = await fetchWithCert(
                     `${API_BASE_URL}/api/${userName}/records/`,
                     { credentials: "include" }
                 );
@@ -59,7 +60,7 @@ export default function MesAides() {
         if (!name.trim()) return;
 
         try {
-            const res = await fetch(
+            const res = await fetchWithCert(
                 `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
                     name
                 )}`,
@@ -98,7 +99,7 @@ export default function MesAides() {
         if (!id) return;
 
         try {
-            const res = await fetch(
+            const res = await fetchWithCert(
                 `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
                 {
                     method: "DELETE",

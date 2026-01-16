@@ -3,6 +3,7 @@
  */
 
 import { API_BASE_URL } from "@/config";
+import { fetchWithCert} from "@/functions/fetchWithCert";
 
 export interface FilResponse {
     id: number;
@@ -57,7 +58,7 @@ export function capitalizeWords(str: string | undefined | null): string {
 
 export async function getCurrentUser(): Promise<string | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/me`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/me`, {
             credentials: 'include',
             cache: 'no-store',
             headers: { 'Accept': 'application/json' }
@@ -74,7 +75,7 @@ export async function getCurrentUser(): Promise<string | null> {
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/`, {
             credentials: 'include',
             cache: 'no-store',
             headers: { 'Accept': 'application/json' }
@@ -114,7 +115,7 @@ export async function fetchAllChannels(
 export async function getChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${categoryEnum}`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -134,7 +135,7 @@ export async function getChannels(userName: string, recordId: number, category: 
 
 export async function getChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -146,7 +147,7 @@ export async function getChannelContent(userName: string, recordId: number, chan
 export async function getCloseChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${categoryEnum}`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -173,7 +174,7 @@ export async function createChannel(
     message: string
 ): Promise<boolean> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/new`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/new`, {
             method: 'POST',
             credentials: 'include',
             cache: 'no-store',
@@ -193,7 +194,7 @@ export async function createChannel(
 
 export async function archiveChannel(userName: string, recordId: number, channelId: number): Promise<boolean> {
     try {
-        const res = await fetch(
+        const res = await fetchWithCert(
             `${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/archive`,
             {
                 method: "POST",
@@ -210,7 +211,7 @@ export async function archiveChannel(userName: string, recordId: number, channel
 
 export async function addMessage(userName: string, recordId: number, channelId: number, content: string): Promise<MessageResponse | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages`, {
             method: 'POST',
             credentials: 'include',
             cache: 'no-store',
