@@ -45,6 +45,7 @@ public class RecordController {
     public static class DossierResponse {
         private Long id;
         private String name;
+        private String admin;
     }
 
     @Getter
@@ -63,7 +64,7 @@ public class RecordController {
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable String userName) {
         List<DossierResponse> dossiers = recordService.getRecords(userName).stream()
-                .map(d -> new DossierResponse(d.getId(), d.getName()))
+                .map(d -> new DossierResponse(d.getId(), d.getName(), d.getAdmin()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dossiers);

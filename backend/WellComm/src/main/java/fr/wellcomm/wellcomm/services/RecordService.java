@@ -45,8 +45,8 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
     }
 
-    public Record createRecord(String name) {
-        return recordRepository.save(new Record(name));
+    public Record createRecord(String name, String admin) {
+        return recordRepository.save(new Record(name, admin));
     }
 
     @Transactional

@@ -20,6 +20,7 @@ public class Record {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private long id;
     private String name;
+    private String admin;
     //Relation vers Fil (Un dossier a plusieurs fils)
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "id")
@@ -33,7 +34,8 @@ public class Record {
     @Transient
     private Report report = new Report();
 
-    public Record(String name) {
+    public Record(String name, String admin) {
         this.name = name;
+        this.admin = admin;
     }
 }

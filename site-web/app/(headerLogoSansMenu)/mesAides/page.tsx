@@ -144,9 +144,6 @@ export default function MesAides() {
             <div className="p-4 rounded-2xl shadow bg-white">
                 <div className="flex flex-col gap-4">
                     {dossiers.map((dossier) =>{
-                        console.log("dossier.admin =", dossier.admin);
-                        console.log("userName =", userName);
-                        console.log("equal ?", dossier.admin === userName);
                         return(
 
                         <div
