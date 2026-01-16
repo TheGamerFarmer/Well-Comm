@@ -10,6 +10,7 @@ import { API_BASE_URL } from "@/config";
 type Dossier = {
     id: number;
     name: string;
+    admin: string;
 };
 
 export default function MesAides() {
@@ -42,6 +43,7 @@ export default function MesAides() {
                 if (!res.ok) throw new Error("Erreur chargement dossiers");
 
                 const data: Dossier[] = await res.json();
+                console.log("API dossiers =", data);
                 setDossiers(data);
             } catch (err) {
                 console.error(err);
@@ -75,8 +77,9 @@ export default function MesAides() {
 
             setDossiers((prev) => [
                 ...prev,
-                { id: newRecord.id, name: newRecord.name },
+                { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
             ]);
+
 
             setName("");
             setFile(null);
@@ -140,7 +143,12 @@ export default function MesAides() {
         ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
                 <div className="flex flex-col gap-4">
-                    {dossiers.map((dossier) => (
+                    {dossiers.map((dossier) =>{
+                        console.log("dossier.admin =", dossier.admin);
+                        console.log("userName =", userName);
+                        console.log("equal ?", dossier.admin === userName);
+                        return(
+
                         <div
                             key={dossier.id}
                             className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
@@ -151,12 +159,13 @@ export default function MesAides() {
                             {dossier.name}
 
                             <div className="ml-auto">
+                                {userName && dossier.admin === userName && (
                                 <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={() => setDossierToDelete(dossier)}>
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
+                                </button>)}
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
             </div>
 

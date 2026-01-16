@@ -40,7 +40,7 @@ public class RecordAccountService {
         return recordAccount;
     }
 
-    public RecordAccount getRecordAccount(String userName, long id) {
+    public RecordAccount getRecordAccounts(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
     }
 }

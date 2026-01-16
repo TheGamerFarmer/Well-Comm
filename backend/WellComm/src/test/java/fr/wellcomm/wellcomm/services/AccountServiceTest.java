@@ -29,7 +29,7 @@ public class AccountServiceTest {
         assertNotNull(found);
 
         // 2. Test RecordAccount
-        Record record = recordService.createRecord("Dossier A");
+        Record record = recordService.createRecord("Dossier A", "testUser");
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGNER_PERMISSIONS);
         RecordAccount ra = new RecordAccount(user, record, "Manager", permissionList);

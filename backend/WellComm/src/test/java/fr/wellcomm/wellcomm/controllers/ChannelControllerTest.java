@@ -62,7 +62,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Médical");
+        Record record = new Record("Dossier Médical", "userTest");
         recordRepository.save(record);
 
         // Ajout de la permission SEND_MESSAGE
@@ -100,7 +100,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret");
+        Record record = new Record("Dossier Secret", "userTest");
         recordRepository.save(record);
 
         // On donne une autre permission, mais pas SEND_MESSAGE

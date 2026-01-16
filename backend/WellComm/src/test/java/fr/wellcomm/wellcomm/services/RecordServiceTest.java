@@ -28,7 +28,7 @@ public class RecordServiceTest {
         accountService.saveUser(testUser);
 
         // 2. Création du Record
-        testRecord = recordService.createRecord("Dossier Global");
+        testRecord = recordService.createRecord("Dossier Global", "userTest");
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
         List<Permission> permissionList = new ArrayList<>();

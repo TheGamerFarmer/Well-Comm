@@ -26,7 +26,7 @@ public class RecordAccountController {
     public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") String userName,
                                                                                  @PathVariable Long recordId
     ) {
-        RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
+        RecordAccount ra = recordAccountService.getRecordAccounts(userName, recordId);
         return ResponseEntity.ok(ra.getPermissions());
     }
 }

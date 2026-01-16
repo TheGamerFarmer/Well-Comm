@@ -74,7 +74,7 @@ public class RecordController {
     public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
                                                @PathVariable String name) {
 
-        Record newRecord = recordService.createRecord(name);
+        Record newRecord = recordService.createRecord(name, userName);
         Role aide = Role.AIDANT_CREATEUR;
         RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
         return ResponseEntity.ok(newRecord);
