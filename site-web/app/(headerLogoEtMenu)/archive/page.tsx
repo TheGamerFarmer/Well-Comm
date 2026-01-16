@@ -71,15 +71,6 @@ export default function Archive() {
         init().then();
     }, []);
 
-    // --- CHARGEMENT DES FILS ---
-    const loadChannels = async () => {
-        if (!currentUserName || !activeRecordId) return;
-        setIsLoading(true);
-        const data = await getCloseChannels(currentUserName, activeRecordId, activeCategory);
-        setChannels(data);
-        setIsLoading(false);
-    };
-
     useEffect(() => {
         if (!currentUserName || !activeRecordId) return;
 
