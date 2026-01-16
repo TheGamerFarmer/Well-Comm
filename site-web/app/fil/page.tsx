@@ -90,6 +90,10 @@ export default function FilDeTransmission() {
         new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
+    const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
+        ? categories.filter(c => c === "Santé") // ne montre que celle-ci
+        : categories; // sinon toutes les catégories
+
     return (
         /* FIX : h-screen et overflow-hidden sur le parent pour bloquer le scroll global */
         <div className="w-full p-6 md:p-10 font-sans h-screen bg-[#f1f2f2] flex flex-col overflow-hidden">
@@ -252,7 +256,7 @@ export default function FilDeTransmission() {
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                         {/* Navigation Catégories (flex-none) */}
                         <div className="bg-white p-5 rounded-2xl shadow-sm mb-8 flex flex-wrap justify-between gap-4 w-full border border-gray-100 flex-none">
-                            {categories.map((cat) => (
+                            {filteredCategories.map((cat) => (
                                 <button
                                     key={cat}
                                     onClick={() => toggleCategory(cat)}
@@ -340,13 +344,22 @@ export default function FilDeTransmission() {
                 <form className="mx-auto max-w-2xl" onSubmit={handleCreateSubmit}>
                     <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
                     <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
+                    {!permissions.includes(Permission.IS_MEDECIN) &&(
                     <select
                         className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
                         {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
-                    </select>
+                    </select>)}
+                    {permissions.includes(Permission.IS_MEDECIN) &&(
+                        <select
+                            className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
+                            value={formData.category}
+                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        >
+                            {filteredCategories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
+                        </select>)}
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Sujet du fil</label>
                     <input
                         type="text"
