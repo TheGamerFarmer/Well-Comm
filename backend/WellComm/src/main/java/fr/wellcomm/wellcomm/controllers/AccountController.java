@@ -112,17 +112,17 @@ public class AccountController {
     public ResponseEntity<?> addRecordAccountCurrebtRecord(@PathVariable String userName, @RequestBody addRecordAccountRequest request, @PathVariable String name) {
         Account account = accountService.getUser(name);
         if (account == null)
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
         Record record = recordService.getRecord(request.getRecordId());
         if (record == null)
-            return ResponseEntity.badRequest().body("Record not found");
+            return ResponseEntity.badRequest().body("Dossier inexistant");
 
         Optional<RecordAccount> existing = recordAccountService.getByRecordId(request.getRecordId()).stream()
             .filter(ra -> ra.getAccount().getUserName().equals(name))
             .findFirst();
         if (existing.isPresent()) {
-            return ResponseEntity.badRequest().body("RecordAccount already exists");
+            return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");
         }
 
         RecordAccount newAccess = new RecordAccount();
@@ -168,7 +168,7 @@ public class AccountController {
     ) {
         Account account = accountService.getUser(userName);
                 if (account == null)
-                    return ResponseEntity.badRequest().body("User not found");
+                    return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
         recordAccountService.deleteRecordAccount(targetUserName, recordId);
 
