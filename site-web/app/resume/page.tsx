@@ -410,49 +410,6 @@ export default function Resume() {
                 )}
             </div>
 
-            {/* Modal de création */}
-            <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                <form className="mx-auto max-w-2xl" onSubmit={handleCreateSubmit}>
-                    <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
-                    <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
-                    {!permissions.includes(Permission.IS_MEDECIN) &&(
-                        <select
-                            className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
-                            value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        >
-                            {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
-                        </select>)}
-                    {permissions.includes(Permission.IS_MEDECIN) &&(
-                        <select
-                            className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
-                            value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        >
-                            {filteredCategories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
-                        </select>)}
-                    <label className="text-sm font-bold text-[#727272] mb-2 block">Sujet du fil</label>
-                    <input
-                        type="text"
-                        required
-                        value={formData.title}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab] text-black border-gray-300"
-                    />
-                    <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
-                    <textarea
-                        required
-                        value={formData.message}
-                        onChange={(e) => setFormData({...formData, message: e.target.value})}
-                        className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none text-black border-gray-300"
-                    ></textarea>
-                    <div className="flex gap-4">
-                        <Button variant="cancel" type="button" onClick={() => setIsOpen(false)} link={""}>Annuler</Button>
-                        <Button variant="validate" type="submit" link={""}>Créer le fil</Button>
-                    </div>
-                </form>
-            </Modal>
-
             {showArchiveModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowArchiveModal(false)}>
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
