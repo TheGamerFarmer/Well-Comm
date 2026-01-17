@@ -96,7 +96,7 @@ public class SecurityService {
         return message.getAuthor().getUserName().equals(account.getUserName());
     }
 
-    public boolean isAdmin() {
+    public boolean deleteRecord() {
         Map<String, String> params = getPathVars();
         Account account = accountService.getUser(params.get("userName"));
         if (account == null)
@@ -106,7 +106,7 @@ public class SecurityService {
         if (record == null)
             return false;
 
-        return hasPermission(account, record, Permission.IS_ADMIN);
+        return hasPermission(account, record, Permission.DELETE_RECORD);
     }
 
     @SuppressWarnings("unchecked")

@@ -76,7 +76,7 @@ public class RecordController {
                                                @PathVariable String name) {
 
         Record newRecord = recordService.createRecord(name, userName);
-        Role aide = Role.AIDANT_CREATEUR;
+        Role aide = Role.AIDANT;
         RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
         return ResponseEntity.ok(newRecord);
     }
@@ -180,7 +180,7 @@ public class RecordController {
     }
 
     @DeleteMapping("/delete/{recordId}")
-    @PreAuthorize("#userName == authentication.name and @securityService.isAdmin()")
+    @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long recordId) {
         boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
