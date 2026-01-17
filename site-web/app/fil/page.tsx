@@ -1,20 +1,15 @@
 "use client";
 
-import React, {useRef, useEffect, useState} from "react";
+import React, {useRef, useEffect, useState, Suspense} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
 import Image from "next/image";
+import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-export type RecordAccount = {
-    record: { id: number };
-    title: string;
-    permissions: Permission[];
-};
-
-export default function FilDeTransmission() {
+function FilContent() {
     const {
         categories, records, channels, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
@@ -26,12 +21,24 @@ export default function FilDeTransmission() {
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const recordIdFromUrl = searchParams.get('recordId');
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
     useEffect(() => {
+        if (recordIdFromUrl) {
+            const id = Number(recordIdFromUrl);
+            if (!isNaN(id)) {
+                setActiveRecordId(id);
+                router.replace(pathname);
+            }
+        }
+    }, [recordIdFromUrl, setActiveRecordId, pathname, router]);
+
+    useEffect(() => {
         if (!currentUserName || !activeRecordId) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setRecordAccount(null);
             return;
         }
@@ -45,6 +52,7 @@ export default function FilDeTransmission() {
             });
     }, [currentUserName, activeRecordId]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
 
     useEffect(() => {
@@ -73,6 +81,14 @@ export default function FilDeTransmission() {
             year: 'numeric'
         });
     };
+
+    useEffect(() => {
+        if (permissions.includes(Permission.IS_MEDECIN)) {
+            if (!selectedCategories.includes("Santé")) {
+                toggleCategory("Santé");
+            }
+        }
+    }, [permissions, selectedCategories, toggleCategory]);
 
     const sortedMessages = [...messages].sort((a, b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -105,7 +121,7 @@ export default function FilDeTransmission() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
-                    <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
+                    <div className="bg-[#f67a7a] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
                         <span className="font-bold text-lg whitespace-nowrap tracking-tight">L&#39;aidé</span>
                         <select
                             value={activeRecordId || ""}
@@ -174,7 +190,6 @@ export default function FilDeTransmission() {
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
 
-                                // On détecte si le message est supprimé via son contenu ou son flag
                                 const isDeleted = msg.content === "Ce message a été supprimé\u200B";
                                 const isEditing = editingMessageId === msg.id;
 
@@ -186,7 +201,6 @@ export default function FilDeTransmission() {
                                     msgDate.getMonth() !== prevDate.getMonth() ||
                                     msgDate.getDate() !== prevDate.getDate();
 
-                                // --- LOGIQUE COULEURS BUBBLES ---
                                 const bubbleStyles = isMe
                                     ? (isDeleted ? "bg-gray-200 text-gray-500 rounded-tr-none" : "bg-[#0551ab] text-white rounded-tr-none")
                                     : (isDeleted ? "bg-gray-100 text-gray-400 border border-gray-200 rounded-tl-none" : "bg-white text-gray-800 border border-gray-100 rounded-tl-none");
@@ -328,12 +342,16 @@ export default function FilDeTransmission() {
                             {filteredCategories.map((cat) => (
                                 <button
                                     key={cat}
-                                    onClick={() => toggleCategory(cat)}
-                                    className={` flex-1 min-w-[130px] py-3 hover:cursor-pointer rounded-xl border-2 font-bold text-lg transition-all ${
+                                    onClick={() => {
+                                        // Si médecin, on empêche de décocher "Santé"
+                                        if (permissions.includes(Permission.IS_MEDECIN)) return;
+                                        toggleCategory(cat);
+                                    }}
+                                    className={` flex-1 min-w-[130px] py-3 rounded-xl border-2 font-bold text-lg transition-all ${
                                         selectedCategories.includes(cat)
                                             ? "bg-[#26b3a9] text-white border-[#26b3a9]"
                                             : "text-[#26b3a9] border-[#26b3a9] hover:bg-gray-50 shadow-sm"
-                                    }`}
+                                    } ${permissions.includes(Permission.IS_MEDECIN) ? "cursor-default" : "hover:cursor-pointer"}`}
                                 >
                                     {cat}
                                 </button>
@@ -482,5 +500,13 @@ export default function FilDeTransmission() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function FilDeTransmissionPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
+            <FilContent />
+        </Suspense>
     );
 }

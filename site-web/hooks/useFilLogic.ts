@@ -64,9 +64,6 @@ export function useFilLogic() {
                 setCurrentUserName(user);
                 const userRecords = await getRecords(user);
                 setRecords(userRecords);
-                if (userRecords.length > 0) {
-                    setActiveRecordId(userRecords[0].id);
-                }
             }
         };
         init().then();
