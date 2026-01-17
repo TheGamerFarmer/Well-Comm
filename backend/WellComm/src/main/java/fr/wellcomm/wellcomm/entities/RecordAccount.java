@@ -17,7 +17,7 @@ import jakarta.persistence.Column;
 public class RecordAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     // Relation vers l'utilisateur (Plusieurs accès pour un utilisateur)
     @ManyToOne
     private Account account;

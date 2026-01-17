@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
+import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class AccountController {
     public final AccountService accountService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final RecordService recordService;
+    private final RecordAccountService recordAccountService;
 
     @Getter
     @Setter
@@ -149,28 +151,20 @@ public class AccountController {
     }
 
     //retirer un assistant autre que la personne connecté
-    @DeleteMapping("/deleteAccess/current_record/{name}/{recordAccountId}")
+    @DeleteMapping("/deleteAccess/current_record/{targetUserName}/{recordId}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> deleteRecordAccount(@PathVariable String userName, @PathVariable String name, @PathVariable Long recordAccountId) {
+    public ResponseEntity<?> deleteRecordAccount(
+            @PathVariable String userName,
+            @PathVariable String targetUserName,
+            @PathVariable Long recordId
+    ) {
+        Account account = accountService.getUser(userName);
+                if (account == null)
+                    return ResponseEntity.badRequest().body("User not found");
 
-    Account account = accountService.getUser(name);
-    if (account == null) {
-        return ResponseEntity.badRequest().body("User not found");
-    }
-
-    RecordAccount recordAccount = account.getRecordAccounts()
-                .stream()
-                .filter(ra -> ra.getId().equals(recordAccountId))
-                .findFirst()
-                .orElse(null);
-
-        if (recordAccount == null) {
-
-            return ResponseEntity.badRequest().body("Access not found");
-        }
-
-        accountService.deleteRecordAccount(account, recordAccount);
+        recordAccountService.deleteRecordAccount(targetUserName, recordId);
 
         return ResponseEntity.ok().build();
-}
+    }
+
 }

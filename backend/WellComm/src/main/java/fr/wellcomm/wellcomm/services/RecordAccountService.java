@@ -45,6 +45,17 @@ public class RecordAccountService {
         return recordAccount;
     }
 
+    //delete record_account
+    public void deleteRecordAccount(String accountUserName, Long recordId) {
+
+        RecordAccount recordAccount =
+                recordAccountRepository
+                .findByAccountUserNameAndRecordId(accountUserName, recordId)
+                .orElseThrow(() -> new RuntimeException("Access not found"));
+
+        recordAccountRepository.delete(recordAccount);
+    }
+
     //à comparer avec la fonction dans account
     public RecordAccount getRecordAccounts(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);

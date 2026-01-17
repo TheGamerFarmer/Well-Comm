@@ -7,12 +7,6 @@ import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 
 import {
     getCurrentUser,
-    getRecords,
-    getChannels,
-    mapCategoryToEnum,
-    createChannel,
-    FilResponse,
-    DossierResponse
 } from "@/functions/fil-API";
 
 //"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
@@ -25,11 +19,6 @@ type Invitation = {
 };
 
 export default function AssistantsPage() {
-
-    const [currentUserName, setCurrentUserName] = useState<string>("");
-    const [records, setRecords] = useState<DossierResponse[]>([]);
-    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
-
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
@@ -37,11 +26,7 @@ export default function AssistantsPage() {
     const [title, setTitle] = useState<Invitation["role"]>("Aidant");
     const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
-
-    const handleInvite = (e: React.FormEvent) => {
-        e.preventDefault();
-        addAccessToCurrentRecord("Aidant");
-    };
+    const [error, setError] = useState("");
 
     useEffect(() => {
         getCurrentUser().then(setUserName);
@@ -100,7 +85,9 @@ export default function AssistantsPage() {
             );
 
             if (!res.ok) {
-                throw new Error("Impossible d'ajouter l'accès");
+                const errorMessage = await res.text();
+                setError(errorMessage);
+                throw new Error(errorMessage);
             }
 
             await fetchAssistants();
@@ -125,7 +112,10 @@ export default function AssistantsPage() {
                 credentials: "include",
             });
 
-            if (!res.ok) throw new Error("Erreur suppression");
+            if (!res.ok) {
+                const errorMessage = await res.text();
+                throw new Error(errorMessage);
+            }
 
             await fetchAssistants();
             console.log("recordAccount supprimé ✅");
@@ -155,7 +145,8 @@ export default function AssistantsPage() {
 
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
-                            onClick={() => setIsOpen(true)}>
+                            onClick={() => setIsOpen(true)}
+                            link={""}>
                         Ajouter un(e) Assistant(e)
                     </Button>
                 </div>
@@ -185,7 +176,7 @@ export default function AssistantsPage() {
 
 
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
-                                <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)}>
+                                <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)} link={""}>
                                     Permissions
                                 </Button>
                                 <select
@@ -254,12 +245,14 @@ export default function AssistantsPage() {
                                         <option>Aide à domicile</option>
                                     </select>
 
+                                    <p className="text-red-500 font-bold text-center">{error}</p>
+
                                     <div className="flex justify-center gap-3">
-                                        <Button variant="secondary" type="button" onClick={() => setIsOpen(false)}>
+                                        <Button variant="secondary" type="button" onClick={() => setIsOpen(false)} link={""}>
                                             Annuler
                                         </Button>
 
-                                        <Button variant="primary" type="submit">
+                                        <Button variant="primary" type="submit" link={""}>
                                             Ajouter
                                         </Button>
                                     </div>
@@ -298,15 +291,12 @@ export default function AssistantsPage() {
                                 variant="secondary"
                                 onClick={() => {
                                     if (!invitationToDelete?.accountUserName || !currentDossier) return;
-
-                                    removeAccess(invitationToDelete.accountUserName, currentDossier); setInvitationToDelete(null);
-
-                                }}>
+                                    removeAccess(invitationToDelete.accountUserName, currentDossier); setInvitationToDelete(null);}}
+                                link={""}>
                                 Oui
                             </Button>
 
-                            <Button
-                                onClick={() => setInvitationToDelete(null)}>
+                            <Button onClick={() => setInvitationToDelete(null)} link={""}>
                                 Non
                             </Button>
                         </div>
@@ -350,11 +340,11 @@ export default function AssistantsPage() {
 
                         <div className="flex justify-center gap-3">
 
-                            <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(false)}>
+                            <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(false)} link={""}>
                                     Annuler
                                 </Button>
 
-                                <Button variant="primary" type="submit" onClick={() => setIsOpenPerms(false)}>
+                                <Button variant="primary" type="submit" onClick={() => setIsOpenPerms(false)} link={""}>
                                     Confirmer
                                 </Button>
 
