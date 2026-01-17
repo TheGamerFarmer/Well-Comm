@@ -38,7 +38,6 @@ export interface MessageResponse {
     date: string;
     authorTitle?: string;
     authorUserName?: string;
-    isDeleted?: boolean;
 }
 
 export interface ChannelContentResponse {
@@ -251,6 +250,22 @@ export async function deleteMessage(userName: string, recordId: number, channelI
         console.error("Erreur suppression message:", err);
     }
     return false;
+}
+
+export async function updateMessage(userName: string, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+            method: 'PUT',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+            body: content
+        });
+        return response.ok;
+    } catch (err) {
+        console.error("Erreur modification message:", err);
+        return false;
+    }
 }
 
 export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {

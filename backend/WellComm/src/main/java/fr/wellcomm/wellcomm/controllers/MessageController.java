@@ -18,20 +18,31 @@ public class MessageController {
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @GetMapping("/modify")
-    @PreAuthorize("#userName == authentication.name and" +
-            "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or" +
-                    "@securityService.ownMessage())")
-    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") String userName,
-                                           @PathVariable @SuppressWarnings("unused") long recordId,
-                                           @PathVariable @SuppressWarnings("unused") long channelId,
-                                           @PathVariable long messageId,
+    @PutMapping("/update")
+    @PreAuthorize("#userName == authentication.name and " +
+            "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or " +
+            "@securityService.ownMessage())")
+    public ResponseEntity<?> modifyContent(@PathVariable String userName,
+                                           @PathVariable long recordId,
+                                           @PathVariable long channelId,
+                                           @PathVariable Long messageId,
                                            @RequestBody String newContent) {
+
         Message message = messageService.getMessage(messageId);
-        if (message == null)
+        if (message == null) {
             return ResponseEntity.badRequest().body("Message not found");
+        }
 
         messageService.modifyContent(message, newContent);
+
+        String destination = "/topic/messages/" + channelId;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", messageId);
+        payload.put("content", newContent);
+        payload.put("type", "UPDATE");
+
+        messagingTemplate.convertAndSend(destination, (Object) payload);
+
         return ResponseEntity.ok().build();
     }
 
@@ -48,17 +59,7 @@ public class MessageController {
 
 
         String deletedContent = "Ce message a été supprimé\u200B";
-        messageService.modifyContent(message, deletedContent);
 
-
-        String destination = "/topic/messages/" + channelId;
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("id", messageId);
-        payload.put("content", deletedContent);
-        payload.put("type", "UPDATE");
-
-        messagingTemplate.convertAndSend(destination, (Object) payload);
-
-        return ResponseEntity.ok().build();
+        return modifyContent(userName,recordId,channelId,messageId,deletedContent);
     }
 }
