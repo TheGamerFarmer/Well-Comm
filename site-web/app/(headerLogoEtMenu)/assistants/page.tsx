@@ -261,8 +261,6 @@ export default function AssistantsPage() {
                             </div>
                         </div>
                     )}
-
-
                 </div>
 
             {/*pop-up delete*/}

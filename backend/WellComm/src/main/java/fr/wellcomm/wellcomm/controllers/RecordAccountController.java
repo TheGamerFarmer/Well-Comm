@@ -57,7 +57,9 @@ public static class RecordAccountResponse {
     public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
         @PathVariable String userName,
         @PathVariable Long recordId) {
+
             List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
+                    .filter(ra -> !ra.getAccount().getUserName().equals(userName))
                     .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 

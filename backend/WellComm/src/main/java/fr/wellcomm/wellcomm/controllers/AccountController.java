@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/{userName}")
@@ -116,6 +117,13 @@ public class AccountController {
         Record record = recordService.getRecord(request.getRecordId());
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
+
+        Optional<RecordAccount> existing = recordAccountService.getByRecordId(request.getRecordId()).stream()
+            .filter(ra -> ra.getAccount().getUserName().equals(name))
+            .findFirst();
+        if (existing.isPresent()) {
+            return ResponseEntity.badRequest().body("RecordAccount already exists");
+        }
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
