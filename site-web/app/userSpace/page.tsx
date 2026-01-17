@@ -5,30 +5,32 @@ import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
 
+import { useRouter } from "next/navigation";
+import { getUserProfile, UserProfile } from "@/functions/user-api";
+
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+
+    const router = useRouter();
 
 
-
-//     const [prenom, setPrenom] = useState("");
-//     const [nom, setNom] = useState("");
-//     const [username, setUsername] = useState("");
-//
-//
-//     useEffect(() => {
-//         const storedUsername = localStorage.getItem("username");
-//         const storedPrenom = localStorage.getItem("prenom");
-//         const storedNom = localStorage.getItem("nom");
-//
-// //         if (storedUsername) setUsername(storedUsername);
-// // /*        if (storedPrenom) setPrenom(storedPrenom);
-// //         if (storedNom) setNom(storedNom);*/
-// //     }, []);
-
+    useEffect(() => {
+        console.log("Calling getUserProfile()...");
+        getUserProfile().then((data) => {
+            console.log("Profile data received:", data);
+            if (!data) {
+                // если нет профиля, перенаправляем на логин
+                router.push("/login?callbackUrl=/userSpace");
+            } else {
+                setProfile(data);
+            }
+        });
+    }, []);
 
     const handleSavePassword = () => {
         if (newPassword !== confirmPassword) {
@@ -36,11 +38,14 @@ export default function UserSpace() {
             return;
         }
 
+        alert(
+            "Mot de passe enregistré !\n(Current: " +
+            currentPassword +
+            ", New: " +
+            newPassword +
+            ")"
+        );
 
-        alert("Mot de passe enregistré !\n(Current: " + currentPassword +
-            ", New: " + newPassword + ")");
-
-        // Сброс полей после сохранения
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -51,11 +56,10 @@ export default function UserSpace() {
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="py-4 ">
                 <p className="font-bold text-[#0551ab] text-2xl">Mon Profil</p>
-                <FilArianne/>
+                <FilArianne />
             </div>
 
             <div className="flex justify-center items-center flex-col bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
-
                 <div className="p-8 relative overflow-visible">
                     <Image
                         src="/images/avatar.svg"
@@ -77,42 +81,42 @@ export default function UserSpace() {
 
                 <form className="mx-auto max-w-200">
                     {/* Поля профиля */}
-                    <div className=" flex flex-col md:flex-row md:gap-4">
+                    <div className="flex flex-col md:flex-row md:gap-4">
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
                             <input
                                 type="text"
-                                // value={prenom}
-                                // onChange={(e) => setPrenom(e.target.value)}
-                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={profile?.firstName || ""}
+                                readOnly
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
                             <input
                                 type="text"
-                                // value={nom}
-                                // onChange={(e) => setNom(e.target.value)}
-                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={profile?.lastName || ""}
+                                readOnly
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
-                            <input
-                                type="date"
-                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
-                            />
-                        </div>
+                        {/*<div className="self-center">*/}
+                        {/*    <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>*/}
+                        {/*    <input*/}
+                        {/*        type="date"*/}
+                        {/*        className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"*/}
+                        {/*    />*/}
+                        {/*</div>*/}
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
-                                // value={username}
-                                // readOnly
-                                className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={profile?.userName || ""}
+                                readOnly
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -121,7 +125,6 @@ export default function UserSpace() {
                         <Button variant="cancel" link={""}>Annuler</Button>
                         <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
                     </div>
-
 
                     <div className="mt-8">
                         <p
@@ -140,7 +143,6 @@ export default function UserSpace() {
                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                     className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
-
                                 <input
                                     type="password"
                                     placeholder="Nouveau mot de passe"
@@ -148,7 +150,6 @@ export default function UserSpace() {
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
-
                                 <input
                                     type="password"
                                     placeholder="Confirmer le nouveau mot de passe"
@@ -156,12 +157,11 @@ export default function UserSpace() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     className="w-[300px] h-[50px] bg-white rounded-lg border-2 border-[#dfdfdf] p-3 text-black text-sm"
                                 />
-
                                 <Button
                                     type="button"
                                     variant="primary"
                                     link={""}
-                                    // onClick={handleSavePassword}
+                                    onClick={handleSavePassword}
                                 >
                                     Enregistrer
                                 </Button>
@@ -184,14 +184,12 @@ export default function UserSpace() {
                             Supprimer le compte
                         </p>
                     </div>
-
                 </form>
             </div>
+
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl">
-
-
                         <button
                             onClick={() => setShowDeleteModal(false)}
                             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -209,7 +207,6 @@ export default function UserSpace() {
                             />
                         </div>
 
-
                         <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
                             Voulez-vous supprimer?
                         </h2>
@@ -217,27 +214,29 @@ export default function UserSpace() {
                             Ceci sera supprimé définitivement
                         </p>
 
-
                         <div className="flex justify-center gap-4">
-
-                            <Button variant={"cancel"} link={""}
-                            // onClick={() => setShowDeleteModal(false)}
-                                >
+                            <Button
+                                variant={"cancel"}
+                                link={""}
+                                onClick={() => setShowDeleteModal(false)}
+                            >
                                 Non
                             </Button>
 
-                            <Button variant={"validate"} link={""} // onClick={() => {
-                                                                     //     console.log("DELETE ACCOUNT");
-                                    //     setShowDeleteModal(false);
-                                    // }}
-                            > Oui
+                            <Button
+                                variant={"validate"}
+                                link={""}
+                                onClick={() => {
+                                    console.log("DELETE ACCOUNT");
+                                    setShowDeleteModal(false);
+                                }}
+                            >
+                                Oui
                             </Button>
-
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

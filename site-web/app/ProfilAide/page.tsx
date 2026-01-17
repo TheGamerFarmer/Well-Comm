@@ -52,16 +52,16 @@ export default function ProfilAide() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:gap-4">
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
-                            <input type="date" className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                        </div>
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Numéro de téléphone</label>
-                            <input type="tel" className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                        </div>
-                    </div>
+                    {/*<div className="flex flex-col md:flex-row md:gap-4">*/}
+                    {/*    <div className="self-center">*/}
+                    {/*        <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>*/}
+                    {/*        <input type="date" className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>*/}
+                    {/*    </div>*/}
+                    {/*    <div className="self-center">*/}
+                    {/*        <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Numéro de téléphone</label>*/}
+                    {/*        <input type="tel" className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
 
                     <div className="flex flex-col md:flex-row md:gap-4">
                     <div className="self-center">
