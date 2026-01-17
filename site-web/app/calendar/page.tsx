@@ -16,14 +16,6 @@ export default function Calendar() {
                         Home / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
                     </nav>
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
-                    <div className="w-full sm:w-60 [&_button]:w-full [&_button]:h-14 [&_button]:text-lg [&_button]:font-bold shadow-md rounded-xl overflow-hidden">
-                        <Button variant="primary">
-                            Modifier l&#39;agenda
-                        </Button>
-                    </div>
-                </div>
             </div>
 
             <FramagendaView/>

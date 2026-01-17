@@ -12,4 +12,5 @@ public enum Permission {
     CLOSE_CHANNEL,
     IS_ADMIN,
     SEE_CALENDAR,
+    MODIFY_CALENDAR,
 }
