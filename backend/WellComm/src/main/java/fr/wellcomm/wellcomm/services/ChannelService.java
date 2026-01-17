@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -50,5 +52,16 @@ public class ChannelService {
         channelRepository.save(channel);
 
         return message;
+    }
+
+    public Date lastMessage(@NotNull OpenChannel channel) {
+        Map<Long, Message> messages = channel.getMessages();
+        Date lastMessage = null;
+        for (Message message : messages.values()) {
+            if(lastMessage == null || lastMessage.getTime() < message.getDate().getTime()) {
+                lastMessage = message.getDate();
+            }
+        }
+        return lastMessage;
     }
 }

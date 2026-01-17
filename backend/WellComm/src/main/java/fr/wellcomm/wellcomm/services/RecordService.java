@@ -8,12 +8,17 @@ import fr.wellcomm.wellcomm.repositories.ReportRepository;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDate.now;
 import static org.springframework.data.util.ClassUtils.ifPresent;
 
 @Service
@@ -43,6 +48,19 @@ public class RecordService {
 
     public List<CloseChannel> getChannelsOfCategoryClose(long recordId, Category category) {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
+    }
+
+    public List<OpenChannel> getLastWeekChannelsOfCategory(long recordId, Category category) {
+        List<OpenChannel> channels = channelRepository.findByDossierIdAndCategorie(recordId, category);
+        List<OpenChannel> lastWeekChannels = new ArrayList<>();
+        Date oneWeekAgo = Date.from(LocalDateTime.now().minusDays(7).atZone(ZoneId.systemDefault()).toInstant());
+        for (OpenChannel channel : channels) {
+            Date lastMessageDate = channelService.lastMessage(channel);
+            if (lastMessageDate != null && lastMessageDate.after(oneWeekAgo)) {
+                lastWeekChannels.add(channel);
+            }
+        }
+        return lastWeekChannels;
     }
 
     public Record createRecord(String name, String admin) {
