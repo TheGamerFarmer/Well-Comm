@@ -118,7 +118,7 @@ export default function AssistantsPage() {
             }
 
             await fetchAssistants();
-            console.log("recordAccount supprimé ✅");
+            console.log("recordAccount supprimé ");
 
         }catch (err: any) {
             console.error(err.message);
@@ -145,7 +145,7 @@ export default function AssistantsPage() {
                 throw new Error(errorMessage);
         }
             await fetchAssistants();
-            console.log("recordAccount supprimé ✅")
+            console.log("recordAccount modifié ")
     }catch (err: any) {
             console.error(err.message);
             alert(err.message);
