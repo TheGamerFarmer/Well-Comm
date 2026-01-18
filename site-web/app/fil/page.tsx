@@ -118,7 +118,7 @@ export default function FilDeTransmissionPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
-                    <div className="bg-[#f67a7a] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
+                    <div className="bg-[#26b3a9] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
                         <span className="font-bold text-lg whitespace-nowrap tracking-tight">L&#39;aidé</span>
                         <select
                             value={activeRecordId || ""}
