@@ -12,11 +12,11 @@ export async function getUserProfile(): Promise<UserProfile | null> {
             credentials: "include",
         });
 
-        console.log("Response status:", response.status); // <- добавлено
+        console.log("Response status:", response.status);
 
         if (response.ok) {
             const data = await response.json();
-            console.log("Data:", data); // <- добавлено
+            console.log("Data:", data);
             return data;
         } else {
             console.error("Failed to fetch profile:", response.status);
