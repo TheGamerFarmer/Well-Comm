@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-function ResumeContent() {
+export default function ResumePage() {
     const {
         categories, records, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
@@ -514,13 +514,5 @@ function ResumeContent() {
                 </div>
             )}
         </div>
-    );
-}
-
-export default function ResumePage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
-            <ResumeContent />
-        </Suspense>
     );
 }

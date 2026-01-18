@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-function ArchiveContent() {
+export default function ArchivePage() {
     const {
         categories, records, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
@@ -401,13 +401,5 @@ function ArchiveContent() {
                 )}
             </div>
         </div>
-    );
-}
-
-export default function ArchivePage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
-            <ArchiveContent />
-        </Suspense>
     );
 }
