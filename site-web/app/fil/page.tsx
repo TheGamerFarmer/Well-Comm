@@ -1,15 +1,14 @@
 "use client";
 
-import React, {useRef, useEffect, useState, Suspense, useMemo} from "react";
+import React, {useRef, useEffect, useState, useMemo} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
 import Image from "next/image";
-import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-function FilContent() {
+export default function FilDeTransmissionPage() {
     const {
         categories, records, channels, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
@@ -21,31 +20,17 @@ function FilContent() {
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const recordIdFromUrl = searchParams.get('recordId');
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
     useEffect(() => {
-        if (recordIdFromUrl) {
-            const id = Number(recordIdFromUrl);
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
             if (!isNaN(id)) {
                 setActiveRecordId(id);
-                localStorage.setItem('lastActiveRecordId', id.toString());
-                router.replace(pathname);
             }
         }
-        else {
-            const savedId = localStorage.getItem('lastActiveRecordId');
-            if (savedId) {
-                const id = Number(savedId);
-                if (!isNaN(id) && activeRecordId !== id) {
-                    setActiveRecordId(id);
-                }
-            }
-        }
-    }, [recordIdFromUrl, setActiveRecordId, pathname, router, activeRecordId]);
+    }, [setActiveRecordId]);
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
@@ -140,7 +125,6 @@ function FilContent() {
                             onChange={(e) => {
                                 const newId = Number(e.target.value);
                                 setActiveRecordId(newId);
-                                localStorage.setItem('lastActiveRecordId', newId.toString());
                                 setSelectedChannel(null);
                             }}
                             className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
@@ -512,7 +496,7 @@ function FilContent() {
                             <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
                         </div>
                         <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous supprimer ce message?</h2>
-                        <p className="text-center text-gray-700 mb-6">Ce message sera remplacé par une mention de suppression.</p>
+                        <p className="text-center text-gray-700 mb-6">Ce message sera supprimé définitivement.</p>
                         <div className="flex justify-center gap-4">
                             <Button variant={"cancel"} link={""} onClick={() => setShowDeleteMessageModal(false)}>Non</Button>
                             <Button variant={"validate"} link={""}  onClick={() => {
@@ -524,13 +508,5 @@ function FilContent() {
                 </div>
             )}
         </div>
-    );
-}
-
-export default function FilDeTransmissionPage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
-            <FilContent />
-        </Suspense>
     );
 }
