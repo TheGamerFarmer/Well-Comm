@@ -27,7 +27,6 @@ export default function MesAides() {
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
 
     /* =======================
        Chargement des dossiers
@@ -36,34 +35,23 @@ export default function MesAides() {
         if (!userName) return;
 
         const fetchDossiers = async () => {
-            try {
-                const res = await fetch(
-                    `${API_BASE_URL}/api/${userName}/records/`,
-                    { credentials: "include" }
-                );
+            const res = await fetch(
+                `${API_BASE_URL}/api/${userName}/records/`,
+                { credentials: "include" }
+            );
 
-                if (!res.ok) throw new Error("Erreur chargement dossiers");
-
-                const data: Dossier[] = await res.json();
-                console.log("API dossiers =", data);
-                setDossiers(data);
-            } catch (err) {
-                console.error(err);
+            if (!res.ok) {
+                console.error("Erreur chargement dossiers");
+                return;
             }
+
+            const data: Dossier[] = await res.json();
+            console.log("API dossiers =", data);
+            setDossiers(data);
         };
 
-        fetchDossiers();
+        fetchDossiers().then();
     }, [userName]);
-
-    useEffect(() => {
-        const localRecordId = localStorage.getItem('activeRecordId');
-        if (localRecordId) {
-            const id = Number(localRecordId);
-            if (!isNaN(id)) {
-                setCurrentRecordId(id);
-            }
-        }
-    }, [setCurrentRecordId]);
 
     /* =======================
        Création d’un dossier
@@ -72,32 +60,31 @@ export default function MesAides() {
         e.preventDefault();
         if (!name.trim()) return;
 
-        try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
-                    name
-                )}`,
-                {
-                    method: "POST",
-                    credentials: "include",
-                }
-            );
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
+                name
+            )}`,
+            {
+                method: "POST",
+                credentials: "include",
+            }
+        );
 
-            if (!res.ok) throw new Error("Erreur création dossier");
-
-            const newRecord = await res.json();
-
-            setDossiers((prev) => [
-                ...prev,
-                { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
-            ]);
-
-            setName("");
-            setFile(null);
-            setIsOpen(false);
-        } catch (err) {
-            console.error(err);
+        if (!res.ok) {
+            console.error("Erreur création dossier");
+            return
         }
+
+        const newRecord = await res.json();
+
+        setDossiers((prev) => [
+            ...prev,
+            { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
+        ]);
+
+        setName("");
+        setFile(null);
+        setIsOpen(false);
     };
 
     /* =======================
@@ -111,26 +98,24 @@ export default function MesAides() {
     const handleDelete = async (id: number) => {
         if (!id) return;
 
-        try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
-                {
-                    method: "DELETE",
-                    credentials: "include",
-                }
-            );
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
+            {
+                method: "DELETE",
+                credentials: "include",
+            }
+        );
 
-            if (!res.ok) throw new Error("Erreur suppression");
-
-            // Mise à jour de la liste côté front
-            setDossiers(dossiers.filter(d => d.id !== id));
-
-            console.log("Dossier supprimé ✅");
-        } catch (err: any) {
-            console.error(err.message);
-            alert(err.message);
+        if (!res.ok) {
+            console.error("Erreur suppression");
+            return;
         }
-    };
+
+        // Mise à jour de la liste côté front
+        setDossiers(dossiers.filter(d => d.id !== id));
+
+        console.log("Dossier supprimé ✅");
+    }
 
     return (
         <div className="p-10">
@@ -139,17 +124,6 @@ export default function MesAides() {
             </p>
 
             <FilArianne />
-
-            <div className="text-black">
-                {currentRecordId}
-            </div>
-            <div>
-                {currentRecordId ? (
-                    <p>Dossier courant : {currentRecordId}</p>
-                ) : (
-                    <p>Aucun dossier sélectionné</p>
-                )}
-            </div>
 
             <div className="flex justify-end my-4">
                 <Button variant="validate" type="button" onClickAction={() => setIsOpen(true)} link={""}>
@@ -260,8 +234,10 @@ export default function MesAides() {
                             </p>
                             <div className="flex gap-4 justify-between mb-4">
                                 <Button variant="secondary" type="button" onClickAction={() => {
-                                    if(!dossierToDelete?.id)return;
-                                    handleDelete(dossierToDelete.id);
+                                    if(!dossierToDelete?.id)
+                                        return;
+
+                                    handleDelete(dossierToDelete.id).then();
                                     setDossierToDelete(null);
                                 }} link={""}>
                                     Oui

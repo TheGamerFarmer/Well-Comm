@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className=" w-full mx-auto px-4 py-3 flex justify-between items-center ">
 
                     {/* 1. Logo/Titre (Image dans la maquette) */}
-                    <Link href="/"
+                    <Link href="/mesAides"
                           className="flex items-center space-x-2"> {/* On utilise Link pour rendre le logo cliquable */}
 
                         {/* 🚨 NOUVEAU CODE POUR L'IMAGE */}

@@ -2,19 +2,6 @@ import { API_BASE_URL } from "@/config";
 
 export const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
-export enum Permission {
-    SEND_MESSAGE = "SEND_MESSAGE",
-    DELETE_MESSAGE = "DELETE_MESSAGE",
-    OPEN_CHANNEL = "OPEN_CHANNEL",
-    CLOSE_CHANNEL = "CLOSE_CHANNEL",
-    IS_ADMIN = "IS_ADMIN",
-    MODIFY_MESSAGE = "MODIFY_MESSAGE",
-    IS_MEDECIN = "IS_MEDECIN",
-    EDIT_CALENDAR = "EDIT_CALENDAR",
-    ASSIGN_PERMISSIONS = "ASSIGN_PERMISSIONS",
-    INVITE = "INVITE",
-}
-
 export interface FilResponse {
     id: number;
     title: string;
@@ -66,7 +53,7 @@ export function capitalizeWords(str: string | undefined | null): string {
         .join(' ');
 }
 
-export async function getCurrentUser(): Promise<string | null> {
+export async function getCurrentUser(): Promise<string> {
     try {
         const response = await fetch(`${API_BASE_URL}/api/me`, {
             credentials: 'include',
@@ -80,7 +67,7 @@ export async function getCurrentUser(): Promise<string | null> {
     } catch (err) {
         console.error("Erreur identification:", err);
     }
-    return null;
+    return "null";
 }
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {
@@ -262,31 +249,5 @@ export async function updateMessage(userName: string, recordId: number, channelI
     } catch (err) {
         console.error("Erreur modification message:", err);
         return false;
-    }
-}
-
-export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
-    if (!userName || !recordId) return [];
-
-    try {
-        const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${recordId}/permissions`,
-            {
-                method: "GET",
-                credentials: "include",
-                cache: "no-store",
-            }
-        );
-
-        if (!res.ok) {
-            console.error("Erreur HTTP:", res.status);
-            return [];
-        }
-
-        const data = await res.json();
-        return Array.isArray(data) ? data : data.permissions ?? [];
-    } catch (err) {
-        console.error("Erreur permissions:", err);
-        return [];
     }
 }

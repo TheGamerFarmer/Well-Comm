@@ -7,13 +7,11 @@ import {
     getCurrentUser,
     getRecords,
     getCloseChannels,
-    mapCategoryToEnum,
-    createChannel,
     FilResponse,
-    DossierResponse, getPermissions,Permission
+    DossierResponse
 } from "@/functions/fil-API";
-import {API_BASE_URL} from "@/config";
 import {useFilLogic} from "@/hooks/useFilLogic";
+import {getPermissions, Permission} from "@/functions/Permissions";
 
 export type RecordAccount = {
     record: { id: number };
@@ -34,14 +32,6 @@ export default function Archive() {
     const [channels, setChannels] = useState<FilResponse[]>([]);
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
-    // État du formulaire
-    const [formData, setFormData] = useState({
-        category: mapCategoryToEnum("Santé"),
-        title: "",
-        message: ""
-    });
-
-    // --- INITIALISATION ---
     useEffect(() => {
         const init = async () => {
             const user = await getCurrentUser();
@@ -89,12 +79,14 @@ export default function Archive() {
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
-            setRecordAccount(null);
+            setTimeout(() => {
+                setActiveRecordId(null);
+            }, 0);
             return;
         }
 
         getPermissions(currentUserName, activeRecordId)
-            .then((permissions) => {
+            .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {

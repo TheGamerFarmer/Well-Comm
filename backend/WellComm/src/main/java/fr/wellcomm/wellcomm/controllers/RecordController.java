@@ -5,7 +5,6 @@ import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,14 +17,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
-import jakarta.servlet.http.HttpSession;
-import fr.wellcomm.wellcomm.services.RecordService;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.entities.Session;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 
 
 @RestController
@@ -35,9 +28,6 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
-    private final ChannelService ChannelService;
-    private final ChannelService channelService;
-    private final RecordRepository recordRepository;
     private final SessionRepository sessionRepository;
 
     @Getter
@@ -197,7 +187,7 @@ public class RecordController {
     @PostMapping("/select/{recordId}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> selectRecord(
-            @PathVariable String userName,
+            @PathVariable @SuppressWarnings("unused") String userName,
             @CookieValue("token") String token,
             @PathVariable Long recordId
     ) {
@@ -216,7 +206,7 @@ public class RecordController {
     @GetMapping("/current-record")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> getCurrentRecord(
-            @PathVariable String userName,
+            @PathVariable @SuppressWarnings("unused") String userName,
             @CookieValue("token") String token
     ) {
           // Récupère la session par le token

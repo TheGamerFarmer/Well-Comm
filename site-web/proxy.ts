@@ -24,7 +24,8 @@ export async function proxy(request: NextRequest) {
 
     const isLoged = await response.json();
 
-    if (!response.ok || (isLoged && logPages.includes(request.nextUrl.pathname)))
+    if (!response.ok
+                || (isLoged && logPages.includes(request.nextUrl.pathname)))
         return NextResponse.redirect(new URL("/mesAides", request.url));
     else if (isLoged
                 || logPages.includes(request.nextUrl.pathname)

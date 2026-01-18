@@ -5,8 +5,9 @@ import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
-import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
+import {mapCategoryToEnum, capitalizeWords, MessageResponse} from "@/functions/fil-API";
 import Image from "next/image";
+import {getPermissions, Permission} from "@/functions/Permissions";
 
 export default function FilDeTransmissionPage() {
     const {
@@ -39,7 +40,7 @@ export default function FilDeTransmissionPage() {
         }
 
         getPermissions(currentUserName, activeRecordId)
-            .then((permissions) => {
+            .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
@@ -175,7 +176,7 @@ export default function FilDeTransmissionPage() {
                                 <span className="px-2 py-2 font-bold">{new Date(selectedChannel.creationDate).toLocaleDateString()}</span>
                                 {permissions.includes(Permission.CLOSE_CHANNEL) &&(
                                     <Button
-                                        variant="archiver" link={""} onClick={() => {
+                                        variant="archiver" link={""} onClickAction={() => {
                                         setChannelToArchive(selectedChannel);
                                         setShowArchiveModal(true);
                                     }}>
