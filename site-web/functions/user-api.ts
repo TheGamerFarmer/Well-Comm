@@ -27,3 +27,52 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     return null;
 }
 
+export async function changePassword(
+    currentPassword: string,
+    newPassword: string
+): Promise<boolean> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/changePassword`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+            }),
+        });
+
+        if (res.ok) {
+            return true;
+        } else {
+            const text = await res.text();
+            alert("Erreur: " + text);
+            return false;
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erreur réseau");
+        return false;
+    }
+}
+
+export async function deleteAccount(userName: string): Promise<boolean> {
+    try {
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/deleteUser`,
+            {
+                method: "DELETE",
+                credentials: "include",
+            }
+        );
+
+        return res.ok;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+

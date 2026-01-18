@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-
 import { useRouter } from "next/navigation";
-import { getUserProfile, UserProfile } from "@/functions/user-api";
+import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/functions/user-api";
+import { API_BASE_URL } from "@/config";
+import encryptPassword from "@/functions/encryptPassword";
+
 
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -15,16 +17,15 @@ export default function UserSpace() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [userName, setUserName] = useState<string>("");
 
     const router = useRouter();
-
 
     useEffect(() => {
         console.log("Calling getUserProfile()...");
         getUserProfile().then((data) => {
             console.log("Profile data received:", data);
             if (!data) {
-                // если нет профиля, перенаправляем на логин
                 router.push("/login?callbackUrl=/userSpace");
             } else {
                 setProfile(data);
@@ -32,25 +33,45 @@ export default function UserSpace() {
         });
     }, []);
 
-    const handleSavePassword = () => {
+    useEffect(() => {
+        fetch(`${API_BASE_URL}/api/me`, {
+            credentials: "include",
+        })
+            .then(res => res.json())
+            .then(data => setUserName(data.userName));
+    }, []);
+
+    const handleSavePassword = async () => {
         if (newPassword !== confirmPassword) {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
 
-        alert(
-            "Mot de passe enregistré !\n(Current: " +
-            currentPassword +
-            ", New: " +
-            newPassword +
-            ")"
-        );
+        const ok = await changePassword(encryptPassword(currentPassword), encryptPassword(newPassword));
 
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setShowPasswordFields(false);
+        if (ok) {
+            alert("Mot de passe modifié avec succès !");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setShowPasswordFields(false);
+        }
     };
+
+
+    const handleDeleteAccount = async () => {
+        const success = await deleteAccount(userName);
+
+        if (success) {
+            window.location.replace("/login");
+        } else {
+            alert("Erreur lors de la suppression du compte");
+        }
+    };
+
+
+
+
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
@@ -80,7 +101,7 @@ export default function UserSpace() {
                 </div>
 
                 <form className="mx-auto max-w-200">
-                    {/* Поля профиля */}
+
                     <div className="flex flex-col md:flex-row md:gap-4">
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
@@ -226,9 +247,9 @@ export default function UserSpace() {
                             <Button
                                 variant={"validate"}
                                 link={""}
-                                onClick={() => {
-                                    console.log("DELETE ACCOUNT");
+                                onClick={async () => {
                                     setShowDeleteModal(false);
+                                    await handleDeleteAccount();
                                 }}
                             >
                                 Oui

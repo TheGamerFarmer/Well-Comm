@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import lombok.Getter;
+import lombok.Setter;
+
 import java.security.Principal;
 
 
@@ -18,6 +25,8 @@ import java.security.Principal;
 public class UserController {
 
     private final AccountRepository accountRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
@@ -37,4 +46,39 @@ public class UserController {
                 )
         );
     }
+
+    @Getter
+    @Setter
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+    }
+
+@PostMapping("/changePassword")
+public ResponseEntity<?> changePassword(
+        @RequestBody ChangePasswordRequest request,
+        Principal principal
+) {
+    if (principal == null) {
+        return ResponseEntity.status(401).body("Utilisateur non connecté");
+    }
+
+    Account account = accountRepository
+            .findById(principal.getName())
+            .orElseThrow();
+
+    if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
+        return ResponseEntity.status(403).body("Mot de passe actuel incorrect");
+    }
+
+    account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    accountRepository.save(account);
+
+    return ResponseEntity.ok().build();
+}
+
+
+
+
+
 }
