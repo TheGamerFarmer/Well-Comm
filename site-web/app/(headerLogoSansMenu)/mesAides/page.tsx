@@ -8,9 +8,6 @@ import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
 
-import { useRouter } from "next/navigation";
-import { useCurrentDossier } from "@/hooks/useCurrentDossier";
-
 type Dossier = {
     id: number;
     name: string;
@@ -30,10 +27,7 @@ export default function MesAides() {
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const router = useRouter();
     const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
-
-    const { currentDossier, loading } = useCurrentDossier(userName);
 
     /* =======================
        Chargement des dossiers
@@ -60,6 +54,16 @@ export default function MesAides() {
 
         fetchDossiers();
     }, [userName]);
+
+    useEffect(() => {
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
+            if (!isNaN(id)) {
+                setCurrentRecordId(id);
+            }
+        }
+    }, [setCurrentRecordId]);
 
     /* =======================
        Création d’un dossier
@@ -128,25 +132,6 @@ export default function MesAides() {
         }
     };
 
-    //Permet de selectionner un dossier et d'enregistrer dans une session l'ID du dossier
-    const selectDossier = async (recordId: number) => {
-        try {
-            // On envoie le recordId au backend pour l'enregistrer dans la session
-            const res = await fetch(`http://localhost:8080/api/${userName}/records/select/${recordId}`, {
-                method: "POST",
-                credentials: "include",
-            });
-
-            if (!res.ok) throw new Error("Impossible de sélectionner le dossier");
-
-            // Met à jour l'état local pour indiquer le dossier courant
-            setCurrentRecordId(recordId);
-
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
     return (
         <div className="p-10">
             <p className="mt-10 font-montserrat text-2xl font-bold text-[#0551ab]">
@@ -159,8 +144,8 @@ export default function MesAides() {
                 {currentRecordId}
             </div>
             <div>
-                {currentDossier ? (
-                    <p>Dossier courant : {currentDossier}</p>
+                {currentRecordId ? (
+                    <p>Dossier courant : {currentRecordId}</p>
                 ) : (
                     <p>Aucun dossier sélectionné</p>
                 )}
@@ -176,14 +161,16 @@ export default function MesAides() {
          Liste des dossiers
         ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 text-black">
                     {dossiers.map((dossier) =>{
                         return(
-
-                            <Link key={dossier.id} href={`/fil?recordId=${dossier.id}`}>
+                            <Link key={dossier.id} href={`/resume`}>
                         <div
                             key={dossier.id}
-                            onClick={() => selectDossier(dossier.id)}
+                            onClick={() => {
+                                localStorage.setItem('activeRecordId', dossier.id.toString());
+                            }
+                        }
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
                             >
                             {/* image plus tard depuis backend */}
@@ -193,7 +180,7 @@ export default function MesAides() {
 
                             <div className="ml-auto">
                                 {userName && dossier.admin === userName && (
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={(e) => {
+                                <button type="button" className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform" onClick={(e) => {
                                     e.preventDefault(); // empêche la navigation
                                     e.stopPropagation(); // empêche le click parent
                                     setDossierToDelete(dossier);}}>
