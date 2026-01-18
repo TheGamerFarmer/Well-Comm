@@ -1,9 +1,6 @@
-/**
- * Logique de communication avec le backend pour les fils de transmission
- */
-
 import { API_BASE_URL } from "@/config";
 
+export const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
 export enum Permission {
     SEND_MESSAGE = "SEND_MESSAGE",

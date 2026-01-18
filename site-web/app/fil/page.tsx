@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useRef, useEffect, useState, Suspense} from "react";
+import React, {useRef, useEffect, useState, Suspense, useMemo} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
@@ -100,8 +100,10 @@ function FilContent() {
         }
     }, [permissions, selectedCategories, toggleCategory]);
 
-    const sortedMessages = [...messages].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+    const sortedMessages = useMemo(() =>
+        [...messages].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        ), [messages]
     );
 
     const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
@@ -309,11 +311,13 @@ function FilContent() {
                                                         <div className="flex items-center gap-2">
                                                             {isDeleted && (
                                                                 <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                                                 </svg>
                                                             )}
-                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? 'italic opacity-80' : ''}`}>
-                                                                {msg.content}
+                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? "italic opacity-80" : ""}`}>
+                                                                {isDeleted
+                                                                    ? msg.content.replace(/\u200B/g, "")
+                                                                    : msg.content}
                                                             </p>
                                                         </div>
                                                     </>
@@ -381,7 +385,7 @@ function FilContent() {
                             <div className="relative mb-10 text-black flex-none">
                                 <input
                                     type="text"
-                                    placeholder="Recherche par titre..."
+                                    placeholder="Recherche par titre"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
@@ -410,7 +414,12 @@ function FilContent() {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-black text-xl mb-1">{channel.category} | {capitalizeWords(channel.title)}</h3>
+                                                <h3 className="font-bold text-black text-xl mb-1">
+                                                    {channel.category === "Maisonterrain"
+                                                        ? "Maison/Terrain"
+                                                        : channel.category
+                                                    } | {capitalizeWords(channel.title)}
+                                                </h3>
                                                 <p className="text-black opacity-80 font-medium line-clamp-1 italic text-sm">
                                                     {channel.lastMessageAuthor ? (<><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>) : "Nouveau fil"}
                                                 </p>

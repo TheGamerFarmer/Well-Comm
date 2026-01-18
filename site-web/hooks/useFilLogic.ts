@@ -13,10 +13,10 @@ import {
     deleteMessage,
     FilResponse,
     DossierResponse,
-    MessageResponse, updateMessage
+    MessageResponse,
+    updateMessage,
+    categories
 } from "@/functions/fil-API";
-
-const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
 interface SockJSOptions extends SockJS.Options {
     withCredentials?: boolean;
@@ -24,38 +24,48 @@ interface SockJSOptions extends SockJS.Options {
 
 export function useFilLogic() {
 
-    // --- ÉTATS DES DONNÉES ---
+    // profil
     const [currentUserName, setCurrentUserName] = useState<string>("");
+
+    // record & channel
     const [records, setRecords] = useState<DossierResponse[]>([]);
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
     const [channels, setChannels] = useState<FilResponse[]>([]);
-    const [messages, setMessages] = useState<MessageResponse[]>([]);
 
-    // --- ÉTATS UI ---
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    // messages
+    const [messages, setMessages] = useState<MessageResponse[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<FilResponse | null>(null);
-    const [newMessage, setNewMessage] = useState("");
-    const [showArchiveModal, setShowArchiveModal] = useState(false);
-    const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
-    const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
-    const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
     const stompClient = useRef<Client | null>(null);
 
-    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
-    const [editingContent, setEditingContent] = useState("");
+    // filter & search
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    // --- ÉTAT FORMULAIRE ---
+    // channel creation
+    const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         category: mapCategoryToEnum("Santé"),
         title: "",
         message: ""
     });
 
+    // send message
+    const [newMessage, setNewMessage] = useState("");
 
-    // 1. Initialisation (Utilisateur + Dossiers)
+    // edit message
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+    const [editingContent, setEditingContent] = useState("");
+
+    // archiving
+    const [showArchiveModal, setShowArchiveModal] = useState(false);
+    const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
+
+    // delete message
+    const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
+
+
     useEffect(() => {
         let isMounted = true;
         const init = async () => {
@@ -70,7 +80,6 @@ export function useFilLogic() {
         return () => { isMounted = false; };
     }, []);
 
-    // 2. Chargement des fils (Multi-catégories)
     const loadChannels = useCallback(async () => {
         if (!currentUserName || !activeRecordId) return;
 
@@ -91,7 +100,6 @@ export function useFilLogic() {
         loadChannels().then();
     }, [loadChannels]);
 
-    // 3. Chargement des messages quand un fil est sélectionné
     useEffect(() => {
         let ignore = false;
         const loadMessages = async () => {
@@ -110,7 +118,6 @@ export function useFilLogic() {
     useEffect(() => {
         if (!selectedChannel) return;
 
-        // Configuration du client STOMP
         const options: SockJSOptions = {
             sessionId: 10,
             transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
@@ -150,13 +157,12 @@ export function useFilLogic() {
         };
     }, [selectedChannel]);
 
-    // --- ACTIONS ---
 
-    const toggleCategory = (category: string) => {
+    const toggleCategory = useCallback((category: string) => {
         setSelectedCategories((prev) =>
             prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
         );
-    };
+    }, []);
 
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -184,7 +190,6 @@ export function useFilLogic() {
 
         const success = await deleteMessage(currentUserName, activeRecordId, selectedChannel.id, messageId);
         if (success) {
-            // Pas besoin de setMessages ici, le WebSocket s'en chargera pour tout le monde
             console.log("Message envoyé pour suppression");
         }
     };
@@ -195,7 +200,6 @@ export function useFilLogic() {
         if (success) setEditingMessageId(null);
     };
 
-    // Filtrage local (Recherche par titre)
     const filteredChannels = channels.filter(c =>
         c.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -213,17 +217,23 @@ export function useFilLogic() {
 
 
     return {
-        // Données & Listes
-        categories, records, channels: filteredChannels, currentUserName, messages,channelToArchive,
-        // Navigation & Filtres
-        activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
-        searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,setShowArchiveModal,setChannelToArchive,
-        // Modale & Formulaire
-        isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,showArchiveModal,
-        // Chat
-        newMessage, setNewMessage, handleSendChatMessage,showDeleteMessageModal,setShowDeleteMessageModal,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
+        // profil
+        currentUserName,
+        // record & channel
+        records, activeRecordId, setActiveRecordId, channels: filteredChannels, categories,
+        // messages
+        messages, selectedChannel, setSelectedChannel,
+        // filter & search
+        selectedCategories, toggleCategory, searchQuery, setSearchQuery, isLoading,
+        // channel creation
+        isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
+        // send message
+        newMessage, setNewMessage, handleSendChatMessage,
+        // edit message
         editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit,
-        // Actions
-        confirmArchive
+        // archiving
+        showArchiveModal, setShowArchiveModal, channelToArchive, setChannelToArchive, confirmArchive,
+        // delete message
+        showDeleteMessageModal, setShowDeleteMessageModal, messageToDelete, setMessageToDelete, handleDeleteChatMessage,
     };
 }
