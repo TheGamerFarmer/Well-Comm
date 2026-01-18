@@ -146,6 +146,11 @@ export default function ResumePage() {
         ? categories.filter(c => c === "Santé") // ne montre que celle-ci
         : categories; // sinon toutes les catégories
 
+    const filteredChannels = channels.filter(channel =>
+        channel.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        channel.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className={`w-full p-4 md:p-10 font-sans bg-[#f1f2f2] flex flex-col ${selectedChannel ? "h-screen overflow-hidden" : "min-h-screen"}`}>
 
@@ -429,7 +434,7 @@ export default function ResumePage() {
                                     <div className="flex justify-center py-20 text-[#26b3a9] font-medium animate-pulse">Chargement...</div>
                                 ) : channels.length === 0 ? (
                                     <div className="text-center py-20 text-gray-400 font-medium">Aucun fil trouvé dans ces catégories.</div>
-                                ) : channels.map(channel => (
+                                ) : filteredChannels.map(channel => (
                                     <div
                                         key={channel.id}
                                         onClick={() => setSelectedChannel(channel)}
