@@ -1,38 +1,54 @@
 "use client";
 
-import React, {useRef, useEffect, useState} from "react";
+import React, {useRef, useEffect, useState, Suspense, useMemo} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
 import Image from "next/image";
+import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-
-
-export type RecordAccount = {
-    record: { id: number };
-    title: string;
-    permissions: Permission[];
-};
-
-export default function FilDeTransmission() {
+function FilContent() {
     const {
         categories, records, channels, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
         newMessage, setNewMessage, handleSendChatMessage,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
-        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal
+        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal,
+        editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const recordIdFromUrl = searchParams.get('recordId');
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
     useEffect(() => {
+        if (recordIdFromUrl) {
+            const id = Number(recordIdFromUrl);
+            if (!isNaN(id)) {
+                setActiveRecordId(id);
+                localStorage.setItem('lastActiveRecordId', id.toString());
+                router.replace(pathname);
+            }
+        }
+        else {
+            const savedId = localStorage.getItem('lastActiveRecordId');
+            if (savedId) {
+                const id = Number(savedId);
+                if (!isNaN(id) && activeRecordId !== id) {
+                    setActiveRecordId(id);
+                }
+            }
+        }
+    }, [recordIdFromUrl, setActiveRecordId, pathname, router, activeRecordId]);
+
+    useEffect(() => {
         if (!currentUserName || !activeRecordId) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setRecordAccount(null);
             return;
         }
@@ -46,6 +62,7 @@ export default function FilDeTransmission() {
             });
     }, [currentUserName, activeRecordId]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
 
     useEffect(() => {
@@ -75,8 +92,18 @@ export default function FilDeTransmission() {
         });
     };
 
-    const sortedMessages = [...messages].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+    useEffect(() => {
+        if (permissions.includes(Permission.IS_MEDECIN)) {
+            if (!selectedCategories.includes("Santé")) {
+                toggleCategory("Santé");
+            }
+        }
+    }, [permissions, selectedCategories, toggleCategory]);
+
+    const sortedMessages = useMemo(() =>
+        [...messages].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        ), [messages]
     );
 
     const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
@@ -86,7 +113,7 @@ export default function FilDeTransmission() {
     return (
         <div className={`w-full p-4 md:p-10 font-sans bg-[#f1f2f2] flex flex-col ${selectedChannel ? "h-screen overflow-hidden" : "min-h-screen"}`}>
 
-            {/* --- HEADER (flex-none) --- */}
+            {/* --- HEADER --- */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-6 gap-6 w-full pt-2 flex-none">
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold text-[#0551ab]">Fil de transmission</h1>
@@ -106,11 +133,16 @@ export default function FilDeTransmission() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
-                    <div className="bg-[#f27474] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
+                    <div className="bg-[#f67a7a] text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-md h-14 w-full sm:w-[450px]">
                         <span className="font-bold text-lg whitespace-nowrap tracking-tight">L&#39;aidé</span>
                         <select
                             value={activeRecordId || ""}
-                            onChange={(e) => setActiveRecordId(Number(e.target.value))}
+                            onChange={(e) => {
+                                const newId = Number(e.target.value);
+                                setActiveRecordId(newId);
+                                localStorage.setItem('lastActiveRecordId', newId.toString());
+                                setSelectedChannel(null);
+                            }}
                             className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
                         >
                             {records.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
@@ -137,7 +169,7 @@ export default function FilDeTransmission() {
 
             {/* --- ZONE DE CONTENU VARIABLE --- */}
             <div className={`flex flex-col ${selectedChannel ? "flex-1 min-h-0 overflow-hidden" : ""}`}>
-            {selectedChannel ? (
+                {selectedChannel ? (
                     /* VUE DISCUSSION */
                     <div className="bg-white rounded-[2.5rem] shadow-sm flex-1 border border-gray-100 flex flex-col overflow-hidden min-h-0">
 
@@ -158,23 +190,26 @@ export default function FilDeTransmission() {
                             <div className="flex flex-col items-end justify-between self-stretch py-1">
                                 <span className="px-2 py-2 font-bold">{new Date(selectedChannel.creationDate).toLocaleDateString()}</span>
                                 {permissions.includes(Permission.CLOSE_CHANNEL) &&(
-                                <Button
-                                    variant="archiver" link={""} onClick={() => {
-                                    setChannelToArchive(selectedChannel);
-                                    setShowArchiveModal(true);
-                                }}>
-                                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="currentColor"/>
-                                    </svg>
-                                    Archiver
-                                </Button>)}
+                                    <Button
+                                        variant="archiver" link={""} onClick={() => {
+                                        setChannelToArchive(selectedChannel);
+                                        setShowArchiveModal(true);
+                                    }}>
+                                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="currentColor"/>
+                                        </svg>
+                                        Archiver
+                                    </Button>)}
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
-                                const isDeleted = msg.isDeleted || msg.content === "Ce message a été supprimé\u200B";
+
+                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isEditing = editingMessageId === msg.id;
+
                                 const msgDate = new Date(msg.date);
                                 const prevMsg = index > 0 ? sortedMessages[index - 1] : null;
                                 const prevDate = prevMsg ? new Date(prevMsg.date) : null;
@@ -199,38 +234,95 @@ export default function FilDeTransmission() {
                                             </div>
                                         )}
                                         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                            {isMe && !isDeleted && permissions.includes(Permission.DELETE_MESSAGE) && (<Image
-                                                src="/images/icons/icons-delete.svg"
-                                                alt="delete"
-                                                width={24}
-                                                height={24}
-                                                priority
-                                                className="mb-2 cursor-pointer"
-                                                onClick={() => {
-                                                    setMessageToDelete(msg.id);
-                                                    setShowDeleteMessageModal(true);
-                                                }}
-                                            />)}
+
+                                            {isMe && !isDeleted && !isEditing && (
+                                                <div className="flex gap-4 mb-2 bg-gray-200/50 rounded-full px-4 py-1.5">
+                                                    {permissions.includes(Permission.MODIFY_MESSAGE) && (
+                                                        <Image
+                                                            src="/images/icons/icons-modify.svg"
+                                                            alt="modify"
+                                                            width={24}
+                                                            height={24}
+                                                            priority
+                                                            className="cursor-pointer transition-transform duration-200 hover:scale-125 hover:opacity-80"
+                                                            onClick={() => {
+                                                                setEditingMessageId(msg.id);
+                                                                setEditingContent(msg.content);
+                                                            }}
+                                                        />
+                                                    )}
+
+                                                    {permissions.includes(Permission.DELETE_MESSAGE) && (
+                                                        <Image
+                                                            src="/images/icons/icons-delete.svg"
+                                                            alt="delete"
+                                                            width={24}
+                                                            height={24}
+                                                            priority
+                                                            className="cursor-pointer transition-transform duration-200 hover:scale-125 hover:opacity-80"
+                                                            onClick={() => {
+                                                                setMessageToDelete(msg.id);
+                                                                setShowDeleteMessageModal(true);
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Bulle de Message */}
                                             <div className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-sm relative ${bubbleStyles}`}>
-                                                {!isMe && !isDeleted && (
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <span className="font-black text-xs text-[#26b3a9]">{msg.authorUserName}</span>
-                                                        <span className="bg-gray-100 text-gray-500 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">
-                                                            {msg.authorTitle}
-                                                        </span>
+
+                                                {isEditing ? (
+                                                    <div className="flex flex-col gap-3 min-w-[200px] md:min-w-[300px]">
+                                                        <textarea
+                                                            className="w-full p-3 text-black rounded-xl border-2 border-blue-200 focus:border-[#0551ab] outline-none resize-none font-semibold text-sm md:text-base bg-white"
+                                                            value={editingContent}
+                                                            onChange={(e) => setEditingContent(e.target.value)}
+                                                            autoFocus
+                                                            rows={2}
+                                                        />
+                                                        <div className="flex justify-end gap-3">
+                                                            <button
+                                                                className="text-xs md:text-sm font-bold text-gray-100 hover:text-white underline"
+                                                                onClick={() => setEditingMessageId(null)}
+                                                            >
+                                                                Annuler
+                                                            </button>
+                                                            <button
+                                                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-full text-xs md:text-sm font-bold shadow-sm transition-colors"
+                                                                onClick={() => handleSaveEdit(msg.id)}
+                                                            >
+                                                                Enregistrer
+                                                            </button>
+                                                        </div>
                                                     </div>
+                                                ) : (
+                                                    /* MODE AFFICHAGE CLASSIQUE */
+                                                    <>
+                                                        {!isMe && !isDeleted && (
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <span className="font-black text-xs text-[#26b3a9]">{msg.authorUserName}</span>
+                                                                <span className="bg-gray-100 text-gray-500 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">
+                                                                    {msg.authorTitle}
+                                                                </span>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex items-center gap-2">
+                                                            {isDeleted && (
+                                                                <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                                                </svg>
+                                                            )}
+                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? "italic opacity-80" : ""}`}>
+                                                                {isDeleted
+                                                                    ? msg.content.replace(/\u200B/g, "")
+                                                                    : msg.content}
+                                                            </p>
+                                                        </div>
+                                                    </>
                                                 )}
 
-                                                <div className="flex items-center gap-2">
-                                                    {isDeleted && (
-                                                        <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                                        </svg>
-                                                    )}
-                                                    <p className={`text-sm md:text-base font-semibold leading-relaxed ${isDeleted ? 'italic opacity-80' : ''}`}>
-                                                        {msg.content}
-                                                    </p>
-                                                </div>
                                                 <div className={`text-[10px] mt-3 flex items-center gap-1 font-bold ${isMe && !isDeleted ? 'text-blue-200 justify-end' : 'text-gray-400'}`}>
                                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                     {new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -243,46 +335,48 @@ export default function FilDeTransmission() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Zone de saisie (flex-none) */}
-                        {permissions.includes(Permission.SEND_MESSAGE) &&(
-                        <div className="p-4 md:p-8 bg-white border-t w-full flex-none">
-                            <form onSubmit={handleSendChatMessage} className="w-full flex items-center gap-2 md:gap-4">
-                                <div className="flex-1">
-                                    <input
-                                        type="text"
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Ecrivez votre message ici"
-                                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base"
-                                    />
-                                </div>
-                                <div className="w-auto ">
-                                    <Button variant="validate" type="submit" link={""}>Envoyer</Button>
-                                </div>
-                            </form>
-                        </div>)}
+                        {permissions.includes(Permission.SEND_MESSAGE) && !editingMessageId && (
+                            <div className="p-4 md:p-8 bg-white border-t w-full flex-none">
+                                <form onSubmit={handleSendChatMessage} className="w-full flex items-center gap-2 md:gap-4">
+                                    <div className="flex-1">
+                                        <input
+                                            type="text"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Ecrivez votre message ici"
+                                            className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base"
+                                        />
+                                    </div>
+                                    <div className="w-auto ">
+                                        <Button variant="validate" type="submit" link={""}>Envoyer</Button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     /* VUE LISTE */
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                        {/* Navigation Catégories (flex-none) */}
                         <div className="bg-white p-5 rounded-2xl shadow-sm mb-8 flex flex-wrap justify-between gap-4 w-full border border-gray-100 flex-none">
                             {filteredCategories.map((cat) => (
                                 <button
                                     key={cat}
-                                    onClick={() => toggleCategory(cat)}
-                                    className={` flex-1 min-w-[130px] py-3 hover:cursor-pointer rounded-xl border-2 font-bold text-lg transition-all ${
+                                    onClick={() => {
+                                        // Si médecin, on empêche de décocher "Santé"
+                                        if (permissions.includes(Permission.IS_MEDECIN)) return;
+                                        toggleCategory(cat);
+                                    }}
+                                    className={` flex-1 min-w-[130px] py-3 rounded-xl border-2 font-bold text-lg transition-all ${
                                         selectedCategories.includes(cat)
                                             ? "bg-[#26b3a9] text-white border-[#26b3a9]"
                                             : "text-[#26b3a9] border-[#26b3a9] hover:bg-gray-50 shadow-sm"
-                                    }`}
+                                    } ${permissions.includes(Permission.IS_MEDECIN) ? "cursor-default" : "hover:cursor-pointer"}`}
                                 >
                                     {cat}
                                 </button>
                             ))}
                         </div>
 
-                        {/* Liste des fils (flex-1 + scroll interne) */}
                         <div className="bg-white rounded-2xl md:rounded-[2.5rem] shadow-sm p-4 md:p-10 border border-gray-50 flex flex-col">
                             <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight flex-none">
                                 {selectedCategories.length === 0 || selectedCategories.length === categories.length ? "Toutes les transmissions" : selectedCategories.join(" + ")}
@@ -291,7 +385,7 @@ export default function FilDeTransmission() {
                             <div className="relative mb-10 text-black flex-none">
                                 <input
                                     type="text"
-                                    placeholder="Recherche par titre..."
+                                    placeholder="Recherche par titre"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
@@ -320,7 +414,12 @@ export default function FilDeTransmission() {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-black text-xl mb-1">{channel.category} | {capitalizeWords(channel.title)}</h3>
+                                                <h3 className="font-bold text-black text-xl mb-1">
+                                                    {channel.category === "Maisonterrain"
+                                                        ? "Maison/Terrain"
+                                                        : channel.category
+                                                    } | {capitalizeWords(channel.title)}
+                                                </h3>
                                                 <p className="text-black opacity-80 font-medium line-clamp-1 italic text-sm">
                                                     {channel.lastMessageAuthor ? (<><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>) : "Nouveau fil"}
                                                 </p>
@@ -328,19 +427,20 @@ export default function FilDeTransmission() {
                                         </div>
                                         <div className="flex flex-col items-end gap-3">
                                             <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
-                                            <button
-                                                className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setChannelToArchive(channel);
-                                                    setShowArchiveModal(true);
-                                                }}
-                                            >
-                                                {permissions.includes(Permission.CLOSE_CHANNEL) &&(
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
-                                                </svg>)}
-                                            </button>
+                                            {permissions.includes(Permission.CLOSE_CHANNEL) && (
+                                                <button
+                                                    className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setChannelToArchive(channel);
+                                                        setShowArchiveModal(true);
+                                                    }}
+                                                >
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h16.5a2.25 2.25 0 0 1 2.25 2.25v1.5A2.25 2.25 0 0 1 21 8.873V9.9a8.252 8.252 0 0 0-1.5-.59V9h-15v8.25a2.25 2.25 0 0 0 2.25 2.25h2.56A8.19 8.19 0 0 0 9.9 21H6.75A3.75 3.75 0 0 1 3 17.25V8.873A2.25 2.25 0 0 1 1.5 6.75v-1.5zm2.25-.75a.75.75 0 0 0-.75.75v1.5a.75.75 0 0 0 .75.75h16.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75H3.75zM17.25 24a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5zm-1.344-9.594L14.56 15.75h2.315A4.125 4.125 0 0 1 21 19.875v.375a.75.75 0 1 1-1.5 0v-.375a2.625 2.625 0 0 0-2.625-2.625H14.56l1.346 1.344a.75.75 0 0 1-1.062 1.062l-2.628-2.631a.75.75 0 0 1 .003-1.057l2.625-2.626a.75.75 0 0 1 1.062 1.063" fill="#0551AB"/>
+                                                    </svg>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -355,22 +455,13 @@ export default function FilDeTransmission() {
                 <form className="mx-auto max-w-2xl" onSubmit={handleCreateSubmit}>
                     <h2 className="text-xl font-bold text-[#0551ab] mb-6 uppercase">Créer une transmission</h2>
                     <label className="text-sm font-bold text-[#727272] mb-2 block ">Catégorie</label>
-                    {!permissions.includes(Permission.IS_MEDECIN) &&(
                     <select
                         className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                     >
                         {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
-                    </select>)}
-                    {permissions.includes(Permission.IS_MEDECIN) &&(
-                        <select
-                            className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
-                            value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        >
-                            {filteredCategories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
-                        </select>)}
+                    </select>
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Sujet du fil</label>
                     <input
                         type="text"
@@ -393,76 +484,53 @@ export default function FilDeTransmission() {
                 </form>
             </Modal>
 
+            {/* Modal Archivage */}
             {showArchiveModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowArchiveModal(false)}>
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-center mb-4">
-                            <Image
-                                src="/images/icons/attention.svg"
-                                alt="attention"
-                                width={48}
-                                height={48}
-                                priority
-                            />
+                            <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
                         </div>
-                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
-                            Voulez-vous archiver ce fil?
-                        </h2>
-                        <p className="text-center text-gray-700 mb-6">
-                            Ce fil sera archivé définitivement
-                        </p>
+                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous archiver ce fil?</h2>
+                        <p className="text-center text-gray-700 mb-6">Ce fil sera archivé définitivement</p>
                         <div className="flex justify-center gap-4">
-
-                            <Button variant={"cancel"} link={""} onClickAction={() => setShowArchiveModal(false)}>
-                                Non
-                            </Button>
-
+                            <Button variant={"cancel"} link={""} onClickAction={() => setShowArchiveModal(false)}>Non</Button>
                             <Button variant={"validate"} link={""}  onClickAction={() => {
                                 confirmArchive().then();
                                 setSelectedChannel(null);
-                            }}>
-                                Oui
-                            </Button>
+                            }}>Oui</Button>
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* Modal Suppression */}
             {showDeleteMessageModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteMessageModal(false)}>
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-center mb-4">
-                            <Image
-                                src="/images/icons/attention.svg"
-                                alt="attention"
-                                width={48}
-                                height={48}
-                                priority
-                            />
+                            <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
                         </div>
-                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">
-                            Voulez-vous supprimer ce message?
-                        </h2>
-                        <p className="text-center text-gray-700 mb-6">
-                            Ce message sera supprimé définitivement
-                        </p>
+                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous supprimer ce message?</h2>
+                        <p className="text-center text-gray-700 mb-6">Ce message sera remplacé par une mention de suppression.</p>
                         <div className="flex justify-center gap-4">
-
-                            <Button variant={"cancel"} link={""} onClickAction={() => setShowDeleteMessageModal(false)}>
-                                Non
-                            </Button>
-
+                            <Button variant={"cancel"} link={""} onClickAction={() => setShowDeleteMessageModal(false)}>Non</Button>
                             <Button variant={"validate"} link={""}  onClickAction={() => {
                                 handleDeleteChatMessage(messageToDelete).then()
                                 setShowDeleteMessageModal(false)
-                            }}>
-                                Oui
-                            </Button>
+                            }}>Oui</Button>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
+    );
+}
+
+export default function FilDeTransmissionPage() {
+    return (
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
+            <FilContent />
+        </Suspense>
     );
 }

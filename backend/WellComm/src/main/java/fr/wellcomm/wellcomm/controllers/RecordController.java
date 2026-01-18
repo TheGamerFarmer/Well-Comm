@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
+import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
+import jakarta.servlet.http.HttpSession;
+import fr.wellcomm.wellcomm.services.RecordService;
+import fr.wellcomm.wellcomm.repositories.RecordRepository;
+import fr.wellcomm.wellcomm.entities.Session;
+import fr.wellcomm.wellcomm.repositories.SessionRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+
 
 @RestController
 @RequestMapping("/api/{userName}/records")
@@ -25,7 +35,10 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
-
+    private final ChannelService ChannelService;
+    private final ChannelService channelService;
+    private final RecordRepository recordRepository;
+    private final SessionRepository sessionRepository;
 
     @Getter
     @Setter
@@ -77,7 +90,7 @@ public class RecordController {
         return ResponseEntity.ok(newRecord);
     }
 
-    @PostMapping("/{recordId}/channels/{category}")
+    @GetMapping("/{recordId}/channels/{category}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable Long recordId,
@@ -170,7 +183,7 @@ public class RecordController {
     }
 
     @DeleteMapping("/{recordId}")
-    @PreAuthorize("#userName == authentication.name and @securityService.isAdmin()")
+    @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
                                               @PathVariable Long recordId) {
         boolean deleted = recordService.deleteRecord(recordId);
@@ -180,4 +193,41 @@ public class RecordController {
             return ResponseEntity.notFound().build(); // 404
         }
     }
+    //création d'une session quand on selectionne un dossier
+    @PostMapping("/select/{recordId}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> selectRecord(
+            @PathVariable String userName,
+            @CookieValue("token") String token,
+            @PathVariable Long recordId
+    ) {
+          // Vérifie que la session existe pour ce token
+          Session session = sessionRepository.findById(token)
+                  .orElseThrow(() -> new RuntimeException("Session invalide"));
+
+
+          // Enregistre le recordId sélectionné
+          session.setCurrentRecordId(recordId);
+          sessionRepository.save(session);
+          return ResponseEntity.ok().build();
+      }
+
+    //return current-record
+    @GetMapping("/current-record")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> getCurrentRecord(
+            @PathVariable String userName,
+            @CookieValue("token") String token
+    ) {
+          // Récupère la session par le token
+          Session session = sessionRepository.findById(token)
+                            .orElseThrow(() -> new RuntimeException("Session invalide"));
+
+          Long currentRecordId = session.getCurrentRecordId();
+          if (currentRecordId == null) {
+              return ResponseEntity.noContent().build(); // 204 si aucun dossier sélectionné
+          }
+
+          return ResponseEntity.ok(currentRecordId); // Retourne juste l'ID du dossier courant
+      }
 }

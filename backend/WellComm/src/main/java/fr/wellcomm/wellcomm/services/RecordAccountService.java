@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Date;
 
 @Service
 @Transactional
@@ -17,6 +19,11 @@ import org.springframework.stereotype.Service;
 public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
     private final AccountRepository accountRepository;
+
+
+    public List<RecordAccount> getByRecordId(Long recordId) {
+        return recordAccountRepository.findByRecordId(recordId);
+    }
 
     public RecordAccount getReccordAccount(long id) {
         return recordAccountRepository.findById(id).orElse(null);
@@ -36,6 +43,21 @@ public class RecordAccountService {
         return recordAccount;
     }
 
+    //update role record_account
+    public void updateRoleRecordAccount(String accountUserName, Long recordId, String role) {
+        RecordAccount recordAccount =
+                recordAccountRepository
+                .findByAccountUserNameAndRecordId(accountUserName, recordId)
+                .orElseThrow(() -> new RuntimeException("Access not found"));
+
+        // Mise à jour du rôle
+        recordAccount.setTitle(role);
+
+        // Sauvegarde
+        recordAccountRepository.save(recordAccount);
+    }
+
+    //à comparer avec la fonction dans account
     public RecordAccount getRecordAccount(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
     }
