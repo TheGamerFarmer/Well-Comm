@@ -8,6 +8,8 @@ import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
 
+import { useRouter } from "next/navigation";
+import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 
 type Dossier = {
     id: number;
@@ -28,6 +30,10 @@ export default function MesAides() {
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const router = useRouter();
+    const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
+
+    const { currentDossier, loading } = useCurrentDossier(userName);
 
     /* =======================
        Chargement des dossiers
@@ -82,7 +88,6 @@ export default function MesAides() {
                 { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
             ]);
 
-
             setName("");
             setFile(null);
             setIsOpen(false);
@@ -98,7 +103,7 @@ export default function MesAides() {
         const files = e.target.files;
         setFile(files && files.length > 0 ? files[0] : null);
     };
-
+//supprimer un dossier
     const handleDelete = async (id: number) => {
         if (!id) return;
 
@@ -123,8 +128,24 @@ export default function MesAides() {
         }
     };
 
+    //Permet de selectionner un dossier et d'enregistrer dans une session l'ID du dossier
+    const selectDossier = async (recordId: number) => {
+        try {
+            // On envoie le recordId au backend pour l'enregistrer dans la session
+            const res = await fetch(`http://localhost:8080/api/${userName}/records/select/${recordId}`, {
+                method: "POST",
+                credentials: "include",
+            });
 
+            if (!res.ok) throw new Error("Impossible de sélectionner le dossier");
 
+            // Met à jour l'état local pour indiquer le dossier courant
+            setCurrentRecordId(recordId);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <div className="p-10">
@@ -133,6 +154,17 @@ export default function MesAides() {
             </p>
 
             <FilArianne />
+
+            <div className="text-black">
+                {currentRecordId}
+            </div>
+            <div>
+                {currentDossier ? (
+                    <p>Dossier courant : {currentDossier}</p>
+                ) : (
+                    <p>Aucun dossier sélectionné</p>
+                )}
+            </div>
 
             <div className="flex justify-end my-4">
                 <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
@@ -151,8 +183,9 @@ export default function MesAides() {
                             <Link key={dossier.id} href={`/fil?recordId=${dossier.id}`}>
                         <div
                             key={dossier.id}
-                            className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
-                        >
+                            onClick={() => selectDossier(dossier.id)}
+                            className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
+                            >
                             {/* image plus tard depuis backend */}
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
 

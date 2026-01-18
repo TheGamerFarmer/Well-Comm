@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "record_account")
@@ -28,6 +30,12 @@ public class RecordAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "permission_name")
     private List<Permission> permissions;
+    @Column(name = "date_creation",nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+        public void onCreate() {
+            this.createdAt = LocalDateTime.now();
+        }
 
     public RecordAccount(Account account, Record record, String title, List<Permission> permissions) {
         this.account = account;
