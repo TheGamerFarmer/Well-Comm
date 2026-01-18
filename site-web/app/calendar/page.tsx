@@ -1,7 +1,6 @@
 'use client';
 
 import FramagendaView from "@/components/FramagendaView";
-import {Button} from "@/components/ButtonMain";
 import React, {useState} from "react";
 
 export default function Calendar() {

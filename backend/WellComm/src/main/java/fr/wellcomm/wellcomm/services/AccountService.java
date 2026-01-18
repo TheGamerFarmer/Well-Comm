@@ -35,7 +35,7 @@ public class AccountService {
 
     public void addRecordAccount(Account account, @NotNull RecordAccount recordAccount) {
         recordAccount.setAccount(account);
-        recordAccountRepository.save(recordAccount);
+        recordAccount = recordAccountRepository.save(recordAccount);
         account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
     }

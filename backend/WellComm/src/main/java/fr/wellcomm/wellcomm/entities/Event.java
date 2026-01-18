@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.awt.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,19 +19,9 @@ public class Event {
     private LocalDateTime timeEnd;
     private String description;
     private String location;
-    private Color color;
+    private String color;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendar_id")
     @JsonIgnore
     private Calendar calendar;
-
-    public Event(String title, LocalDateTime start, LocalDateTime end, String description, String location, Color color, Calendar calendar) {
-        this.title = title;
-        this.timeStart = start;
-        this.timeEnd = end;
-        this.description = description;
-        this.location = location;
-        this.color = color;
-        this.calendar = calendar;
-    }
 }

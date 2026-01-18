@@ -46,11 +46,12 @@ public class RecordService {
 
     public Record createRecord(String name, String admin) {
         Record record = new Record(name, admin);
-        recordRepository.save(record);
+
+        record = recordRepository.save(record);
 
         Calendar calendar = calendarService.createCalendar(record);
         record.setCalendar(calendar);
-        recordRepository.save(record);
+        record = recordRepository.save(record);
 
         return record;
     }
@@ -66,6 +67,7 @@ public class RecordService {
         recordRepository.delete(recordOpt.get()); // cascade JPA supprime les enfants
         return true;
     }
+
     public void archiveChannel(Record record, long channelId) {
         OpenChannel channel = channelRepository.findById(channelId).orElse(null);
         if (channel == null)

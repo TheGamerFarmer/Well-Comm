@@ -1,15 +1,19 @@
+// noinspection CssUnusedSymbol
+
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import FullCalendar from '@fullcalendar/react';
+import { HexColorPicker } from "react-colorful";
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { EventSourceInput, EventClickArg } from '@fullcalendar/core';
 import { Button } from "@/components/ButtonMain";
+import {getCurrentUser} from "@/functions/fil-API";
+import {DateSelectArg, EventClickArg} from "@fullcalendar/core";
 
 interface MyEvent {
-    id: number;
+    id: string;
     title: string;
     start: string;
     end: string;
@@ -19,58 +23,107 @@ interface MyEvent {
 }
 
 export default function FramagendaView() {
-    const [events, setEvents] = useState<MyEvent[]>([]);
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState<any>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isOpen, toggleOpen] = useState(false);
+    const popover = useRef<HTMLDivElement>(null);
     let calendarViewState = "timeGridWeek";
 
-    // Variable de permission (à lier à ton auth)
+    const PRESET_COLORS = [
+        "#FF0000", "#FF7F00", "#FFD700", "#00FF00",
+        "#00FFFF", "#007FFF", "#0000FF", "#7F00FF",
+        "#FF00FF", "#FF1493", "#ADFF2F", "#00FA9A"
+    ];
+
+    const [userName, setUserName] = useState<string | null>(null);
+
     const hasPermission = true;
 
-    const calendarRef = useRef<any>(null);
+    const calendarRef = useRef<FullCalendar>(null);
 
-    const loadData = async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/TheGamerFarmer/records/5/calendar', {
-                method: "GET",
-                credentials: 'include',
-                cache: 'no-store'
-            });
-            const data: MyEvent[] = await response.json();
-            const formatted = data.map(evt => ({
-                ...evt,
-                start: formatIcsDate(evt.start),
-                end: formatIcsDate(evt.end),
-                location: evt.location,
-                description: evt.description,
-                color: evt.color,
-            }));
-            setEvents(formatted);
-        } catch (error) {
-            console.error("Erreur de fetch :", error);
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as Node;
+
+            if (isOpen) {
+                if (popover.current && !popover.current.contains(target)) {
+                    toggleOpen(false);
+                    return;
+                }
+            }
+
+            if (!isOpen && selectedEvent) {
+                if (target instanceof HTMLElement && target.id === "modal-overlay") {
+                    setSelectedEvent(null);
+                    setIsEditing(false);
+                    setIsCreating(false);
+                }
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isOpen, selectedEvent, isEditing, isCreating]);
+
+    useEffect(() => {
+        getCurrentUser().then(setUserName);
+    }, []);
+
+    const fetchEvents = useCallback(async (fetchInfo: { start: Date; end: Date }, successCallback: (events: MyEvent[]) => void, failureCallback: (error: Error) => void) => {
+        if (!userName) {
+            successCallback([]);
+            return;
         }
+
+        const start = fetchInfo.start.toISOString().split('.')[0];
+        const end = fetchInfo.end.toISOString().split('.')[0];
+
+        const response = await fetch(
+            `http://localhost:8080/api/${userName}/records/10/calendar/startDate/${start}/endDate/${end}`, {
+                credentials: 'include'
+            }
+        );
+
+        if (!response.ok) {
+            failureCallback(new Error())
+            return;
+        }
+
+        const data = await response.json();
+        successCallback(data);
+    }, [userName]);
+
+    const handleSelect = (selectInfo: DateSelectArg) => {
+        const newEvent: MyEvent = {
+            id: "",
+            title: "",
+            start: selectInfo.startStr.split('+')[0].split('Z')[0],
+            end: selectInfo.endStr.split('+')[0].split('Z')[0],
+            location: "",
+            description: "",
+            color: "#0551ab", // Couleur par défaut
+        };
+
+        setSelectedEvent(newEvent);
+        setEditData(newEvent);
+        setIsEditing(true);
+        setIsCreating(true); // On active le mode création
     };
 
-    const formatIcsDate = (icsDate: string) => {
-        if (!icsDate || icsDate.includes("-")) return icsDate;
-        return icsDate.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2}).*$/, "$1-$2-$3T$4:$5:$6");
-    };
-
-    useEffect(() => { loadData().then(); }, []);
-
-    const handleEventChange = async (changeInfo: any) => {
+    const handleEventChange = async (changeInfo: EventClickArg) => {
         if (!hasPermission) return;
 
         const updatedEvent = {
             id: changeInfo.event.id,
             title: changeInfo.event.title,
-            start: changeInfo.event.startStr,
-            end: changeInfo.event.endStr,
+            start: changeInfo.event.startStr.split('+')[0].split('Z')[0],
+            end: changeInfo.event.endStr.split('+')[0].split('Z')[0],
             ...changeInfo.event.extendedProps
         };
 
-        const response = await fetch(`http://localhost:8080/api/TheGamerFarmer/records/5/calendar`, {
+        const response = await fetch(`http://localhost:8080/api/${userName}/records/10/calendar`, {
             method: "PUT",
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -78,65 +131,68 @@ export default function FramagendaView() {
         });
 
         if (response.ok) {
-            await loadData();
+            calendarRef.current?.getApi().refetchEvents();
         }
     };
 
     const handleEventClick = (info: EventClickArg) => {
-        const eventData = {
+        const eventData: MyEvent = {
             id: info.event.id,
             title: info.event.title,
-            start: info.event.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            end: info.event.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            start: info.event.startStr.split('+')[0].split('Z')[0],
+            end: info.event.endStr.split('+')[0].split('Z')[0],
             color: info.event.backgroundColor,
-            ...info.event.extendedProps
+            location: info.event.extendedProps.location || "",
+            description: info.event.extendedProps.description || "",
         };
+
         setSelectedEvent(eventData);
         setEditData(eventData);
-        setIsEditing(false); // Toujours en lecture seule au clic
-    };
-
-    const syncEvent = async (event: MyEvent) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/TheGamerFarmer/records/5/calendar`, {
-                method: "PUT",
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(event)
-            });
-
-            if (response.ok) {
-                await loadData();
-            }
-        } catch (error) {
-            console.error("Erreur de synchro :", error);
-        }
+        setIsEditing(false);
     };
 
     const saveEdits = async () => {
-        await syncEvent(editData);
-        setIsEditing(false)
-        setEditData(null);
-    }
+        if (!editData || !userName)
+            return;
 
-    const deleteEvent = async () => {
-        const response = await fetch(`http://localhost:8080/api/TheGamerFarmer/records/5/calendar`, {
-            method: "DELETE",
+        setIsEditing(false);
+        setIsCreating(false);
+        setSelectedEvent(null);
+
+        const response = await fetch(`http://localhost:8080/api/${userName}/records/10/calendar/event` + (isCreating ? "" : `/${editData.id}`), {
+            method: isCreating ? "POST" : "PUT",
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify(editData)
         });
 
         if (response.ok) {
-            setIsEditing(false)
-            setEditData(null);
+            calendarRef.current?.getApi().refetchEvents();
         }
     }
+
+    const deleteEvent = async () => {
+        setIsEditing(false)
+        setEditData(null);
+
+        const response = await fetch(`http://localhost:8080/api/${userName}/records/10/calendar/event/${editData.id}`, {
+            method: "DELETE",
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            calendarRef.current?.getApi().refetchEvents();
+        }
+    }
+
+    const formatDisplayTime = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
         <div className="h-screen p-4 bg-white rounded-2xl">
             <FullCalendar
+                key={userName}
                 ref={calendarRef}
+                events={fetchEvents}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView={typeof window !== 'undefined' && window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek'}
 
@@ -147,11 +203,11 @@ export default function FramagendaView() {
                 }}
 
                 buttonText={{
-                    today:    "Aujourd'hui",
-                    month:    "Mois",
-                    week:     "Semaine",
-                    day:      "Jour",
-                    list:     "Liste"
+                    today: "Aujourd'hui",
+                    month: "Mois",
+                    week: "Semaine",
+                    day: "Jour",
+                    list: "Liste"
                 }}
 
                 windowResize={(arg) => {
@@ -168,6 +224,9 @@ export default function FramagendaView() {
                 slotMinTime="06:00:00"
                 slotMaxTime="22:00:00"
 
+                selectable={hasPermission}
+                select={handleSelect as any}
+
                 // --- CONFIGURATION MODIFICATION ---
                 editable={hasPermission} // Active le drag&drop et resize seulement si autorisé
                 eventStartEditable={hasPermission}
@@ -175,7 +234,6 @@ export default function FramagendaView() {
                 eventDrop={handleEventChange}   // Appelé après un glisser-déposer
                 eventResize={handleEventChange} // Appelé après avoir étiré l'évènement
 
-                events={events as EventSourceInput}
                 eventClick={handleEventClick}
                 locale="fr"
                 height="100%"
@@ -210,27 +268,69 @@ export default function FramagendaView() {
                 .fc-event-draggable:active {
                     cursor: grabbing !important;
                 }
+                
             `}</style>
 
-            {selectedEvent && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            {selectedEvent && editData && (
+                <div id="modal-overlay" className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-250 h-full max-h-175 overflow-hidden transform transition-all flex flex-col border border-gray-200">
 
-                        <div className="p-10 border-b border-gray-100 flex flex-col" style={{ borderLeft: `16px solid ${selectedEvent.color}` }}>
+                        <div className="p-6 border-b border-gray-100 flex flex-col" style={{ borderLeft: `16px solid ${editData.color}` }}>
                             {isEditing ? (
-                                <input
-                                    className="text-2xl font-black w-full border-b-4 border-black outline-none bg-gray-50 text-[#0551ab]"
-                                    value={editData.title}
-                                    onChange={(e) => setEditData({...editData, title: e.target.value})}
-                                />
+                                <div className="space-y-4">
+                                    <input
+                                        className="text-2xl font-black w-full border-b-4 border-black outline-none bg-gray-50 text-[#0551ab]"
+                                        placeholder="Titre de l'événement"
+                                        value={editData.title}
+                                        onChange={(e) => setEditData({...editData, title: e.target.value})}
+                                    />
+                                    <div className="flex flex-wrap gap-4 items-center text-sm">
+                                        <input type="datetime-local" className="border p-1 rounded" value={editData.start} onChange={(e) => setEditData({...editData, start: e.target.value})} />
+                                        <span>au</span>
+                                        <input type="datetime-local" className="border p-1 rounded" value={editData.end} onChange={(e) => setEditData({...editData, end: e.target.value})} />
+                                        <div
+                                            className="w-10 h-10 cursor-pointer border-1 border-gray-200 shadow-md transition-transform hover:scale-110"
+                                            style={{ backgroundColor: editData.color }}
+                                            onClick={() => toggleOpen(true)}
+                                        />
+
+                                        {isOpen && (
+                                            <div className="absolute z-[100] mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-gray-100 w-64" ref={popover}>
+                                                <HexColorPicker
+                                                    color={editData.color}
+                                                    onChange={(c) => setEditData({...editData, color: c})}
+                                                />
+
+                                                <div className="mt-4 grid grid-cols-6 gap-2">
+                                                    {PRESET_COLORS.map((c) => (
+                                                        <button
+                                                            key={c}
+                                                            className="w-6 h-6 border border-gray-200 transition-transform hover:scale-125"
+                                                            style={{ backgroundColor: c }}
+                                                            onClick={() => setEditData({...editData, color: c})}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                <input
+                                                    className="mt-4 w-full text-center font-mono text-xs p-1 bg-gray-50 rounded border uppercase"
+                                                    value={editData.color}
+                                                    onChange={(e) => setEditData({...editData, color: e.target.value})}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             ) : (
-                                <h3 className="text-2xl font-black text-[#0551ab] leading-tight">
-                                    {selectedEvent.title}
-                                </h3>
+                                <>
+                                    <h3 className="text-2xl font-black text-[#0551ab] leading-tight">
+                                        {selectedEvent.title || "(Sans titre)"}
+                                    </h3>
+                                    <p className="text-l text-gray-600 mt-2 font-medium">
+                                    🕒 {formatDisplayTime(selectedEvent.start)} — {formatDisplayTime(selectedEvent.end)}
+                                    </p>
+                                </>
                             )}
-                            <p className="text-l text-gray-600 mt-2 font-medium">
-                                🕒 {selectedEvent.start} — {selectedEvent.end}
-                            </p>
                         </div>
 
                         {/* Corps Modale */}
@@ -242,6 +342,7 @@ export default function FramagendaView() {
                                 {isEditing ? (
                                     <textarea
                                         className="w-full text-l border-4 border-gray-100 rounded-2xl p-6 min-h-[200px] outline-none focus:border-black"
+                                        placeholder="Description de l'événement"
                                         value={editData.description}
                                         onChange={(e) => setEditData({...editData, description: e.target.value})}
                                     />
@@ -259,6 +360,7 @@ export default function FramagendaView() {
                                 {isEditing ? (
                                     <input
                                         className="w-full text-l font-black border-b-4 border-gray-100 outline-none focus:border-black"
+                                        placeholder="Lieu de l'événement"
                                         value={editData.location}
                                         onChange={(e) => setEditData({...editData, location: e.target.value})}
                                     />
@@ -272,7 +374,7 @@ export default function FramagendaView() {
 
                         <div className="p-6 flex justify-between items-center mt-auto">
                             <div className="flex gap-6">
-                                {hasPermission && !isEditing && (
+                                {hasPermission && !isEditing && !isCreating && (
                                     <Button variant="primary" onClickAction={() => setIsEditing(true)}>
                                         Modifier
                                     </Button>
@@ -282,14 +384,18 @@ export default function FramagendaView() {
                                         Enregistrer
                                     </Button>
                                 )}
-                                {hasPermission && (
+                                {hasPermission && !isCreating && (
                                     <Button variant="cancel" onClickAction={() => deleteEvent()}>
                                         Supprimer
                                     </Button>
                                 )}
                             </div>
 
-                            <Button variant="cancel" onClickAction={() => { if (!isEditing) setSelectedEvent(null); setIsEditing(false); }}>
+                            <Button variant="cancel" onClickAction={() => {
+                                        if (!isEditing || isCreating)
+                                            setSelectedEvent(null);
+                                        setIsEditing(false);
+                                        setIsCreating(false)}}>
                                 {isEditing ? "ANNULER" : "FERMER"}
                             </Button>
                         </div>

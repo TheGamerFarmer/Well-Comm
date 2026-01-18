@@ -13,7 +13,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class CalendarController {
                 e.getTimeEnd().toString(),
                 e.getDescription(),
                 e.getLocation(),
-                e.getColor().toString());
+                e.getColor());
     }
 
     private void mapToEntity(@NotNull EventDTO dto, @NotNull Event e) {
@@ -53,7 +52,7 @@ public class CalendarController {
         e.setTimeEnd(LocalDateTime.parse(dto.end()));
         e.setDescription(dto.description());
         e.setLocation(dto.location());
-        e.setColor(Color.decode(dto.color()));
+        e.setColor(dto.color());
     }
 
     @GetMapping("/startDate/{timeStart}/endDate/{timeEnd}")
@@ -81,7 +80,7 @@ public class CalendarController {
 
         event.setCalendar(calendar);
         mapToEntity(dto, event);
-        eventRepository.save(event);
+        event = eventRepository.save(event);
 
         calendar.getEvents().put(event.getId(), event);
         calendarRepository.save(calendar);

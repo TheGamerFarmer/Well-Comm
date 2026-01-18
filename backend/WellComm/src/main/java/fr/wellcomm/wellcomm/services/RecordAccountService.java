@@ -28,7 +28,7 @@ public class RecordAccountService {
                 role.getTitre(),
                 role.getPermission());
 
-        recordAccountRepository.save(recordAccount);
+        recordAccount = recordAccountRepository.save(recordAccount);
         account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
         //record.getRecordAccounts().add(recordAccount);

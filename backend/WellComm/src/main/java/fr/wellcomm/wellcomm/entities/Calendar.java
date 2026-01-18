@@ -24,7 +24,6 @@ public class Calendar {
     private Map<Long, Event> events = new HashMap<>();
 
     public Calendar(@NotNull Record record) {
-        this.id = record.getId();
         this.record = record;
     }
 }
