@@ -148,7 +148,7 @@ export default function MesAides() {
                     {dossiers.map((dossier) =>{
                         return(
 
-                            <Link key={dossier.id} href={`/fil`}>
+                            <Link key={dossier.id} href={`/fil?recordId=${dossier.id}`}>
                         <div
                             key={dossier.id}
                             className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"

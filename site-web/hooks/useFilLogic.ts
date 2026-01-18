@@ -13,7 +13,7 @@ import {
     deleteMessage,
     FilResponse,
     DossierResponse,
-    MessageResponse
+    MessageResponse, updateMessage
 } from "@/functions/fil-API";
 
 const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
@@ -44,6 +44,9 @@ export function useFilLogic() {
     const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
     const stompClient = useRef<Client | null>(null);
 
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+    const [editingContent, setEditingContent] = useState("");
+
     // --- ÉTAT FORMULAIRE ---
     const [formData, setFormData] = useState({
         category: mapCategoryToEnum("Santé"),
@@ -61,9 +64,6 @@ export function useFilLogic() {
                 setCurrentUserName(user);
                 const userRecords = await getRecords(user);
                 setRecords(userRecords);
-                if (userRecords.length > 0) {
-                    setActiveRecordId(userRecords[0].id);
-                }
             }
         };
         init().then();
@@ -129,7 +129,7 @@ export function useFilLogic() {
                 if (data.type === 'UPDATE' || data.type === 'DELETE') {
                     setMessages((prev) => prev.map(m =>
                         m.id === data.id || m.id === data.deletedMessageId
-                            ? { ...m, content: data.content || "Ce message a été supprimé", isDeleted: true }
+                            ? { ...m, content: data.content || "Ce message a été supprimé"}
                             : m
                     ));
                 }
@@ -189,6 +189,12 @@ export function useFilLogic() {
         }
     };
 
+    const handleSaveEdit = async (id: number) => {
+        if (!editingContent.trim() || !selectedChannel || !activeRecordId) return;
+        const success = await updateMessage(currentUserName, activeRecordId, selectedChannel.id, id, editingContent);
+        if (success) setEditingMessageId(null);
+    };
+
     // Filtrage local (Recherche par titre)
     const filteredChannels = channels.filter(c =>
         c.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -216,6 +222,7 @@ export function useFilLogic() {
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,showArchiveModal,
         // Chat
         newMessage, setNewMessage, handleSendChatMessage,showDeleteMessageModal,setShowDeleteMessageModal,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
+        editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit,
         // Actions
         confirmArchive
     };
