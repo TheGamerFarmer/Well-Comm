@@ -31,7 +31,7 @@ public class AccountServiceTest {
         // 2. Test RecordAccount
         Record record = recordService.createRecord("Dossier A", "testUser");
         List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGNER_PERMISSIONS);
+        permissionList.add(Permission.ASSIGN_PERMISSIONS);
         RecordAccount ra = new RecordAccount(user, record, "Manager", permissionList);
 
         accountService.addRecordAccount(user, ra);

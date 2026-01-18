@@ -10,9 +10,10 @@ import {
     archiveChannel,
     getChannelContent,
     addMessage,
+    deleteMessage,
     FilResponse,
     DossierResponse,
-    MessageResponse
+    MessageResponse, updateMessage
 } from "@/functions/fil-API";
 
 const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
@@ -38,8 +39,13 @@ export function useFilLogic() {
     const [selectedChannel, setSelectedChannel] = useState<FilResponse | null>(null);
     const [newMessage, setNewMessage] = useState("");
     const [showArchiveModal, setShowArchiveModal] = useState(false);
+    const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
     const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
+    const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
     const stompClient = useRef<Client | null>(null);
+
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+    const [editingContent, setEditingContent] = useState("");
 
     // --- ÉTAT FORMULAIRE ---
     const [formData, setFormData] = useState({
@@ -58,9 +64,6 @@ export function useFilLogic() {
                 setCurrentUserName(user);
                 const userRecords = await getRecords(user);
                 setRecords(userRecords);
-                if (userRecords.length > 0) {
-                    setActiveRecordId(userRecords[0].id);
-                }
             }
         };
         init().then();
@@ -120,17 +123,22 @@ export function useFilLogic() {
         });
 
         client.onConnect = () => {
-            // S'abonner au topic diffusé par le ChannelController
             client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
-                const newMessage: MessageResponse = JSON.parse(payload.body);
+                const data = JSON.parse(payload.body);
 
-                // --- FILTRE ANTI-DOUBLON ---
-                setMessages((prev) => {
-                    // On vérifie si le message (par son ID) est déjà dans la liste
-                    const exists = prev.some(m => m.id === newMessage.id);
-                    if (exists) return prev; // Si oui, on ne change rien
-                    return [...prev, newMessage]; // Sinon, on l'ajoute
-                });
+                if (data.type === 'UPDATE' || data.type === 'DELETE') {
+                    setMessages((prev) => prev.map(m =>
+                        m.id === data.id || m.id === data.deletedMessageId
+                            ? { ...m, content: data.content || "Ce message a été supprimé"}
+                            : m
+                    ));
+                }
+                else if (data.id) {
+                    setMessages((prev) => {
+                        if (prev.some(m => m.id === data.id)) return prev;
+                        return [...prev, data];
+                    });
+                }
             });
         };
 
@@ -171,6 +179,22 @@ export function useFilLogic() {
         }
     };
 
+    const handleDeleteChatMessage = async (messageId: number | null) => {
+        if (!selectedChannel || !activeRecordId || messageId==null) return;
+
+        const success = await deleteMessage(currentUserName, activeRecordId, selectedChannel.id, messageId);
+        if (success) {
+            // Pas besoin de setMessages ici, le WebSocket s'en chargera pour tout le monde
+            console.log("Message envoyé pour suppression");
+        }
+    };
+
+    const handleSaveEdit = async (id: number) => {
+        if (!editingContent.trim() || !selectedChannel || !activeRecordId) return;
+        const success = await updateMessage(currentUserName, activeRecordId, selectedChannel.id, id, editingContent);
+        if (success) setEditingMessageId(null);
+    };
+
     // Filtrage local (Recherche par titre)
     const filteredChannels = channels.filter(c =>
         c.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -197,7 +221,8 @@ export function useFilLogic() {
         // Modale & Formulaire
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,showArchiveModal,
         // Chat
-        newMessage, setNewMessage, handleSendChatMessage,
+        newMessage, setNewMessage, handleSendChatMessage,showDeleteMessageModal,setShowDeleteMessageModal,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
+        editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit,
         // Actions
         confirmArchive
     };

@@ -3,7 +3,20 @@
  */
 
 import { API_BASE_URL } from "@/config";
-import {Permission} from "@/app/fil/page";
+
+
+export enum Permission {
+    SEND_MESSAGE = "SEND_MESSAGE",
+    DELETE_MESSAGE = "DELETE_MESSAGE",
+    OPEN_CHANNEL = "OPEN_CHANNEL",
+    CLOSE_CHANNEL = "CLOSE_CHANNEL",
+    IS_ADMIN = "IS_ADMIN",
+    MODIFY_MESSAGE = "MODIFY_MESSAGE",
+    IS_MEDECIN = "IS_MEDECIN",
+    EDIT_CALENDAR = "EDIT_CALENDAR",
+    ASSIGN_PERMISSIONS = "ASSIGN_PERMISSIONS",
+    INVITE = "INVITE",
+}
 
 export interface FilResponse {
     id: number;
@@ -223,6 +236,36 @@ export async function addMessage(userName: string, recordId: number, channelId: 
         console.error("Erreur envoi message:", err);
     }
     return null;
+}
+
+export async function deleteMessage(userName: string, recordId: number, channelId: number, messageId: number): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+            method: 'DELETE',
+            credentials: 'include',
+            cache: 'no-store',
+        });
+        return response.ok;
+    } catch (err) {
+        console.error("Erreur suppression message:", err);
+    }
+    return false;
+}
+
+export async function updateMessage(userName: string, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+            method: 'PUT',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+            body: content
+        });
+        return response.ok;
+    } catch (err) {
+        console.error("Erreur modification message:", err);
+        return false;
+    }
 }
 
 export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
