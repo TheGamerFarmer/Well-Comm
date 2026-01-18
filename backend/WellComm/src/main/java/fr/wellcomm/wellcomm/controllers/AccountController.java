@@ -109,7 +109,7 @@ public class AccountController {
     //ajouter un assistant autre que la personne connecté à un dossier
     @PostMapping("/addAccess/current_record/{name}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> addRecordAccountCurrebtRecord(@PathVariable String userName, @RequestBody addRecordAccountRequest request, @PathVariable String name) {
+    public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable String userName, @RequestBody addRecordAccountRequest request, @PathVariable String name) {
         Account account = accountService.getUser(name);
         if (account == null)
             return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
@@ -170,9 +170,24 @@ public class AccountController {
                 if (account == null)
                     return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
-        recordAccountService.deleteRecordAccount(targetUserName, recordId);
+        Account targetAccount = accountService.getUser(targetUserName);
+            if (targetAccount == null) {
+                return ResponseEntity.badRequest().body("Assistant introuvable");
+            }
 
-        return ResponseEntity.ok().build();
+         RecordAccount recordAccount = targetAccount.getRecordAccounts()
+                    .stream()
+                    .filter(ra -> ra.getRecord().getId() == recordId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (recordAccount == null) {
+                return ResponseEntity.badRequest().body("Accès introuvable");
+            }
+
+            accountService.deleteRecordAccount(targetAccount, recordAccount);
+
+            return ResponseEntity.ok().build();
     }
 
     //modifier le role d'un assistant autre que la personne connecté

@@ -6,23 +6,19 @@ import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
+import fr.wellcomm.wellcomm.entities.Account;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import fr.wellcomm.wellcomm.entities.*;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 import java.util.Date;
 import java.util.List;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import java.util.stream.Collectors;
-import org.springframework.web.bind.annotation.*;
-import fr.wellcomm.wellcomm.entities.Account;
 import java.time.LocalDateTime;
 
 @RestController
@@ -50,7 +46,6 @@ public static class RecordAccountResponse {
         RecordAccount ra = recordAccountService.getRecordAccounts(userName, recordId);
         return ResponseEntity.ok(ra.getPermissions());
     }
-
 
     @GetMapping("/{recordId}")
     @PreAuthorize("#userName == authentication.name")
