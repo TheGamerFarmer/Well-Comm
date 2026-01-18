@@ -32,10 +32,20 @@ function FilContent() {
             const id = Number(recordIdFromUrl);
             if (!isNaN(id)) {
                 setActiveRecordId(id);
+                localStorage.setItem('lastActiveRecordId', id.toString());
                 router.replace(pathname);
             }
         }
-    }, [recordIdFromUrl, setActiveRecordId, pathname, router]);
+        else {
+            const savedId = localStorage.getItem('lastActiveRecordId');
+            if (savedId) {
+                const id = Number(savedId);
+                if (!isNaN(id) && activeRecordId !== id) {
+                    setActiveRecordId(id);
+                }
+            }
+        }
+    }, [recordIdFromUrl, setActiveRecordId, pathname, router, activeRecordId]);
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
@@ -125,7 +135,12 @@ function FilContent() {
                         <span className="font-bold text-lg whitespace-nowrap tracking-tight">L&#39;aidé</span>
                         <select
                             value={activeRecordId || ""}
-                            onChange={(e) => setActiveRecordId(Number(e.target.value))}
+                            onChange={(e) => {
+                                const newId = Number(e.target.value);
+                                setActiveRecordId(newId);
+                                localStorage.setItem('lastActiveRecordId', newId.toString());
+                                setSelectedChannel(null);
+                            }}
                             className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
                         >
                             {records.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
