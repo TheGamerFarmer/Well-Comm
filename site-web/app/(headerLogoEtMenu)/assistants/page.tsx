@@ -126,6 +126,32 @@ export default function AssistantsPage() {
         }
     };
 
+
+    //mettre a jour le role d'un assistant
+    const updateRoleAccess = async (name: string, id: number, title: string) => {
+        if (!userName || !currentDossier) {
+            console.error("Aucun dossier sélectionné");
+            return;
+        }
+
+        try {
+            const res = await fetch (`http://localhost:8080/api/${userName}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+                method: "PUT",
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                const errorMessage = await res.text();
+                throw new Error(errorMessage);
+        }
+            await fetchAssistants();
+            console.log("recordAccount supprimé ✅")
+    }catch (err: any) {
+            console.error(err.message);
+            alert(err.message);
+        }
+    };
+
     return (
 
         <>
@@ -173,29 +199,23 @@ export default function AssistantsPage() {
                                 </ul>
                             </div>
 
-
-
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
                                 <Button variant="secondary" type="button" onClick={() => setIsOpenPerms(true)} link={""}>
                                     Permissions
                                 </Button>
+
                                 <select
                                     value={inv.title}
-                                    onChange={(e) =>
-                                        setInvitations((prev) =>
-                                            prev.map((i) =>
-                                                i.id === inv.id
-                                                    ? { ...i, role: e.target.value as Invitation["title"] }
-                                                    : i
-                                            )
-                                        )
-                                    }
+                                    onChange={(e) =>{
+                                        if ( !currentDossier) return;
+                                        updateRoleAccess(inv.accountUserName, currentDossier, e.target.value)}}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option>Aidant</option>
                                     <option>Infirmier(e)</option>
                                     <option>Aide soignant(e)</option>
                                     <option>Aide à domicile</option>
                                 </select>
+
                                 <button
                                     onClick={() => setInvitationToDelete(inv)}
                                     className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">

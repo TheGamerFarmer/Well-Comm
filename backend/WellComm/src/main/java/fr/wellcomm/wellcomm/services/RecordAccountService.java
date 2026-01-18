@@ -56,6 +56,20 @@ public class RecordAccountService {
         recordAccountRepository.delete(recordAccount);
     }
 
+    //update role record_account
+    public void updateRoleRecordAccount(String accountUserName, Long recordId, String role) {
+        RecordAccount recordAccount =
+                recordAccountRepository
+                .findByAccountUserNameAndRecordId(accountUserName, recordId)
+                .orElseThrow(() -> new RuntimeException("Access not found"));
+
+        // Mise à jour du rôle
+        recordAccount.setTitle(role);
+
+        // Sauvegarde
+        recordAccountRepository.save(recordAccount);
+    }
+
     //à comparer avec la fonction dans account
     public RecordAccount getRecordAccounts(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);

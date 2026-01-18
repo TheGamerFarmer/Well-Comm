@@ -175,4 +175,22 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
+    //modifier le role d'un assistant autre que la personne connecté
+    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> updateRoleRecordAccount(
+            @PathVariable String userName,
+            @PathVariable String targetUserName,
+            @PathVariable Long recordId,
+            @PathVariable String role
+    ) {
+        Account account = accountService.getUser(userName);
+                if (account == null)
+                    return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
+
+        recordAccountService.updateRoleRecordAccount(targetUserName, recordId, role);
+
+        return ResponseEntity.ok().build();
+    }
+
 }
