@@ -1,15 +1,14 @@
 "use client";
 
-import React, {useRef, useEffect, useState, Suspense} from "react";
+import React, {useRef, useEffect, useState, useMemo} from "react";
 import Modal from "./Modal";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {mapCategoryToEnum, capitalizeWords, MessageResponse, getPermissions, Permission} from "@/functions/fil-API";
 import Image from "next/image";
-import {useSearchParams, usePathname, useRouter} from "next/navigation";
 
-function FilContent() {
+export default function FilDeTransmissionPage() {
     const {
         categories, records, channels, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
@@ -21,31 +20,17 @@ function FilContent() {
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const recordIdFromUrl = searchParams.get('recordId');
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
 
     useEffect(() => {
-        if (recordIdFromUrl) {
-            const id = Number(recordIdFromUrl);
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
             if (!isNaN(id)) {
                 setActiveRecordId(id);
-                localStorage.setItem('lastActiveRecordId', id.toString());
-                router.replace(pathname);
             }
         }
-        else {
-            const savedId = localStorage.getItem('lastActiveRecordId');
-            if (savedId) {
-                const id = Number(savedId);
-                if (!isNaN(id) && activeRecordId !== id) {
-                    setActiveRecordId(id);
-                }
-            }
-        }
-    }, [recordIdFromUrl, setActiveRecordId, pathname, router, activeRecordId]);
+    }, [setActiveRecordId]);
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
@@ -100,8 +85,10 @@ function FilContent() {
         }
     }, [permissions, selectedCategories, toggleCategory]);
 
-    const sortedMessages = [...messages].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+    const sortedMessages = useMemo(() =>
+        [...messages].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        ), [messages]
     );
 
     const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
@@ -138,7 +125,6 @@ function FilContent() {
                             onChange={(e) => {
                                 const newId = Number(e.target.value);
                                 setActiveRecordId(newId);
-                                localStorage.setItem('lastActiveRecordId', newId.toString());
                                 setSelectedChannel(null);
                             }}
                             className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
@@ -309,11 +295,13 @@ function FilContent() {
                                                         <div className="flex items-center gap-2">
                                                             {isDeleted && (
                                                                 <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                                                 </svg>
                                                             )}
-                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? 'italic opacity-80' : ''}`}>
-                                                                {msg.content}
+                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? "italic opacity-80" : ""}`}>
+                                                                {isDeleted
+                                                                    ? msg.content.replace(/\u200B/g, "")
+                                                                    : msg.content}
                                                             </p>
                                                         </div>
                                                     </>
@@ -381,7 +369,7 @@ function FilContent() {
                             <div className="relative mb-10 text-black flex-none">
                                 <input
                                     type="text"
-                                    placeholder="Recherche par titre..."
+                                    placeholder="Recherche par titre"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
@@ -410,7 +398,12 @@ function FilContent() {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-black text-xl mb-1">{channel.category} | {capitalizeWords(channel.title)}</h3>
+                                                <h3 className="font-bold text-black text-xl mb-1">
+                                                    {channel.category === "Maisonterrain"
+                                                        ? "Maison/Terrain"
+                                                        : channel.category
+                                                    } | {capitalizeWords(channel.title)}
+                                                </h3>
                                                 <p className="text-black opacity-80 font-medium line-clamp-1 italic text-sm">
                                                     {channel.lastMessageAuthor ? (<><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>) : "Nouveau fil"}
                                                 </p>
@@ -503,7 +496,7 @@ function FilContent() {
                             <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
                         </div>
                         <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous supprimer ce message?</h2>
-                        <p className="text-center text-gray-700 mb-6">Ce message sera remplacé par une mention de suppression.</p>
+                        <p className="text-center text-gray-700 mb-6">Ce message sera supprimé définitivement.</p>
                         <div className="flex justify-center gap-4">
                             <Button variant={"cancel"} link={""} onClick={() => setShowDeleteMessageModal(false)}>Non</Button>
                             <Button variant={"validate"} link={""}  onClick={() => {
@@ -515,13 +508,5 @@ function FilContent() {
                 </div>
             )}
         </div>
-    );
-}
-
-export default function FilDeTransmissionPage() {
-    return (
-        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
-            <FilContent />
-        </Suspense>
     );
 }

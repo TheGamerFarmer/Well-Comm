@@ -54,7 +54,8 @@ public class LoginController {
 
             sessionRepository.save(new Session(token,
                     account,
-                    LocalDateTime.now().plusHours(24)));
+                    LocalDateTime.now().plusHours(24),
+                    null));
 
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
@@ -79,14 +80,5 @@ public class LoginController {
         return authentication != null
                 && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken);
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(401).body("Utilisateur non connecté");
-        }
-
-        return ResponseEntity.ok(Map.of("userName", principal.getName()));
     }
 }

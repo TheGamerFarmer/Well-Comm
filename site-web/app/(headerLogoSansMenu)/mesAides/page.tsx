@@ -8,7 +8,6 @@ import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
 
-
 type Dossier = {
     id: number;
     name: string;
@@ -28,6 +27,7 @@ export default function MesAides() {
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
 
     /* =======================
        Chargement des dossiers
@@ -54,6 +54,16 @@ export default function MesAides() {
 
         fetchDossiers();
     }, [userName]);
+
+    useEffect(() => {
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
+            if (!isNaN(id)) {
+                setCurrentRecordId(id);
+            }
+        }
+    }, [setCurrentRecordId]);
 
     /* =======================
        Création d’un dossier
@@ -82,7 +92,6 @@ export default function MesAides() {
                 { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
             ]);
 
-
             setName("");
             setFile(null);
             setIsOpen(false);
@@ -98,7 +107,7 @@ export default function MesAides() {
         const files = e.target.files;
         setFile(files && files.length > 0 ? files[0] : null);
     };
-
+//supprimer un dossier
     const handleDelete = async (id: number) => {
         if (!id) return;
 
@@ -123,9 +132,6 @@ export default function MesAides() {
         }
     };
 
-
-
-
     return (
         <div className="p-10">
             <p className="mt-10 font-montserrat text-2xl font-bold text-[#0551ab]">
@@ -133,6 +139,17 @@ export default function MesAides() {
             </p>
 
             <FilArianne />
+
+            <div className="text-black">
+                {currentRecordId}
+            </div>
+            <div>
+                {currentRecordId ? (
+                    <p>Dossier courant : {currentRecordId}</p>
+                ) : (
+                    <p>Aucun dossier sélectionné</p>
+                )}
+            </div>
 
             <div className="flex justify-end my-4">
                 <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
@@ -144,15 +161,18 @@ export default function MesAides() {
          Liste des dossiers
         ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 text-black">
                     {dossiers.map((dossier) =>{
                         return(
-
-                            <Link key={dossier.id} href={`/fil?recordId=${dossier.id}`}>
+                            <Link key={dossier.id} href={`/resume`}>
                         <div
                             key={dossier.id}
-                            className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
-                        >
+                            onClick={() => {
+                                localStorage.setItem('activeRecordId', dossier.id.toString());
+                            }
+                        }
+                            className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
+                            >
                             {/* image plus tard depuis backend */}
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
 
@@ -160,7 +180,7 @@ export default function MesAides() {
 
                             <div className="ml-auto">
                                 {userName && dossier.admin === userName && (
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={(e) => {
+                                <button type="button" className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform" onClick={(e) => {
                                     e.preventDefault(); // empêche la navigation
                                     e.stopPropagation(); // empêche le click parent
                                     setDossierToDelete(dossier);}}>
