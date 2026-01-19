@@ -59,12 +59,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         {/* --------------------------- */}
 
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-4 mr-4">
+
+                <div className="flex items-center space-x-2 sm:space-x-4 mr-4 cursor-pointer rounded-2xl bg-gray-100 mt-2 mb-2 pl-2 pr-2"
+                onClick={() => setIsOpen(true)}>
+
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13.333 11.666a1 1 0 0 1 .096 1.996l-.096.004H2.667a1 1 0 0 1-.096-1.995l.095-.005h10.667zm0-4.666a1 1 0 0 1 0 2H2.667a1 1 0 1 1 0-2h10.666zm0-4.667a1 1 0 0 1 0 2H2.667a1 1 0 0 1 0-2h10.666z" fill="#215A9E"/>
+                    </svg>
 
                         <Image
                             src="/images/user.svg"
                             alt="Logo WellComm"
-                            onClick={() => setIsOpen(true)}
                             width={60}
                             height={60}
                             priority
@@ -72,7 +77,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
             </header>
             {isOpen && (
-                <div className="absolute right-0 mt-17 w-44 rounded-md bg-white shadow-lg border border-black z-100 mr-2">
+                <div className="absolute right-0 mt-18 w-44 rounded-md bg-white shadow-lg border border-black z-100 mr-2">
                     <button
                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-md"
                         onClick={async () => {
@@ -90,7 +95,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
             )}
             <main className="bg-[#fafafa] flex-1">{children}</main>
-
         </div>
     )
 }
