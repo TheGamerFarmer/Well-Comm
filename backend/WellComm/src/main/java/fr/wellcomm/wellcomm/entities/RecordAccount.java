@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fr.wellcomm.wellcomm.domain.Permission;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,9 +21,11 @@ public class RecordAccount {
     private long id;
     // Relation vers l'utilisateur (Plusieurs accès pour un utilisateur)
     @ManyToOne
+    @JsonIgnore
     private Account account;
     // Relation vers le dossier (Plusieurs utilisateurs pour un dossier)
     @ManyToOne
+    @JsonIgnore
     private Record record;
     private String title;
     @ElementCollection(targetClass = Permission.class)
