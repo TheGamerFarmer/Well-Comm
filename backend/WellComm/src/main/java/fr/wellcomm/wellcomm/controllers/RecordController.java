@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.entities.Session;
@@ -127,7 +128,13 @@ public class RecordController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().get(recordId);
+        RecordAccount recordAccount = null;
+        Map<Long, RecordAccount> recordAccounts = account.getRecordAccounts();
+        for (Map.Entry<Long, RecordAccount> entry : recordAccounts.entrySet()) {
+            if (entry.getValue().getRecord().getId() == recordId){
+                recordAccount = entry.getValue();
+            }
+        }
         if (recordAccount == null)
             return ResponseEntity.badRequest().body("RecordAccount not found");
 
