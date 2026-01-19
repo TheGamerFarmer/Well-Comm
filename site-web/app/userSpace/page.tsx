@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
 import { useRouter } from "next/navigation";
 import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/functions/user-api";
 import { API_BASE_URL } from "@/config";
-import encryptPassword from "@/functions/encryptPassword";
+import {encryptPassword} from "@/functions/encryptPassword";
 
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -185,7 +185,7 @@ export default function UserSpace() {
                                     type="button"
                                     variant="primary"
                                     link={""}
-                                    onClick={handleSavePassword}
+                                    onClickAction={handleSavePassword}
                                 >
                                     Enregistrer
                                 </Button>
@@ -242,7 +242,7 @@ export default function UserSpace() {
                             <Button
                                 variant={"cancel"}
                                 link={""}
-                                onClick={() => setShowDeleteModal(false)}
+                                onClickAction={() => setShowDeleteModal(false)}
                             >
                                 Non
                             </Button>
@@ -250,7 +250,7 @@ export default function UserSpace() {
                             <Button
                                 variant={"validate"}
                                 link={""}
-                                onClick={async () => {
+                                onClickAction={async () => {
                                     setShowDeleteModal(false);
                                     await handleDeleteAccount();
                                 }}
