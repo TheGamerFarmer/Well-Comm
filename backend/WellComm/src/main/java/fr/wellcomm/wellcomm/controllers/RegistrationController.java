@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
@@ -30,15 +32,22 @@ public class RegistrationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (accountRepository.existsById(request.getUserName())) {
+        if (accountRepository.existsByUserName(request.getUserName())) {
             return ResponseEntity.status(409).body("Account already exists");
         }
 
-        accountRepository.save(new Account(request.getUserName(),
-                request.getFirstName(),
+        Account savedAccount = accountRepository.save(new Account(
+                request.getUserName(),
                 request.getLastName(),
-                passwordEncoder.encode(request.getPassword())));
+                request.getFirstName(),
+                passwordEncoder.encode(request.getPassword())
+        ));
 
-        return ResponseEntity.status(201).build();
+        Map<String, Object> responseBody = Map.of(
+                "id", savedAccount.getId(),
+                "userName", savedAccount.getUserName()
+        );
+
+        return ResponseEntity.status(201).body(responseBody);
     }
 }

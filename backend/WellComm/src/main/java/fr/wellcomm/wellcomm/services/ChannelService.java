@@ -30,7 +30,7 @@ public class ChannelService {
     }
 
     public Message addMessage(@NotNull OpenChannel channel, String content, @NotNull Account account) {
-        accountRepository.findById(account.getUserName())
+        accountRepository.findById(account.getId())
                 .orElseGet(() -> accountRepository.save(account));
 
         if (channel.getId() == 0) {
@@ -47,7 +47,6 @@ public class ChannelService {
                 account,
                 userTitle,
                 channel);
-
         message = messageRepository.save(message);
 
         channel.getMessages().put(message.getId(), message);

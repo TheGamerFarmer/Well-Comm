@@ -5,7 +5,6 @@ import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.CalendarService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +44,7 @@ public class LoginController {
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
 
-        Account account = accountRepository.findById(userName).orElse(null);
+        Account account = accountRepository.findByUserName(userName).orElse(null);
 
         if (account == null)
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
@@ -74,9 +72,14 @@ public class LoginController {
                     .sameSite("Strict")
                     .build();
 
+            Map<String, Object> responseBody = Map.of(
+                    "id", account.getId(),
+                    "userName", account.getUserName()
+            );
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .build();
+                    .body(responseBody);
         } else {
             accountService.registerFailedAttempt(account);
             return ResponseEntity.status(401).body("Nom d'utilisateur ou mot de passe incorrect");

@@ -24,13 +24,13 @@ public class AccountService {
     private static final long LOCK_TIME_DURATION = 15;
 
     public Account getUser(String username) {
-        return accountRepository.findById(username)
+        return accountRepository.findByUserName(username)
                 .orElse(null);
     }
 
     public void deleteUser(Account account) {
         sessionRepository.deleteByAccount(account);
-        accountRepository.deleteById(account.getUserName());
+        accountRepository.deleteById(account.getId());
     }
 
     public void saveUser(Account account) {

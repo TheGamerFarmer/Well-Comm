@@ -18,6 +18,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class Account {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true, nullable = false)
     private String userName;
     private String firstName;
     private String lastName;
