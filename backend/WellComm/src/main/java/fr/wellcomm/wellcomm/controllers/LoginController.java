@@ -91,4 +91,13 @@ public class LoginController {
                 && authentication.isAuthenticated()
                 && !(authentication instanceof AnonymousAuthenticationToken);
     }
+
+       @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body("Utilisateur non connecté");
+        }
+
+        return ResponseEntity.ok(Map.of("userName", principal.getName()));
+    }
 }
