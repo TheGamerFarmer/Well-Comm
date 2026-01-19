@@ -118,6 +118,25 @@ public class RecordController {
         return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{recordId}/channels/{category}/week")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
+                                                                 @PathVariable Long recordId,
+                                                                 @PathVariable Category category) {
+
+        List<FilResponse> response = recordService.getLastWeekChannelsOfCategory(recordId, category).stream()
+                .map(f -> {
+                    Message lastMsg = f.getLastMessage();
+                    return new FilResponse(
+                            f.getId(), f.getTitle(), f.getCategory(), f.getCreationDate(),
+                            lastMsg != null ? lastMsg.getContent() : "Aucun message",
+                            lastMsg != null ? lastMsg.getAuthor().getUserName() : ""
+                    );
+                }).collect(Collectors.toList());
+
+        return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userName == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).OPEN_CHANNEL)")

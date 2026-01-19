@@ -153,6 +153,27 @@ export async function getCloseChannels(userName: string, recordId: number, categ
     return [];
 }
 
+export async function getLastWeekChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
+    const categoryEnum = mapCategoryToEnum(category);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${categoryEnum}/week`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
+
+        if (response.status === 204) return [];
+
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) return data;
+            return data.opened_channels || [];
+        }
+    } catch (err) {
+        console.error("Erreur channels:", err);
+    }
+    return [];
+}
+
 
 export async function createChannel(
     userName: string,
