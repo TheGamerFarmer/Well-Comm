@@ -6,10 +6,11 @@ export interface UserProfile {
     lastName: string;
 }
 
-export async function getUserProfile(): Promise<UserProfile | null> {
+export async function getUserProfile(userName: string): Promise<UserProfile | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/profile`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/infos`, {
             credentials: "include",
+            cache: "no-store",
         });
 
         console.log("Response status:", response.status);
@@ -28,11 +29,15 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 }
 
 export async function changePassword(
+    userName: string,
     currentPassword: string,
     newPassword: string
 ): Promise<boolean> {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/changePassword`, {
+
+        const url = `${API_BASE_URL}/api/${userName}/changePassword`;
+        console.log("FETCH URL =", url);
+        const res = await fetch(url, {
             method: "POST",
             credentials: "include",
             headers: {

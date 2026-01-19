@@ -9,7 +9,6 @@ import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/fu
 import { API_BASE_URL } from "@/config";
 import encryptPassword from "@/functions/encryptPassword";
 
-
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
     const [currentPassword, setCurrentPassword] = useState("");
@@ -22,23 +21,29 @@ export default function UserSpace() {
     const router = useRouter();
 
     useEffect(() => {
-        console.log("Calling getUserProfile()...");
-        getUserProfile().then((data) => {
-            console.log("Profile data received:", data);
-            if (!data) {
-                router.push("/login?callbackUrl=/userSpace");
-            } else {
-                setProfile(data);
-            }
-        });
-    }, []);
+        const loadProfile = async () => {
+            const meRes = await fetch(`${API_BASE_URL}/api/me`, {
+                credentials: "include",
+                cache: "no-store",
+            });
 
-    useEffect(() => {
-        fetch(`${API_BASE_URL}/api/me`, {
-            credentials: "include",
-        })
-            .then(res => res.json())
-            .then(data => setUserName(data.userName));
+            if (!meRes.ok) {
+                router.push("/login");
+                return;
+            }
+
+            const me = await meRes.json();
+            setUserName(me.userName);
+
+            const profile = await getUserProfile(me.userName);
+            if (profile)setProfile({
+                userName: me.userName,
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+            });
+
+        };
+        loadProfile();
     }, []);
 
     const handleSavePassword = async () => {
@@ -46,8 +51,7 @@ export default function UserSpace() {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
-
-        const ok = await changePassword(encryptPassword(currentPassword), encryptPassword(newPassword));
+        const ok = await changePassword(userName, encryptPassword(currentPassword), encryptPassword(newPassword));
 
         if (ok) {
             alert("Mot de passe modifié avec succès !");
@@ -57,7 +61,6 @@ export default function UserSpace() {
             setShowPasswordFields(false);
         }
     };
-
 
     const handleDeleteAccount = async () => {
         const success = await deleteAccount(userName);
