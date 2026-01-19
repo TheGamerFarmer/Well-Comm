@@ -1,4 +1,3 @@
-// mon-site-web/components/ImageTextSection.tsx
 import Image from 'next/image';
 
 export default function ImageTextSection() {
@@ -7,7 +6,6 @@ export default function ImageTextSection() {
             <div className="container mx-auto  ">
                 <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
 
-                    {/* 1. Bloc Image à gauche */}
                     <div className="w-full hidden lg:block">
                         <div className="relative w-[650px] h-[570px]">
                             <Image
@@ -19,7 +17,6 @@ export default function ImageTextSection() {
                         </div>
                     </div>
 
-                    {/* 2. Bloc Texte à droite (Plus de contenu, pas de bouton) */}
                     <div className="w-full text-gray-700 p-8">
                         <h2 className="text-3xl md:text-4xl font-bold text-[#1e40af] mb-6">
                             Qu&#39;est-ce que WellComm?

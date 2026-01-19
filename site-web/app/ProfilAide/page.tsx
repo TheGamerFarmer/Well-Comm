@@ -1,5 +1,5 @@
-
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
@@ -7,12 +7,10 @@ import FilArianne from "@/components/FilArianne";
 import { API_BASE_URL } from "@/config";
 import {getCurrentUser} from "@/functions/fil-API";
 
-
 export default function ProfilAide() {
-
     const [assisted, setAssisted] = useState({firstName: "", lastName: "", dateOfBirth: "", mobileNumber: "", information: ""});
-    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
-    const [assistedId, setAssistedId] = useState<number | null>(null);
+    const [activeRecordId] = useState<number | null>(null);
+    const [assistedId] = useState<number | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
 
     useEffect(() => {
@@ -29,7 +27,7 @@ export default function ProfilAide() {
             },
             body: JSON.stringify({
                 ...assisted,
-                recordId: 1 // ⚠️ ID du dossier (à adapter)
+                recordId: 1
             }),
         });
     };
@@ -37,7 +35,7 @@ export default function ProfilAide() {
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="py-4 ">
-                <p className="font-bold text-[#0551ab] text-2xl">L'aidé</p>
+                <p className="font-bold text-[#0551ab] text-2xl">L&#39;aidé</p>
                 <FilArianne/>
             </div>
             <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-[100%] rounded-xl border-20 border-[#f4f4f4] md:border-white ">

@@ -74,7 +74,7 @@ export default function Archive() {
             setIsLoading(false);
         };
 
-        fetchChannels();
+        fetchChannels().then();
     }, [currentUserName, activeRecordId, selectedCategories, categories]);
 
     useEffect(() => {

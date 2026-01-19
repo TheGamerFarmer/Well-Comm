@@ -23,25 +23,20 @@ interface SockJSOptions extends SockJS.Options {
 }
 
 export function useFilLogic() {
-
     // profil
     const [currentUserName, setCurrentUserName] = useState<string>("");
-
     // record & channel
     const [records, setRecords] = useState<DossierResponse[]>([]);
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
     const [channels, setChannels] = useState<FilResponse[]>([]);
-
     // messages
     const [messages, setMessages] = useState<MessageResponse[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<FilResponse | null>(null);
     const stompClient = useRef<Client | null>(null);
-
     // filter & search
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-
     // channel creation
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -49,22 +44,17 @@ export function useFilLogic() {
         title: "",
         message: ""
     });
-
     // send message
     const [newMessage, setNewMessage] = useState("");
-
     // edit message
     const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
     const [editingContent, setEditingContent] = useState("");
-
     // archiving
     const [showArchiveModal, setShowArchiveModal] = useState(false);
     const [channelToArchive, setChannelToArchive] = useState<FilResponse | null>(null);
-
     // delete message
     const [showDeleteMessageModal, setShowDeleteMessageModal] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
-
 
     useEffect(() => {
         let isMounted = true;

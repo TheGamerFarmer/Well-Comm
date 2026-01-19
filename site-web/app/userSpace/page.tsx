@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
@@ -187,6 +187,7 @@ export default function UserSpace() {
 
                 </form>
             </div>
+
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl">
@@ -237,7 +238,6 @@ export default function UserSpace() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

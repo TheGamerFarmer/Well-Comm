@@ -9,8 +9,6 @@ export default function Resume() {
     const [activeCategories, setActiveCategories] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const aideNom = "userTemp";
-    const archiveCount = 0;
     const channels = [];
 
     const toggleCategory = (cat: string) => {
@@ -23,9 +21,13 @@ export default function Resume() {
 
     useEffect(() => {
         if (activeCategories.length > 0) {
-            setActiveCategory(activeCategories.join(", ")); // toutes séparées par une virgule
+            setTimeout(() => {
+                setActiveCategory(activeCategories.join(", "));
+            }, 0);
         } else {
-            setActiveCategory(""); // ou un texte par défaut
+            setTimeout(() => {
+                setActiveCategory("");
+            }, 0);
         }
     }, [activeCategories]);
 

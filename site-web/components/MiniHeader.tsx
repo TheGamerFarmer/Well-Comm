@@ -1,25 +1,19 @@
-// mon-site-web/components/Header.tsx
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function Header() {
-    // Ici, on utiliserait un état React (useState) pour gérer l'ouverture/fermeture du menu sur mobile, mais nous allons garder le prototype simple.
-
     return (
-        // La barre de navigation principale
         <header className="bg-white shadow-md relative z-10">
             <div className="w-full mx-auto px-4 py-3 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-2">
                     <Image
-                        src="/images/logo.svg" //  Assurez-vous que ce nom de fichier est exact
+                        src="/images/logo.svg"
                         alt="Logo WellComm"
-                        width={60} // Largeur du logo (à ajuster)
-                        height={60} // Hauteur du logo (à ajuster)
-                        priority // Pour charger l'image rapidement
+                        width={60}
+                        height={60}
+                        priority
                     />
                 </Link>
-
-
             </div>
         </header>
     );

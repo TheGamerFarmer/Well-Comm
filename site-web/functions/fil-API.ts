@@ -53,13 +53,12 @@ export function capitalizeWords(str: string | undefined | null): string {
         .join(' ');
 }
 
-export async function getCurrentUser(): Promise<string | null> {
+export async function getCurrentUser(): Promise<string> {
     const userName = localStorage.getItem('username');
-    if (userName) {
+    if (userName)
         return userName;
-    } else {
-        return null;
-    }
+    else
+        return "null";
 }
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {

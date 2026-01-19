@@ -31,7 +31,7 @@ export function useCurrentDossier(userName: string | null) {
             }
         };
 
-        fetchCurrent();
+        fetchCurrent().then();
     }, [userName]);
 
     return { currentDossier, loading };

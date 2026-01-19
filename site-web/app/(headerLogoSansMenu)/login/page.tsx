@@ -2,8 +2,8 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import encryptPassword from "../../../functions/encryptPassword";
-import logUser from "../../../functions/logUser";
+import {encryptPassword} from "@/functions/encryptPassword";
+import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
 
 // 1. Move the logic into a separate component

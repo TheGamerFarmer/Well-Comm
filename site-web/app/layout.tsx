@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import {Comic_Neue} from "next/font/google";
 import {Montserrat} from "next/font/google";
 import "./globals.css";
-
-
-const comicNeue= Comic_Neue({
+Comic_Neue({
     subsets: ["latin"],
     weight: ["400", "700"], // обычный и жирный
     style: "normal",

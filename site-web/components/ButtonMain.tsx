@@ -64,7 +64,6 @@ export const Button = ({
 
     const className = `${baseStyles} ${variantStyles[variant]}`;
 
-    //Si le bouton comporte un link
     if (link){
         return (
             <Link href={link}>

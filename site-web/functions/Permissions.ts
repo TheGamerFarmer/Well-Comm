@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import { API_BASE_URL } from "@/config";
 
 export enum Permission {
