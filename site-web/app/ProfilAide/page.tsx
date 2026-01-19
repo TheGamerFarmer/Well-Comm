@@ -6,6 +6,7 @@ import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
 import { API_BASE_URL } from "@/config";
 import {getCurrentUser} from "@/functions/fil-API";
+import {fetchWithCert} from "@/functions/fetchWithCert";
 
 export default function ProfilAide() {
     const [assisted, setAssisted] = useState({firstName: "", lastName: "", dateOfBirth: "", mobileNumber: "", information: ""});
@@ -20,7 +21,7 @@ export default function ProfilAide() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        await fetch(`${API_BASE_URL}/api/${userName}/records/${activeRecordId}/assisted/${assistedId}`, {
+        await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${activeRecordId}/assisted/${assistedId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -36,7 +36,7 @@ export default function MesAides() {
         if (!userName) return;
 
         const fetchDossiers = async () => {
-            const res = await fetch(
+            const res = await fetchWithCert(
                 `${API_BASE_URL}/api/${userName}/records/`,
                 { credentials: "include" }
             );
@@ -61,7 +61,7 @@ export default function MesAides() {
         e.preventDefault();
         if (!name.trim()) return;
 
-        const res = await fetch(
+        const res = await fetchWithCert(
             `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
                 name
             )}`,
@@ -99,7 +99,7 @@ export default function MesAides() {
     const handleDelete = async (id: number) => {
         if (!id) return;
 
-        const res = await fetch(
+        const res = await fetchWithCert(
             `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
             {
                 method: "DELETE",

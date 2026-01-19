@@ -216,7 +216,7 @@ export async function addMessage(userName: string, recordId: number, channelId: 
 
 export async function deleteMessage(userName: string, recordId: number, channelId: number, messageId: number): Promise<boolean> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
             method: 'DELETE',
             credentials: 'include',
             cache: 'no-store',
@@ -230,7 +230,7 @@ export async function deleteMessage(userName: string, recordId: number, channelI
 
 export async function updateMessage(userName: string, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
             method: 'PUT',
             credentials: 'include',
             cache: 'no-store',
@@ -269,7 +269,7 @@ export async function fetchAllCloseChannels(
 
 export async function getCloseChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
             credentials: 'include',
             cache: 'no-store'
         });
