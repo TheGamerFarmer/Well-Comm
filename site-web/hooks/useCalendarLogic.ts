@@ -81,7 +81,7 @@ export function useCalendarLogic() {
         getCurrentUser().then(setUserName);
     }, []);
 
-    async function handleSelect(selectInfo: DateSelectArg) {
+    function handleSelect(selectInfo: DateSelectArg) {
         const newEvent: MyEvent = {
             id: "",
             title: "",
@@ -98,7 +98,7 @@ export function useCalendarLogic() {
         setIsCreating(true);
     }
 
-    async function handleEventClick (info: EventClickArg) {
+    function handleEventClick (info: EventClickArg) {
         const eventData: MyEvent = {
             id: info.event.id,
             title: info.event.title,
@@ -114,7 +114,7 @@ export function useCalendarLogic() {
         setIsEditing(false);
     }
 
-    async function handleEventChange(changeInfo: EventClickArg) {
+    function handleEventChange(changeInfo: EventClickArg) {
         if (!hasEditPermission)
             return;
 
@@ -126,10 +126,10 @@ export function useCalendarLogic() {
             ...changeInfo.event.extendedProps
         };
 
-        await saveEditsRequest(userName, activeRecordId, false, updatedEvent, calendarRef);
+        saveEditsRequest(userName, activeRecordId, false, updatedEvent, calendarRef);
     }
 
-    async function formatDisplayTime (iso: string){
+    function formatDisplayTime (iso: string){
         return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
