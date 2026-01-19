@@ -208,41 +208,4 @@ public class RecordController {
             return ResponseEntity.notFound().build(); // 404
         }
     }
-    //création d'une session quand on selectionne un dossier
-    @PostMapping("/select/{recordId}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> selectRecord(
-            @PathVariable @SuppressWarnings("unused") String userName,
-            @CookieValue("token") String token,
-            @PathVariable Long recordId
-    ) {
-          // Vérifie que la session existe pour ce token
-          Session session = sessionRepository.findById(token)
-                  .orElseThrow(() -> new RuntimeException("Session invalide"));
-
-
-          // Enregistre le recordId sélectionné
-          session.setCurrentRecordId(recordId);
-          sessionRepository.save(session);
-          return ResponseEntity.ok().build();
-      }
-
-    //return current-record
-    @GetMapping("/current-record")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> getCurrentRecord(
-            @PathVariable @SuppressWarnings("unused") String userName,
-            @CookieValue("token") String token
-    ) {
-          // Récupère la session par le token
-          Session session = sessionRepository.findById(token)
-                            .orElseThrow(() -> new RuntimeException("Session invalide"));
-
-          Long currentRecordId = session.getCurrentRecordId();
-          if (currentRecordId == null) {
-              return ResponseEntity.noContent().build(); // 204 si aucun dossier sélectionné
-          }
-
-          return ResponseEntity.ok(currentRecordId); // Retourne juste l'ID du dossier courant
-      }
 }
