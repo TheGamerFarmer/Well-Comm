@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -58,7 +57,6 @@ public class ChannelService {
         return message;
     }
 
-<<<<<<< HEAD
     public Date lastMessage(@NotNull OpenChannel channel) {
         Map<Long, Message> messages = channel.getMessages();
         Date lastMessage = null;
@@ -69,12 +67,10 @@ public class ChannelService {
         }
         return lastMessage;
     }
-}
-=======
+
     // ========== CLOSE CHANNELS ==========
 
     public CloseChannel getCloseChannel(long id) {
         return closeChannelRepository.findById(id).orElse(null);
     }
 }
->>>>>>> main

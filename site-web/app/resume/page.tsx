@@ -1,57 +1,44 @@
 "use client";
 
-import React, {useRef, useEffect, useState} from "react";
+import React, {useRef, useEffect, useState, useMemo} from "react";
 import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {
+    mapCategoryToEnum,
     capitalizeWords,
     MessageResponse,
-    getPermissions,
-    Permission,
-    FilResponse, getLastWeekChannels
+    FilResponse,
+    getLastWeekChannels
 } from "@/functions/fil-API";
 import Image from "next/image";
-import {useSearchParams, usePathname, useRouter} from "next/navigation";
+import {getPermissions, Permission} from "@/functions/Permissions";
 
 export default function ResumePage() {
     const {
         categories, records, currentUserName, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, selectedChannel, setSelectedChannel,
+        isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
         newMessage, setNewMessage, handleSendChatMessage,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
-        setShowDeleteMessageModal,showDeleteMessageModal,
+        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal,
         editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit
     } = useFilLogic();
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const recordIdFromUrl = searchParams.get('recordId');
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [channels, setChannels] = useState<FilResponse[]>([]);
 
     useEffect(() => {
-        if (recordIdFromUrl) {
-            const id = Number(recordIdFromUrl);
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
             if (!isNaN(id)) {
                 setActiveRecordId(id);
-                localStorage.setItem('lastActiveRecordId', id.toString());
-                router.replace(pathname);
             }
         }
-        else {
-            const savedId = localStorage.getItem('lastActiveRecordId');
-            if (savedId) {
-                const id = Number(savedId);
-                if (!isNaN(id) && activeRecordId !== id) {
-                    setActiveRecordId(id);
-                }
-            }
-        }
-    }, [recordIdFromUrl, setActiveRecordId, pathname, router, activeRecordId]);
+    }, [setActiveRecordId]);
 
     useEffect(() => {
         if (!currentUserName || !activeRecordId) {
@@ -60,7 +47,7 @@ export default function ResumePage() {
         }
 
         getPermissions(currentUserName, activeRecordId)
-            .then((permissions) => {
+            .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
@@ -136,8 +123,10 @@ export default function ResumePage() {
         }
     }, [permissions, selectedCategories, toggleCategory]);
 
-    const sortedMessages = [...messages].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+    const sortedMessages = useMemo(() =>
+        [...messages].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        ), [messages]
     );
 
     const filteredCategories = permissions.includes(Permission.IS_MEDECIN)
@@ -149,25 +138,38 @@ export default function ResumePage() {
         channel.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+
     return (
         <div className={`w-full p-4 md:p-10 font-sans bg-[#f1f2f2] flex flex-col ${selectedChannel ? "h-screen overflow-hidden" : "min-h-screen"}`}>
 
             {/* --- HEADER --- */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-6 gap-6 w-full pt-2 flex-none">
-                <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-[#0551ab]">Resume</h1>
-                    <nav aria-label="Breadcrumb" className="text-sm text-[#6b7280] flex items-center whitespace-nowrap">
-                        <span> <FilArianne/> </span>
-                        {!selectedChannel && (
-                            <span className="ml-1">
-                                 {
-                                     selectedCategories.length === 0 || selectedCategories.length === categories.length
-                                         ? ""
-                                         : " / Catégories / " + selectedCategories.join(", ")
-                                 }
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-3xl font-bold text-[#0551ab] mb-1">Résumé</h1>
+                    <nav aria-label="Breadcrumb" className="text-sm text-[#6b7280] leading-relaxed">
+                        {/* On utilise un affichage inline-block pour l'icône */}
+                        <span className="inline-flex items-center align-middle">
+                            <FilArianne />
+                        </span>
+                        {!selectedChannel && selectedCategories.length > 0 && selectedCategories.length !== categories.length && (
+                            <span className="inline">
+                                <span className="mx-2 inline-block">/</span>
+                                <span className="font-medium inline-block">Catégories</span>
+                                <span className="mx-2 inline-block">/</span>
+                                {selectedCategories.map((cat, index) => (
+                                    <span key={cat} className="text-[#26b3a9] font-medium inline">
+                                            {cat}
+                                        {index < selectedCategories.length - 1 ? ", " : ""}
+                                        </span>
+                                ))}
                             </span>
                         )}
-                        {selectedChannel && <span className="ml-1"> / {selectedChannel.title}</span>}
+                        {selectedChannel && (
+                            <span className="inline">
+                                <span className="mx-2 inline-block">/</span>
+                                <span className="font-medium inline">{selectedChannel.title}</span>
+                            </span>
+                        )}
                     </nav>
                 </div>
 
@@ -179,7 +181,6 @@ export default function ResumePage() {
                             onChange={(e) => {
                                 const newId = Number(e.target.value);
                                 setActiveRecordId(newId);
-                                localStorage.setItem('lastActiveRecordId', newId.toString());
                                 setSelectedChannel(null);
                             }}
                             className="bg-white text-black rounded-lg px-4 py-2 flex-1 text-base font-medium cursor-pointer border-none outline-none"
@@ -191,7 +192,7 @@ export default function ResumePage() {
                         {selectedChannel && (
                             <Button
                                 variant="retourFil"
-                                onClick={() => setSelectedChannel(null)}
+                                onClickAction={() => setSelectedChannel(null)}
                                 link={""}
                             >
                                 Retour
@@ -208,22 +209,29 @@ export default function ResumePage() {
                     <div className="bg-white rounded-[2.5rem] shadow-sm flex-1 border border-gray-100 flex flex-col overflow-hidden min-h-0">
 
                         {/* Header interne */}
-                        <div className="px-8 py-4 flex items-center justify-between bg-[#26b3a9] text-white w-full flex-none">
-                            <div className="flex items-center gap-6">
-                                <div className="bg-white p-4 rounded-full text-[#26b3a9] flex items-center justify-center shadow-md">
-                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 30 30">
+                        <div className="px-4 md:px-8 py-3 md:py-4 flex items-center justify-between bg-[#26b3a9] text-white w-full flex-none gap-2">
+                            {/* ZONE GAUCHE : Prend le maximum de place et tronque si besoin */}
+                            <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
+                                <div className="bg-white p-2 md:p-4 rounded-full text-[#26b3a9] shrink-0 shadow-md">
+                                    <svg className="w-5 h-5 md:w-8" fill="currentColor" viewBox="0 0 30 30">
                                         <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" />
                                         <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" />
                                     </svg>
                                 </div>
-                                <div className="flex flex-col">
-                                    <h2 className="text-xl font-bold leading-tight">{capitalizeWords(selectedChannel.title)}</h2>
-                                    <span className="text-sm opacity-90">{selectedChannel.category}</span>
+                                <div className="flex flex-col min-w-0">
+                                    <h2 className="text-sm md:text-xl font-bold leading-tight truncate">
+                                        {capitalizeWords(selectedChannel.title)}
+                                    </h2>
+                                    <span className="text-[10px] md:text-sm opacity-90 truncate">
+                                        {selectedChannel.category}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end justify-between self-stretch py-1">
-                                <span className="px-2 py-2 font-bold">{new Date(selectedChannel.creationDate).toLocaleDateString()}</span>
 
+                            <div className="flex flex-col items-end justify-center shrink-0 gap-1">
+                                <span className="font-bold text-[10px] md:text-sm whitespace-nowrap">
+                                    {new Date(selectedChannel.creationDate).toLocaleDateString()}
+                                </span>
                             </div>
                         </div>
 
@@ -307,13 +315,13 @@ export default function ResumePage() {
                                                         />
                                                         <div className="flex justify-end gap-3">
                                                             <button
-                                                                className="text-xs md:text-sm font-bold text-gray-100 hover:text-white underline"
+                                                                className="text-xs md:text-sm font-bold text-[#f67a7a] hover:scale-110 hover:cursor-pointer transition-transform underline"
                                                                 onClick={() => setEditingMessageId(null)}
                                                             >
                                                                 Annuler
                                                             </button>
                                                             <button
-                                                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-full text-xs md:text-sm font-bold shadow-sm transition-colors"
+                                                                className="bg-white text-[#0551ab] hover:scale-110 hover:cursor-pointer transition-transform px-4 py-1.5 rounded-full text-xs md:text-sm font-bold shadow-sm"
                                                                 onClick={() => handleSaveEdit(msg.id)}
                                                             >
                                                                 Enregistrer
@@ -335,11 +343,13 @@ export default function ResumePage() {
                                                         <div className="flex items-center gap-2">
                                                             {isDeleted && (
                                                                 <svg className="w-4 h-4 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                                                 </svg>
                                                             )}
-                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? 'italic opacity-80' : ''}`}>
-                                                                {msg.content}
+                                                            <p className={`text-sm md:text-base font-semibold leading-relaxed wrap-break-word ${isDeleted ? "italic opacity-80" : ""}`}>
+                                                                {isDeleted
+                                                                    ? msg.content.replace(/\u200B/g, "")
+                                                                    : msg.content}
                                                             </p>
                                                         </div>
                                                     </>
@@ -358,19 +368,24 @@ export default function ResumePage() {
                         </div>
 
                         {permissions.includes(Permission.SEND_MESSAGE) && !editingMessageId && (
-                            <div className="p-4 md:p-8 bg-white border-t w-full flex-none">
+                            <div className="p-3 md:p-8 bg-white border-t w-full flex-none">
                                 <form onSubmit={handleSendChatMessage} className="w-full flex items-center gap-2 md:gap-4">
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         <input
                                             type="text"
                                             value={newMessage}
                                             onChange={(e) => setNewMessage(e.target.value)}
                                             placeholder="Ecrivez votre message ici"
-                                            className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base"
+                                            className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base placeholder:text-xs md:placeholder:text-base"
                                         />
                                     </div>
-                                    <div className="w-auto ">
-                                        <Button variant="validate" type="submit" link={""}>Envoyer</Button>
+                                    <div className="shrink-0">
+                                        <button type="submit" className="bg-[#0551ab] text-white font-bold h-11 md:h-14 px-4 md:px-8 rounded-xl md:rounded-2xl hover:bg-[#f87c7c] transition-colors text-sm md:text-base flex items-center justify-center whitespace-nowrap">
+                                            <span className="hidden md:inline">Envoyer</span>
+                                            <svg className="w-5 h-5 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14M12 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -400,14 +415,14 @@ export default function ResumePage() {
                         </div>
 
                         <div className="bg-white rounded-2xl md:rounded-[2.5rem] shadow-sm p-4 md:p-10 border border-gray-50 flex flex-col">
-                            <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 uppercase tracking-tight flex-none">
-                                {selectedCategories.length === 0 || selectedCategories.length === categories.length ? "Toutes les transmissions" : selectedCategories.join(" + ")}
+                            <h2 className="text-[#26b3a9] font-bold text-3xl mb-8 tracking-tight flex-none">
+                                {selectedCategories.length === 0 || selectedCategories.length === categories.length ? "Toutes les transmissions" : selectedCategories.join(", ")}
                             </h2>
 
                             <div className="relative mb-10 text-black flex-none">
                                 <input
                                     type="text"
-                                    placeholder="Recherche par titre..."
+                                    placeholder="Recherche par titre"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
@@ -426,24 +441,39 @@ export default function ResumePage() {
                                     <div
                                         key={channel.id}
                                         onClick={() => setSelectedChannel(channel)}
-                                        className="bg-gray-100 p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-gray-200"
+                                        className="bg-gray-100 p-4 sm:p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-gray-200 gap-3"
                                     >
-                                        <div className="flex items-center gap-6">
-                                            <div className="bg-[#26b3a9] p-4 rounded-full text-white shadow-md">
-                                                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 30 30">
+                                        {/* Conteneur de gauche : Icône + Texte */}
+                                        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+                                            {/* Icône adaptative : plus petite sur mobile */}
+                                            <div className="bg-[#26b3a9] p-2 sm:p-4 rounded-full text-white shadow-md shrink-0">
+                                                <svg className="w-5 h-5 sm:w-8" fill="currentColor" viewBox="0 0 30 30">
                                                     <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" fill="white"/>
                                                     <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" fill="white"/>
                                                 </svg>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-black text-xl mb-1">{channel.category} | {capitalizeWords(channel.title)}</h3>
-                                                <p className="text-black opacity-80 font-medium line-clamp-1 italic text-sm">
-                                                    {channel.lastMessageAuthor ? (<><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>) : "Nouveau fil"}
+
+                                            {/* Textes avec gestion du débordement */}
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="font-bold text-black text-sm sm:text-xl mb-0.5 sm:mb-1 truncate">
+                                                    {channel.category === "Maisonterrain"
+                                                        ? "Maison/Terrain"
+                                                        : channel.category
+                                                    } | {capitalizeWords(channel.title)}
+                                                </h3>
+                                                <p className="text-black opacity-80 font-medium line-clamp-1 italic text-[10px] sm:text-sm">
+                                                    {channel.lastMessageAuthor ? (
+                                                        <><span className="font-bold">{channel.lastMessageAuthor} : </span>{channel.lastMessage}</>
+                                                    ) : "Nouveau fil"}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-3">
-                                            <span className="text-sm font-bold text-gray-400">{new Date(channel.creationDate).toLocaleDateString()}</span>
+
+                                        {/* Conteneur de droite : Date + Bouton */}
+                                        <div className="flex flex-col items-end gap-1 sm:gap-3 shrink-0 ml-2">
+                                            <span className="text-[10px] sm:text-sm font-bold text-gray-400 whitespace-nowrap">
+                                                {new Date(channel.creationDate).toLocaleDateString()}
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
@@ -453,6 +483,28 @@ export default function ResumePage() {
                 )}
             </div>
 
+
+
+            {/* Modal Archivage */}
+            {showArchiveModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowArchiveModal(false)}>
+                    <div className="bg-white rounded-2xl w-[420px] p-8 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-center mb-4">
+                            <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
+                        </div>
+                        <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous archiver ce fil?</h2>
+                        <p className="text-center text-gray-700 mb-6">Ce fil sera archivé définitivement</p>
+                        <div className="flex justify-center gap-4">
+                            <Button variant={"cancel"} link={""} onClickAction={() => setShowArchiveModal(false)}>Non</Button>
+                            <Button variant={"validate"} link={""}  onClickAction={() => {
+                                confirmArchive().then();
+                                setSelectedChannel(null);
+                            }}>Oui</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal Suppression */}
             {showDeleteMessageModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowDeleteMessageModal(false)}>
@@ -461,10 +513,10 @@ export default function ResumePage() {
                             <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
                         </div>
                         <h2 className="text-center text-xl font-bold text-[#0551ab] mb-2">Voulez-vous supprimer ce message?</h2>
-                        <p className="text-center text-gray-700 mb-6">Ce message sera remplacé par une mention de suppression.</p>
+                        <p className="text-center text-gray-700 mb-6">Ce message sera supprimé définitivement.</p>
                         <div className="flex justify-center gap-4">
-                            <Button variant={"cancel"} link={""} onClick={() => setShowDeleteMessageModal(false)}>Non</Button>
-                            <Button variant={"validate"} link={""}  onClick={() => {
+                            <Button variant={"cancel"} link={""} onClickAction={() => setShowDeleteMessageModal(false)}>Non</Button>
+                            <Button variant={"validate"} link={""}  onClickAction={() => {
                                 handleDeleteChatMessage(messageToDelete).then()
                                 setShowDeleteMessageModal(false)
                             }}>Oui</Button>

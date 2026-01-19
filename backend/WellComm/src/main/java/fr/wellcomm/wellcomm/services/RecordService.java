@@ -18,12 +18,6 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 
-<<<<<<< HEAD
-import static java.time.LocalDate.now;
-import static org.springframework.data.util.ClassUtils.ifPresent;
-
-=======
->>>>>>> main
 @Service
 @Transactional
 @AllArgsConstructor
