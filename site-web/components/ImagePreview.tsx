@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type ImagePreviewProps = {
     file: File | null;
@@ -11,24 +12,29 @@ const ImagePreview = ({ file }: ImagePreviewProps) => {
 
     useEffect(() => {
         if (!file) {
-            setPreviewUrl(null);
+            setTimeout(() => {
+                setPreviewUrl(null);
+            }, 0);
             return;
         }
 
         const url = URL.createObjectURL(file);
-        setPreviewUrl(url);
+        setTimeout(() => {
+            setPreviewUrl(url);
+        }, 0);
 
-        // Nettoyage mémoire
         return () => {
             URL.revokeObjectURL(url);
         };
     }, [file]);
 
     return (
-        <img
+        <Image
             src={previewUrl || "/images/placeholder.png"}
             alt="Preview"
-            className="w-50 h-50 object-contain rounded-lg border cursor-pointer hover:opacity-80 transition"
+            width={250}
+            height={250}
+            className="object-contain rounded-lg border cursor-pointer hover:opacity-80 transition"
         />
     );
 };

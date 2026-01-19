@@ -22,6 +22,7 @@ const BurgerScreen = () => {
         { text: "Calendrier", iconWhite: "/images/icons/white/solar-calendar-outline.svg", iconBlue: "/images/icons/blue/solar-calendar-outline(1).svg", href: "/calendar" },
         { text: "Résumé", iconWhite: "/images/icons/white/icons-bell.svg", iconBlue: "/images/icons/blue/icons-bell(1).svg", href: "/resume" },
         { text: "Fil de transmission", iconWhite: "/images/icons/white/icons-message.svg", iconBlue: "/images/icons/blue/ep-message.svg", href: "/fil" },
+        { text: "Archive", iconWhite: "/images/icons/white/icon-archive.svg", iconBlue: "/images/icons/blue/icon-archive(1).svg", href: "/archive" },
         { text: "Médecin", iconWhite: "/images/icons/white/hugeicons-doctor-03.svg", iconBlue: "/images/icons/blue/hugeicons-doctor-03(1).svg", href: "/medecin" },
         { text: "Assistants", iconWhite: "/images/icons/white/lucide-users.svg", iconBlue: "/images/icons/blue/lucide-users(1).svg", href: "/assistants" },
     ];
@@ -105,7 +106,10 @@ const BurgerScreen = () => {
                                     cursor: "pointer",
                                 }}
                             >
-                                <img src={iconSrc} alt={item.text} style={{ width: "24px", height: "24px", marginRight: "12px" }} />
+                                <Image src={iconSrc} alt={item.text}
+                                       width={24}
+                                       height={24}
+                                       style={{ marginRight: "12px" }} />
                                 <span>{item.text}</span>
                             </div>
                         </Link>

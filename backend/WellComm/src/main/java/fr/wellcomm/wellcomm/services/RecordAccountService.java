@@ -1,6 +1,5 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -12,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -20,27 +18,43 @@ import java.util.List;
 @AllArgsConstructor
 public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
-    private final RecordRepository recordRepository;
     private final AccountRepository accountRepository;
+    private final RecordRepository recordRepository;
 
-    public RecordAccount getReccordAccount(long id) {
-        return recordAccountRepository.findById(id).orElse(null);
+
+    public List<RecordAccount> getByRecordId(Long recordId) {
+        return recordAccountRepository.findByRecordId(recordId);
     }
 
-    public RecordAccount createReccordAccount(Account account, Record record, @NotNull Role role) {
+    public void createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
                 role.getTitre(),
                 role.getPermission());
 
-        account.getRecordAccounts().add(recordAccount);
+        recordAccount = recordAccountRepository.save(recordAccount);
+        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
-        //record.getRecordAccounts().add(recordAccount);
-        //recordRepository.save(record);
-        return recordAccount;
+        record.getRecordAccounts().add(recordAccount);
+        recordRepository.save(record);
     }
 
-    public RecordAccount getRecordAccounts(String userName, long id) {
+    //update role record_account
+    public void updateRoleRecordAccount(String accountUserName, Long recordId, String role) {
+        RecordAccount recordAccount =
+                recordAccountRepository
+                .findByAccountUserNameAndRecordId(accountUserName, recordId)
+                .orElseThrow(() -> new RuntimeException("Access not found"));
+
+        // Mise à jour du rôle
+        recordAccount.setTitle(role);
+
+        // Sauvegarde
+        recordAccountRepository.save(recordAccount);
+    }
+
+    //à comparer avec la fonction dans account
+    public RecordAccount getRecordAccount(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
     }
 }

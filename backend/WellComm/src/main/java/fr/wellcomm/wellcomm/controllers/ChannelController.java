@@ -3,6 +3,7 @@ package fr.wellcomm.wellcomm.controllers;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
+import fr.wellcomm.wellcomm.entities.CloseChannel;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/{userName}/records/{recordId}/channels/{channelId}")
 @AllArgsConstructor
 public class ChannelController {
     private final ChannelService channelService;
@@ -45,7 +45,9 @@ public class ChannelController {
         private List<MessageInfos> messages;
     }
 
-    @GetMapping("/")
+    // ========== OPEN CHANNELS ==========
+
+    @GetMapping("/api/{userName}/records/{recordId}/channels/{channelId}/")
     @PreAuthorize("#userName == authentication.name and" +
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") String userName,
@@ -65,7 +67,7 @@ public class ChannelController {
         ));
     }
 
-    @PostMapping("/messages")
+    @PostMapping("/api/{userName}/records/{recordId}/channels/{channelId}/messages")
     @PreAuthorize("#userName == authentication.name and" +
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<?> addMessage(
@@ -80,10 +82,8 @@ public class ChannelController {
         OpenChannel channel = channelService.getChannel(channelId);
         if (channel == null) return ResponseEntity.badRequest().body("Channel not found");
 
-        // 1. Sauvegarde classique en base via ton service existant
         Message msg = channelService.addMessage(channel, content, account);
 
-        // 2. Création de l'objet de réponse (Format attendu par le Front)
         MessageInfos response = new MessageInfos(
                 msg.getId(),
                 msg.getContent(),
@@ -92,11 +92,41 @@ public class ChannelController {
                 msg.getAuthorTitle()
         );
 
-        // 3. DIFFUSION WEBSOCKET (Temps réel)
-        // On envoie le message à tous les abonnés du canal spécifique
         String destination = "/topic/messages/" + channelId;
         messagingTemplate.convertAndSend(destination, response);
 
         return ResponseEntity.ok(response);
+    }
+
+    // ========== CLOSE CHANNELS ==========
+
+    @GetMapping("/api/{userName}/records/{recordId}/closechannels/{channelId}/")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<ChannelInfos> getCloseChannelContent(
+            @PathVariable @SuppressWarnings("unused") String userName,
+            @PathVariable @SuppressWarnings("unused") long recordId,
+            @PathVariable Long channelId) {
+
+        CloseChannel channel = channelService.getCloseChannel(channelId);
+        if (channel == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<MessageInfos> messages = channel.getMessages().values().stream()
+                .map(m -> new MessageInfos(
+                        m.getId(),
+                        m.getContent(),
+                        m.getDate(),
+                        m.getAuthor().getUserName(),
+                        m.getAuthorTitle()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ChannelInfos(
+                channel.getId(),
+                channel.getTitle(),
+                channel.getCategory().toString(),
+                messages
+        ));
     }
 }

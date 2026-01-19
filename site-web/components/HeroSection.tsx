@@ -1,4 +1,3 @@
-// mon-site-web/components/HeroSection.tsx
 import Image from 'next/image';
 import {Button} from "@/components/ButtonMain";
 

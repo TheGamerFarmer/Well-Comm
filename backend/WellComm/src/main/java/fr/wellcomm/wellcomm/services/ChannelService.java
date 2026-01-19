@@ -5,20 +5,25 @@ import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
+import fr.wellcomm.wellcomm.repositories.CloseChannelRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class ChannelService {
     private final ChannelRepository channelRepository;
+    private final CloseChannelRepository closeChannelRepository;
     private final RecordAccountRepository recordAccountRepository;
     private final MessageRepository messageRepository;
     private final AccountRepository accountRepository;
+
+    // ========== OPEN CHANNELS ==========
 
     public OpenChannel getChannel(long id) {
         return channelRepository.findById(id).orElse(null);
@@ -50,5 +55,22 @@ public class ChannelService {
         channelRepository.save(channel);
 
         return message;
+    }
+
+    public Date lastMessage(@NotNull OpenChannel channel) {
+        Map<Long, Message> messages = channel.getMessages();
+        Date lastMessage = null;
+        for (Message message : messages.values()) {
+            if(lastMessage == null || lastMessage.getTime() < message.getDate().getTime()) {
+                lastMessage = message.getDate();
+            }
+        }
+        return lastMessage;
+    }
+
+    // ========== CLOSE CHANNELS ==========
+
+    public CloseChannel getCloseChannel(long id) {
+        return closeChannelRepository.findById(id).orElse(null);
     }
 }

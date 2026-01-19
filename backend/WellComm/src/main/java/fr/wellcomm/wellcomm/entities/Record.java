@@ -17,7 +17,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class Record {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
     private String admin;
@@ -33,6 +33,9 @@ public class Record {
     private List<RecordAccount> recordAccounts = new ArrayList<>();
     @Transient
     private Report report = new Report();
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JoinColumn(name = "calendar_id")
+    private Calendar calendar;
 
     public Record(String name, String admin) {
         this.name = name;

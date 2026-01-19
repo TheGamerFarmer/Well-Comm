@@ -8,13 +8,15 @@ import fr.wellcomm.wellcomm.repositories.ReportRepository;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.data.util.ClassUtils.ifPresent;
 
 @Service
 @Transactional
@@ -24,6 +26,7 @@ public class RecordService {
     private final ChannelRepository channelRepository;
     private final RecordAccountRepository recordAccountRepository;
     private final ChannelService channelService;
+    private final CalendarService calendarService;
 
     public Record getRecord(long id) {
         return recordRepository.findById(String.valueOf(id)).orElse(null);
@@ -45,8 +48,29 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
     }
 
+    public List<OpenChannel> getLastWeekChannelsOfCategory(long recordId, Category category) {
+        List<OpenChannel> channels = channelRepository.findByDossierIdAndCategorie(recordId, category);
+        List<OpenChannel> lastWeekChannels = new ArrayList<>();
+        Date oneWeekAgo = Date.from(LocalDateTime.now().minusDays(7).atZone(ZoneId.systemDefault()).toInstant());
+        for (OpenChannel channel : channels) {
+            Date lastMessageDate = channelService.lastMessage(channel);
+            if (lastMessageDate != null && lastMessageDate.after(oneWeekAgo)) {
+                lastWeekChannels.add(channel);
+            }
+        }
+        return lastWeekChannels;
+    }
+
     public Record createRecord(String name, String admin) {
-        return recordRepository.save(new Record(name, admin));
+        Record record = new Record(name, admin);
+
+        record = recordRepository.save(record);
+
+        Calendar calendar = calendarService.createCalendar(record);
+        record.setCalendar(calendar);
+        record = recordRepository.save(record);
+
+        return record;
     }
 
     @Transactional
@@ -60,6 +84,7 @@ public class RecordService {
         recordRepository.delete(recordOpt.get()); // cascade JPA supprime les enfants
         return true;
     }
+
     public void archiveChannel(Record record, long channelId) {
         OpenChannel channel = channelRepository.findById(channelId).orElse(null);
         if (channel == null)

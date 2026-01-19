@@ -2,8 +2,8 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import encryptPassword from "../../../functions/encryptPassword";
-import logUser from "../../../functions/logUser";
+import {encryptPassword} from "@/functions/encryptPassword";
+import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
 
 // 1. Move the logic into a separate component
@@ -19,13 +19,17 @@ function LoginForm() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        const hashedPwd = encryptPassword(password);
+        setErrorMessage("");
 
-        if (await logUser(userName, hashedPwd)) {
-            // Use router.push for client-side navigation inside event handlers
+        const hashedPwd = encryptPassword(password);
+        const result = await logUser(userName, hashedPwd);
+
+        if (result.success) {
+            localStorage.setItem("username", userName);
+            //localStorage.setItem("userId",userId)
             router.push(callbackUrl);
         } else {
-            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
+            setErrorMessage(result.message || "Une erreur est survenue");
         }
     };
 

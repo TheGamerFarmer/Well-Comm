@@ -8,7 +8,6 @@ import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
 
-
 type Dossier = {
     id: number;
     name: string;
@@ -36,23 +35,22 @@ export default function MesAides() {
         if (!userName) return;
 
         const fetchDossiers = async () => {
-            try {
-                const res = await fetch(
-                    `${API_BASE_URL}/api/${userName}/records/`,
-                    { credentials: "include" }
-                );
+            const res = await fetch(
+                `${API_BASE_URL}/api/${userName}/records/`,
+                { credentials: "include" }
+            );
 
-                if (!res.ok) throw new Error("Erreur chargement dossiers");
-
-                const data: Dossier[] = await res.json();
-                console.log("API dossiers =", data);
-                setDossiers(data);
-            } catch (err) {
-                console.error(err);
+            if (!res.ok) {
+                console.log("Erreur chargement dossiers");
+                return;
             }
+
+            const data: Dossier[] = await res.json();
+            console.log("API dossiers =", data);
+            setDossiers(data);
         };
 
-        fetchDossiers();
+        fetchDossiers().then();
     }, [userName]);
 
     /* =======================
@@ -62,33 +60,31 @@ export default function MesAides() {
         e.preventDefault();
         if (!name.trim()) return;
 
-        try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
-                    name
-                )}`,
-                {
-                    method: "POST",
-                    credentials: "include",
-                }
-            );
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
+                name
+            )}`,
+            {
+                method: "POST",
+                credentials: "include",
+            }
+        );
 
-            if (!res.ok) throw new Error("Erreur création dossier");
-
-            const newRecord = await res.json();
-
-            setDossiers((prev) => [
-                ...prev,
-                { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
-            ]);
-
-
-            setName("");
-            setFile(null);
-            setIsOpen(false);
-        } catch (err) {
-            console.error(err);
+        if (!res.ok) {
+            console.log("Erreur création dossier");
+            return
         }
+
+        const newRecord = await res.json();
+
+        setDossiers((prev) => [
+            ...prev,
+            { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
+        ]);
+
+        setName("");
+        setFile(null);
+        setIsOpen(false);
     };
 
     /* =======================
@@ -98,33 +94,28 @@ export default function MesAides() {
         const files = e.target.files;
         setFile(files && files.length > 0 ? files[0] : null);
     };
-
+//supprimer un dossier
     const handleDelete = async (id: number) => {
         if (!id) return;
 
-        try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
-                {
-                    method: "DELETE",
-                    credentials: "include",
-                }
-            );
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
+            {
+                method: "DELETE",
+                credentials: "include",
+            }
+        );
 
-            if (!res.ok) throw new Error("Erreur suppression");
-
-            // Mise à jour de la liste côté front
-            setDossiers(dossiers.filter(d => d.id !== id));
-
-            console.log("Dossier supprimé ✅");
-        } catch (err: any) {
-            console.error(err.message);
-            alert(err.message);
+        if (!res.ok) {
+            console.log("Erreur suppression");
+            return;
         }
-    };
 
+        // Mise à jour de la liste côté front
+        setDossiers(dossiers.filter(d => d.id !== id));
 
-
+        console.log("Dossier supprimé ✅");
+    }
 
     return (
         <div className="p-10">
@@ -135,7 +126,7 @@ export default function MesAides() {
             <FilArianne />
 
             <div className="flex justify-end my-4">
-                <Button variant="validate" type="button" onClick={() => setIsOpen(true)} link={""}>
+                <Button variant="validate" type="button" onClickAction={() => setIsOpen(true)} link={""}>
                     Ajouter un aidé
                 </Button>
             </div>
@@ -144,15 +135,18 @@ export default function MesAides() {
          Liste des dossiers
         ======================= */}
             <div className="p-4 rounded-2xl shadow bg-white">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 text-black">
                     {dossiers.map((dossier) =>{
                         return(
-
-                            <Link key={dossier.id} href={`/fil`}>
+                            <Link key={dossier.id} href={`/resume`}>
                         <div
                             key={dossier.id}
-                            className=" text-black w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
-                        >
+                            onClick={() => {
+                                localStorage.setItem('activeRecordId', dossier.id.toString());
+                            }
+                        }
+                            className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
+                            >
                             {/* image plus tard depuis backend */}
                             <div className="w-12 h-12 bg-gray-300 rounded-md" />
 
@@ -160,7 +154,7 @@ export default function MesAides() {
 
                             <div className="ml-auto">
                                 {userName && dossier.admin === userName && (
-                                <button type="button" className="text-[#f27474] hover:scale-110 transition-transform" onClick={(e) => {
+                                <button type="button" className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform" onClick={(e) => {
                                     e.preventDefault(); // empêche la navigation
                                     e.stopPropagation(); // empêche le click parent
                                     setDossierToDelete(dossier);}}>
@@ -211,7 +205,7 @@ export default function MesAides() {
                                 <Button
                                     variant="cancel"
                                     type="button"
-                                    onClick={() => setIsOpen(false)} link={""}>
+                                    onClickAction={() => setIsOpen(false)} link={""}>
                                     Annuler
                                 </Button>
 
@@ -239,14 +233,16 @@ export default function MesAides() {
                                 <strong>{dossierToDelete.name}</strong> sera supprimé définitivement.
                             </p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="button" onClick={() => {
-                                    if(!dossierToDelete?.id)return;
-                                    handleDelete(dossierToDelete.id);
+                                <Button variant="cancel" onClickAction={() => setDossierToDelete(null)} link={""}>Non</Button>
+                                <Button variant="validate" type="button" onClickAction={() => {
+                                    if(!dossierToDelete?.id)
+                                        return;
+
+                                    handleDelete(dossierToDelete.id).then();
                                     setDossierToDelete(null);
                                 }} link={""}>
                                     Oui
                                 </Button>
-                                <Button onClick={() => setDossierToDelete(null)} link={""}>Non</Button>
                             </div>
                         </div>
                     </div>

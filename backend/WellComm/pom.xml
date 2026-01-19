@@ -87,6 +87,12 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.lookfirst</groupId>
+            <artifactId>sardine</artifactId>
+            <version>5.12</version>
+        </dependency>
     </dependencies>
 
     <build>
