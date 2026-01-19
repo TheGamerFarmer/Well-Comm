@@ -161,8 +161,8 @@ export default function ArchivePage() {
                         {/* Header interne */}
                         <div className="px-4 md:px-8 py-3 md:py-4 flex items-center justify-between bg-[#26b3a9] text-white w-full flex-none gap-2">
                             <div className="flex items-center gap-3 md:gap-6 min-w-0 flex-1">
-                                <div className="bg-white p-2 md:p-4 rounded-full text-[#26b3a9] shrink-0 shadow-md">
-                                    <svg className="w-5 h-5 md:w-8" fill="currentColor" viewBox="0 0 30 30">
+                                <div className="bg-white p-2  rounded-full text-[#26b3a9] shrink-0 shadow-md">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 30 30">
                                         <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" />
                                         <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" />
                                     </svg>
@@ -304,7 +304,7 @@ export default function ArchivePage() {
                                     >
                                         <div className="flex items-center gap-3 sm:gap-6 min-w-0">
                                             <div className="bg-[#26b3a9] p-2 sm:p-4 rounded-full text-white shadow-md shrink-0">
-                                                <svg className="w-5 h-5 sm:w-8" fill="currentColor" viewBox="0 0 30 30">
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 30 30">
                                                     <path d="M4.80002 21.6002H7.20002V26.4974L13.3212 21.6002H19.2C20.5236 21.6002 21.6 20.5238 21.6 19.2002V9.6002C21.6 8.2766 20.5236 7.2002 19.2 7.2002H4.80002C3.47642 7.2002 2.40002 8.2766 2.40002 9.6002V19.2002C2.40002 20.5238 3.47642 21.6002 4.80002 21.6002Z" fill="white"/>
                                                     <path d="M24 2.40039H9.59995C8.27635 2.40039 7.19995 3.47679 7.19995 4.80039H21.6C22.9236 4.80039 24 5.87679 24 7.20039V16.8004C25.3236 16.8004 26.4 15.724 26.4 14.4004V4.80039C26.4 3.47679 25.3236 2.40039 24 2.40039Z" fill="white"/>
                                                 </svg>
