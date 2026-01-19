@@ -5,7 +5,7 @@ interface ColorPickerProps {
     color: string;
     onChange: (color: string) => void;
     presetColors: string[];
-    colorPopupRef: React.RefObject<HTMLDivElement | null>;
+    colorPopupRef: React.RefObject<HTMLDivElement>;
 }
 
 export function ColorPicker({ color, onChange, presetColors, colorPopupRef }: ColorPickerProps) {

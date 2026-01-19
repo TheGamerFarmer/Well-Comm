@@ -13,14 +13,14 @@ interface EventModalProps {
     setIsCreating: (value: boolean) => void;
     setSelectedEvent: (event: any) => void;
     hasEditPermission: boolean;
-    formatDisplayTime: (iso: string) => string;
+    formatDisplayTime: (date: Date) => string;
     joinISO: (date: string, time: string) => string;
     splitISO: (iso: string) => { date: string; time: string };
     saveEdits: () => void;
     deleteEvent: () => void;
     isColorPopupOpen: boolean;
     toggleColorPopupOpen: (open: boolean) => void;
-    colorPopupRef: React.RefObject<HTMLDivElement | null>;
+    colorPopupRef: React.RefObject<HTMLDivElement>;
     presetColors: string[];
 }
 
