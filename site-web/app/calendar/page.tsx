@@ -1,6 +1,6 @@
 'use client';
 
-import FramagendaView from "@/components/FramagendaView";
+import Agenda from "@/components/Agenda";
 import React, {useState} from "react";
 
 export default function Calendar() {
@@ -17,7 +17,7 @@ export default function Calendar() {
                 </div>
             </div>
 
-            <FramagendaView/>
+            <Agenda/>
         </div>
     );
 }
