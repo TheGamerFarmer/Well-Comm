@@ -41,7 +41,7 @@ export default function MesAides() {
             );
 
             if (!res.ok) {
-                console.error("Erreur chargement dossiers");
+                console.log("Erreur chargement dossiers");
                 return;
             }
 
@@ -71,7 +71,7 @@ export default function MesAides() {
         );
 
         if (!res.ok) {
-            console.error("Erreur création dossier");
+            console.log("Erreur création dossier");
             return
         }
 
@@ -107,7 +107,7 @@ export default function MesAides() {
         );
 
         if (!res.ok) {
-            console.error("Erreur suppression");
+            console.log("Erreur suppression");
             return;
         }
 

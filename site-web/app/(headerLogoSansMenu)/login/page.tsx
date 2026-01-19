@@ -23,7 +23,7 @@ function LoginForm() {
 
         if (await logUser(userName, hashedPwd)) {
             localStorage.setItem("username", userName);
-            // Use router.push for client-side navigation inside event handlers
+
             router.push(callbackUrl);
         } else {
             setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");

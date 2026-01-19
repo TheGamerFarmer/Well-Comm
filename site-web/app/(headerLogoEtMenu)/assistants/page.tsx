@@ -46,7 +46,7 @@ export default function AssistantsPage() {
         );
 
         if (!res.ok) {
-            console.error("Erreur chargement assistants");
+            console.log("Erreur chargement assistants");
             return;
         }
 
@@ -64,7 +64,7 @@ export default function AssistantsPage() {
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
         if (!userName || !currentDossier) {
-            console.error("Aucun dossier sélectionné");
+            console.log("Aucun dossier sélectionné");
             return;
         }
 
@@ -88,7 +88,7 @@ export default function AssistantsPage() {
         if (!res.ok) {
             const errorMessage = await res.text();
             setError(errorMessage);
-            console.error(errorMessage);
+            console.log(errorMessage);
             return;
         }
 
@@ -101,7 +101,7 @@ export default function AssistantsPage() {
 //supprimer un assistant
     const removeAccess = async (name: string, id: number ) => {
         if (!userName || !currentDossier) {
-            console.error("Aucun dossier sélectionné");
+            console.log("Aucun dossier sélectionné");
             return;
         }
 
@@ -112,7 +112,7 @@ export default function AssistantsPage() {
 
         if (!res.ok) {
             const errorMessage = await res.text();
-            console.error(errorMessage);
+            console.log(errorMessage);
             return;
         }
 
@@ -124,7 +124,7 @@ export default function AssistantsPage() {
     //mettre a jour le role d'un assistant
     const updateRoleAccess = async (name: string, id: number, title: string) => {
         if (!userName || !currentDossier) {
-            console.error("Aucun dossier sélectionné");
+            console.log("Aucun dossier sélectionné");
             return;
         }
 
@@ -135,7 +135,7 @@ export default function AssistantsPage() {
 
         if (!res.ok) {
             const errorMessage = await res.text();
-            console.error(errorMessage);
+            console.log(errorMessage);
             return;
         }
         await fetchAssistants();

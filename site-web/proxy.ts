@@ -24,12 +24,11 @@ export async function proxy(request: NextRequest) {
 
     const isLoged = await response.json();
 
-    if (!response.ok
-                || (isLoged && logPages.includes(request.nextUrl.pathname)))
-        return NextResponse.redirect(new URL("/mesAides", request.url));
+    if (!response.ok || (isLoged && logPages.includes(request.nextUrl.pathname)))
+        return NextResponse.redirect(new URL(homePage, request.url));
     else if (isLoged
                 || logPages.includes(request.nextUrl.pathname)
-                || homePage === request.nextUrl.pathname)
+                || "/" === request.nextUrl.pathname)
         return NextResponse.next();
     else {
         const urlSource = request.nextUrl.pathname + request.nextUrl.search;

@@ -72,7 +72,7 @@ export async function getRecords(userName: string): Promise<DossierResponse[]> {
             return await response.json();
         }
     } catch (err) {
-        console.error("Erreur records:", err);
+        console.log("Erreur records:", err);
     }
     return [];
 }
@@ -95,7 +95,7 @@ export async function fetchAllChannels(
             new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
         );
     } catch (err) {
-        console.error("Erreur fetchAllChannels:", err);
+        console.log("Erreur fetchAllChannels:", err);
         return [];
     }
 }
@@ -116,7 +116,7 @@ export async function getChannels(userName: string, recordId: number, category: 
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -128,7 +128,7 @@ export async function getChannelContent(userName: string, recordId: number, chan
             cache: 'no-store'
         });
         if (response.ok) return await response.json();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.log(err); }
     return null;
 }
 
@@ -148,7 +148,7 @@ export async function getCloseChannels(userName: string, recordId: number, categ
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -175,7 +175,7 @@ export async function createChannel(
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur lors de la création du fil:", err);
+        console.log("Erreur lors de la création du fil:", err);
         return false;
     }
 }
@@ -192,7 +192,7 @@ export async function archiveChannel(userName: string, recordId: number, channel
         );
         return res.ok;
     } catch (err) {
-        console.error("Erreur archivage:", err);
+        console.log("Erreur archivage:", err);
         return false;
     }
 }
@@ -208,7 +208,7 @@ export async function addMessage(userName: string, recordId: number, channelId: 
         });
         if (response.ok) return await response.json();
     } catch (err) {
-        console.error("Erreur envoi message:", err);
+        console.log("Erreur envoi message:", err);
     }
     return null;
 }
@@ -222,7 +222,7 @@ export async function deleteMessage(userName: string, recordId: number, channelI
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur suppression message:", err);
+        console.log("Erreur suppression message:", err);
     }
     return false;
 }
@@ -238,7 +238,7 @@ export async function updateMessage(userName: string, recordId: number, channelI
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur modification message:", err);
+        console.log("Erreur modification message:", err);
         return false;
     }
 }

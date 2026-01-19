@@ -49,12 +49,13 @@ function RegisterForm() {
 
             if (response.ok) {
                 await logUser(userName, hashedPwd);
+                localStorage.setItem("username", userName);
                 router.push(callbackUrl);
             } else {
                 setErrorMessage("L'utilisateur existe déjà");
             }
         } catch (err) {
-            console.error(err);
+            console.log(err);
             setErrorMessage("Une erreur est survenue.");
         }
     };

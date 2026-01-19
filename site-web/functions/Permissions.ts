@@ -30,14 +30,14 @@ export async function getPermissions(userName: string, recordId: number): Promis
         );
 
         if (!res.ok) {
-            console.error("Erreur HTTP:", res.status);
+            console.log("Erreur HTTP:", res.status);
             return [];
         }
 
         const data = await res.json();
         return Array.isArray(data) ? data : data.permissions ?? [];
     } catch (err) {
-        console.error("Erreur permissions:", err);
+        console.log("Erreur permissions:", err);
         return [];
     }
 }

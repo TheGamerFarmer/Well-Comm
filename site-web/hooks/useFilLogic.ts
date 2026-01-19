@@ -80,7 +80,7 @@ export function useFilLogic() {
             const data = await fetchAllChannels(currentUserName, activeRecordId, selectedCategories, categories);
             setChannels(data);
         } catch (error) {
-            console.error("Erreur chargement fils:", error);
+            console.log("Erreur chargement fils:", error);
         } finally {
             setIsLoading(false);
         }
