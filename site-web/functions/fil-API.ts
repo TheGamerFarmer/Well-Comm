@@ -242,3 +242,39 @@ export async function updateMessage(userName: string, recordId: number, channelI
         return false;
     }
 }
+
+export async function fetchAllCloseChannels(
+    userName: string,
+    recordId: number,
+    selectedCategories: string[],
+    allAvailableCategories: string[]
+): Promise<FilResponse[]> {
+
+    const categoriesToFetch = selectedCategories.length === 0 ? allAvailableCategories : selectedCategories;
+
+    try {
+        const promises = categoriesToFetch.map(cat => getCloseChannels(userName, recordId, cat));
+        const results = await Promise.all(promises);
+        const flatResults = results.flat();
+
+        return flatResults.sort((a, b) =>
+            new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+        );
+    } catch (err) {
+        console.error("Erreur fetchAllCloseChannels:", err);
+        return [];
+    }
+}
+
+export async function getCloseChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
+        if (response.ok) return await response.json();
+    } catch (err) {
+        console.error("Erreur getCloseChannelContent:", err);
+    }
+    return null;
+}
