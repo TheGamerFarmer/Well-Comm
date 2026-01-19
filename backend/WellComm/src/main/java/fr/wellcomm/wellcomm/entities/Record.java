@@ -33,7 +33,7 @@ public class Record {
     private List<RecordAccount> recordAccounts = new ArrayList<>();
     @Transient
     private Report report = new Report();
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "calendar_id")
     private Calendar calendar;
 

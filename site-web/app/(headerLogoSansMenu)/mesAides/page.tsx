@@ -243,7 +243,6 @@ export default function MesAides() {
                                 }} link={""}>
                                     Oui
                                 </Button>
-                                <Button onClickAction={() => setDossierToDelete(null)} link={""}>Non</Button>
                             </div>
                         </div>
                     </div>

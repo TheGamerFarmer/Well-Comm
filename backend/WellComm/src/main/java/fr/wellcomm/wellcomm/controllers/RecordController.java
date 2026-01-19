@@ -172,7 +172,7 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{recordId}")
+    @DeleteMapping("/delete/{recordId}")
     @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
                                               @PathVariable Long recordId) {
