@@ -1,11 +1,14 @@
 package fr.wellcomm.wellcomm.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fr.wellcomm.wellcomm.domain.Permission;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "record_account")
@@ -18,9 +21,11 @@ public class RecordAccount {
     private long id;
     // Relation vers l'utilisateur (Plusieurs accès pour un utilisateur)
     @ManyToOne
+    @JsonIgnore
     private Account account;
     // Relation vers le dossier (Plusieurs utilisateurs pour un dossier)
     @ManyToOne
+    @JsonIgnore
     private Record record;
     private String title;
     @ElementCollection(targetClass = Permission.class)
@@ -28,6 +33,12 @@ public class RecordAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "permission_name")
     private List<Permission> permissions;
+    @Column(name = "date_creation",nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+        public void onCreate() {
+            this.createdAt = LocalDateTime.now();
+        }
 
     public RecordAccount(Account account, Record record, String title, List<Permission> permissions) {
         this.account = account;

@@ -1,9 +1,7 @@
-/**
- * Logique de communication avec le backend pour les fils de transmission
- */
-
 import { API_BASE_URL } from "@/config";
 import { fetchWithCert} from "@/functions/fetchWithCert";
+
+export const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
 export interface FilResponse {
     id: number;
@@ -56,21 +54,12 @@ export function capitalizeWords(str: string | undefined | null): string {
         .join(' ');
 }
 
-export async function getCurrentUser(): Promise<string | null> {
-    try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/me`, {
-            credentials: 'include',
-            cache: 'no-store',
-            headers: { 'Accept': 'application/json' }
-        });
-        if (response.ok) {
-            const data = await response.json();
-            return data.userName;
-        }
-    } catch (err) {
-        console.error("Erreur identification:", err);
-    }
-    return null;
+export async function getCurrentUser(): Promise<string> {
+    const userName = localStorage.getItem('username');
+    if (userName)
+        return userName;
+    else
+        return "null";
 }
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {
@@ -107,7 +96,7 @@ export async function fetchAllChannels(
             new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
         );
     } catch (err) {
-        console.error("Erreur fetchAllChannels:", err);
+        console.log("Erreur fetchAllChannels:", err);
         return [];
     }
 }
@@ -128,7 +117,7 @@ export async function getChannels(userName: string, recordId: number, category: 
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -140,7 +129,7 @@ export async function getChannelContent(userName: string, recordId: number, chan
             cache: 'no-store'
         });
         if (response.ok) return await response.json();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.log(err); }
     return null;
 }
 
@@ -160,7 +149,7 @@ export async function getCloseChannels(userName: string, recordId: number, categ
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -187,7 +176,7 @@ export async function createChannel(
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur lors de la création du fil:", err);
+        console.log("Erreur lors de la création du fil:", err);
         return false;
     }
 }
@@ -204,7 +193,7 @@ export async function archiveChannel(userName: string, recordId: number, channel
         );
         return res.ok;
     } catch (err) {
-        console.error("Erreur archivage:", err);
+        console.log("Erreur archivage:", err);
         return false;
     }
 }
@@ -220,7 +209,73 @@ export async function addMessage(userName: string, recordId: number, channelId: 
         });
         if (response.ok) return await response.json();
     } catch (err) {
-        console.error("Erreur envoi message:", err);
+        console.log("Erreur envoi message:", err);
+    }
+    return null;
+}
+
+export async function deleteMessage(userName: string, recordId: number, channelId: number, messageId: number): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+            method: 'DELETE',
+            credentials: 'include',
+            cache: 'no-store',
+        });
+        return response.ok;
+    } catch (err) {
+        console.log("Erreur suppression message:", err);
+    }
+    return false;
+}
+
+export async function updateMessage(userName: string, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+            method: 'PUT',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+            body: content
+        });
+        return response.ok;
+    } catch (err) {
+        console.log("Erreur modification message:", err);
+        return false;
+    }
+}
+
+export async function fetchAllCloseChannels(
+    userName: string,
+    recordId: number,
+    selectedCategories: string[],
+    allAvailableCategories: string[]
+): Promise<FilResponse[]> {
+
+    const categoriesToFetch = selectedCategories.length === 0 ? allAvailableCategories : selectedCategories;
+
+    try {
+        const promises = categoriesToFetch.map(cat => getCloseChannels(userName, recordId, cat));
+        const results = await Promise.all(promises);
+        const flatResults = results.flat();
+
+        return flatResults.sort((a, b) =>
+            new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
+        );
+    } catch (err) {
+        console.error("Erreur fetchAllCloseChannels:", err);
+        return [];
+    }
+}
+
+export async function getCloseChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
+        if (response.ok) return await response.json();
+    } catch (err) {
+        console.error("Erreur getCloseChannelContent:", err);
     }
     return null;
 }

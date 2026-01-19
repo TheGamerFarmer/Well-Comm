@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, Suspense } from "react";
-import encryptPassword from "../../../functions/encryptPassword";
-import logUser from "../../../functions/logUser";
+import {encryptPassword} from "@/functions/encryptPassword";
+import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
-import { API_BASE_URL } from "../../../config";
 import { fetchWithCert} from "@/functions/fetchWithCert";
+import { API_BASE_URL } from "@/config";
 
 function RegisterForm() {
     const [firstName, setFirstName] = useState("");
@@ -18,7 +18,7 @@ function RegisterForm() {
 
     const searchParams = useSearchParams();
     const router = useRouter();
-    const callbackUrl = searchParams.get("callbackUrl") || "/";
+    const callbackUrl = searchParams.get("callbackUrl") || "/mesAides";
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,12 +50,13 @@ function RegisterForm() {
 
             if (response.ok) {
                 await logUser(userName, hashedPwd);
+                localStorage.setItem("username", userName);
                 router.push(callbackUrl);
             } else {
                 setErrorMessage("L'utilisateur existe déjà");
             }
         } catch (err) {
-            console.error(err);
+            console.log(err);
             setErrorMessage("Une erreur est survenue.");
         }
     };

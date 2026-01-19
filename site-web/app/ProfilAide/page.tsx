@@ -1,16 +1,41 @@
-
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
+import { API_BASE_URL } from "@/config";
+import {getCurrentUser} from "@/functions/fil-API";
 
 export default function ProfilAide() {
+    const [assisted, setAssisted] = useState({firstName: "", lastName: "", dateOfBirth: "", mobileNumber: "", information: ""});
+    const [activeRecordId] = useState<number | null>(null);
+    const [assistedId] = useState<number | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
+
+    useEffect(() => {
+        getCurrentUser().then(setUserName);
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        await fetch(`${API_BASE_URL}/api/${userName}/records/${activeRecordId}/assisted/${assistedId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                ...assisted,
+                recordId: 1
+            }),
+        });
+    };
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="py-4 ">
-                <p className="font-bold text-[#0551ab] text-2xl">L'aidé</p>
+                <p className="font-bold text-[#0551ab] text-2xl">L&#39;aidé</p>
                 <FilArianne/>
             </div>
             <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-[100%] rounded-xl border-20 border-[#f4f4f4] md:border-white ">
@@ -40,33 +65,38 @@ export default function ProfilAide() {
 
                 </div>
 
-                <form className="mx-auto  ">
+                <form onSubmit={handleSubmit} className="mx-auto  ">
                     <div className="flex flex-col md:flex-row md:gap-4">
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
-                            <input className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex  flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input type="text" value={assisted.firstName} onChange={(e) => setAssisted({ ...assisted, firstName: e.target.value })}
+                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex  flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
-                            <input className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input type="text" value={assisted.lastName} onChange={(e) => setAssisted({ ...assisted, lastName: e.target.value })}
+                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
-                            <input type="date" className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input type="date" value={assisted.dateOfBirth} onChange={(e) => setAssisted({ ...assisted, dateOfBirth: e.target.value })}
+                                   className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Numéro de téléphone</label>
-                            <input type="tel" className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input type="tel" value={assisted.mobileNumber} onChange={(e) => setAssisted({ ...assisted, mobileNumber: e.target.value })}
+                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
                     <div className="self-center">
                         <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Informations complémentaires</label>
-                        <textarea className="w-[280px] md:w-[300px] h-[100px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                        <textarea value={assisted.information} onChange={(e) => setAssisted({ ...assisted, information: e.target.value })}
+                                  className="w-[280px] md:w-[300px] h-[100px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                     </div>
                     </div>
 

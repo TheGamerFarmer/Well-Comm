@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -24,7 +21,7 @@ public class Account {
     private String lastName;
     private String password;
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecordAccount> recordAccounts = new ArrayList<>();
+    private Map<Long, RecordAccount> recordAccounts = new HashMap<>();
 
     public Account(String userName, String lastName, String firstName, String password) {
         this.userName = userName;

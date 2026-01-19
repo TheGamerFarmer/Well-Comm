@@ -5,7 +5,6 @@ import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.services.AccountService;
-import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,8 +15,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
+import fr.wellcomm.wellcomm.entities.Session;
+import fr.wellcomm.wellcomm.repositories.SessionRepository;
+
 
 @RestController
 @RequestMapping("/api/{userName}/records")
@@ -26,9 +29,7 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
-    private final ChannelService ChannelService;
-    private final ChannelService channelService;
-
+    private final SessionRepository sessionRepository;
 
     @Getter
     @Setter
@@ -45,6 +46,7 @@ public class RecordController {
     public static class DossierResponse {
         private Long id;
         private String name;
+        private String admin;
     }
 
     @Getter
@@ -63,7 +65,7 @@ public class RecordController {
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable String userName) {
         List<DossierResponse> dossiers = recordService.getRecords(userName).stream()
-                .map(d -> new DossierResponse(d.getId(), d.getName()))
+                .map(d -> new DossierResponse(d.getId(), d.getName(), d.getAdmin()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dossiers);
@@ -71,12 +73,10 @@ public class RecordController {
 
     @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Record> createRecord(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<Record> createRecord(@PathVariable String userName,
                                                @PathVariable String name) {
-
-        Record newRecord = recordService.createRecord(name);
-        Role aide = Role.AIDANT;
-        RecordAccount newRecordAccount = recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
+        Record newRecord = recordService.createRecord(name, userName);
+        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, Role.AIDANT);
         return ResponseEntity.ok(newRecord);
     }
 
@@ -119,25 +119,28 @@ public class RecordController {
     }
 
     @PostMapping("/{recordId}/channels/new")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).OPEN_CHANNEL)")
     public ResponseEntity<?> createChannel(@PathVariable String userName,
                                            @PathVariable long recordId,
                                            @RequestBody CreateFilRequest request) {
-
         Account account = accountService.getUser(userName);
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().stream()
-                .filter(ra -> ra.getRecord().getId() == recordId)
-                .findFirst()
-                .orElse(null);
-
-        if (recordAccount == null) {
-            return ResponseEntity.badRequest().body("L'utilisateur n'a pas accès à ce dossier.");
+        RecordAccount recordAccount = null;
+        Map<Long, RecordAccount> recordAccounts = account.getRecordAccounts();
+        for (Map.Entry<Long, RecordAccount> entry : recordAccounts.entrySet()) {
+            if (entry.getValue().getRecord().getId() == recordId){
+                recordAccount = entry.getValue();
+            }
         }
+        if (recordAccount == null)
+            return ResponseEntity.badRequest().body("RecordAccount not found");
 
         Record record = recordAccount.getRecord();
+        if (record == null)
+            return ResponseEntity.badRequest().body("Record not found");
 
         OpenChannel newChannel = recordService.createChannel(
                 record,
@@ -159,13 +162,12 @@ public class RecordController {
         ));
     }
 
-
     @PostMapping("/{recordId}/channels/{channelId}/archive")
-    @PreAuthorize("#userName == authentication.name") // il faudra vérifier ici si l'utilisateur à les droits de fermer un fil
+    @PreAuthorize("#userName == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).CLOSE_CHANNEL)")
     public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
             @PathVariable long recordId,
             @PathVariable long channelId) {
-
         Record record = recordService.getRecord(recordId);
         if (record == null) {
             return ResponseEntity.badRequest().body("Record not found");
@@ -176,14 +178,52 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable Long id) {
-        boolean deleted = recordService.deleteRecord(id);
+    @DeleteMapping("/delete/{recordId}")
+    @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
+                                              @PathVariable Long recordId) {
+        boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
             return ResponseEntity.noContent().build(); // 204
         } else {
             return ResponseEntity.notFound().build(); // 404
         }
     }
+    //création d'une session quand on selectionne un dossier
+    @PostMapping("/select/{recordId}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> selectRecord(
+            @PathVariable @SuppressWarnings("unused") String userName,
+            @CookieValue("token") String token,
+            @PathVariable Long recordId
+    ) {
+          // Vérifie que la session existe pour ce token
+          Session session = sessionRepository.findById(token)
+                  .orElseThrow(() -> new RuntimeException("Session invalide"));
+
+
+          // Enregistre le recordId sélectionné
+          session.setCurrentRecordId(recordId);
+          sessionRepository.save(session);
+          return ResponseEntity.ok().build();
+      }
+
+    //return current-record
+    @GetMapping("/current-record")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> getCurrentRecord(
+            @PathVariable @SuppressWarnings("unused") String userName,
+            @CookieValue("token") String token
+    ) {
+          // Récupère la session par le token
+          Session session = sessionRepository.findById(token)
+                            .orElseThrow(() -> new RuntimeException("Session invalide"));
+
+          Long currentRecordId = session.getCurrentRecordId();
+          if (currentRecordId == null) {
+              return ResponseEntity.noContent().build(); // 204 si aucun dossier sélectionné
+          }
+
+          return ResponseEntity.ok(currentRecordId); // Retourne juste l'ID du dossier courant
+      }
 }

@@ -60,10 +60,10 @@ public class ChannelControllerTest {
         // 1. Création des données réelles en base
         Account userTest = new Account();
         userTest.setUserName("userTest");
-        accountRepository.save(userTest);
+        userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Médical");
-        recordRepository.save(record);
+        Record record = new Record("Dossier Médical", "userTest");
+        record = recordRepository.save(record);
 
         // Ajout de la permission SEND_MESSAGE
         List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
@@ -98,13 +98,13 @@ public class ChannelControllerTest {
         // 1. Création des données SANS la permission SEND_MESSAGE
         Account userTest = new Account();
         userTest.setUserName("userTest");
-        accountRepository.save(userTest);
+        userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret");
-        recordRepository.save(record);
+        Record record = new Record("Dossier Secret", "userTest");
+        record = recordRepository.save(record);
 
         // On donne une autre permission, mais pas SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.IsMedecin);
+        List<Permission> permissions = List.of(Permission.IS_MEDECIN);
         RecordAccount ra = new RecordAccount(userTest, record, "LECTEUR", permissions);
         recordAccountRepository.save(ra);
 

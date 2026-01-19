@@ -9,14 +9,30 @@ import java.util.List;
 @Getter
 public enum Role {
     AIDANT("Aidant",
-            Permission.ModifierAgenda,
-            Permission.AssignerPermissions,
-            Permission.Inviter),
+            Permission.EDIT_CALENDAR,
+            Permission.SEE_CALENDAR,
+            Permission.ASSIGN_PERMISSIONS,
+            Permission.INVITE,
+            Permission.OPEN_CHANNEL,
+            Permission.CLOSE_CHANNEL,
+            Permission.SEND_MESSAGE,
+            Permission.MODIFY_MESSAGE,
+            Permission.DELETE_MESSAGE,
+            Permission.DELETE_RECORD),
     EMPLOYEE("Employée",
-            Permission.AssignerPermissions,
-            Permission.Inviter),
+            Permission.SEE_CALENDAR,
+            Permission.OPEN_CHANNEL,
+            Permission.CLOSE_CHANNEL,
+            Permission.SEND_MESSAGE,
+            Permission.MODIFY_MESSAGE,
+            Permission.DELETE_MESSAGE),
     MEDECIN("Médecin",
-            Permission.IsMedecin);
+            Permission.IS_MEDECIN,
+            Permission.OPEN_CHANNEL,
+            Permission.CLOSE_CHANNEL,
+            Permission.SEND_MESSAGE,
+            Permission.MODIFY_MESSAGE,
+            Permission.DELETE_MESSAGE);
 
     private final String titre;
     private final List<Permission> permission;

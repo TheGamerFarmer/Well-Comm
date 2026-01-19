@@ -14,8 +14,6 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.data.util.ClassUtils.ifPresent;
-
 @Service
 @Transactional
 @AllArgsConstructor
@@ -24,6 +22,7 @@ public class RecordService {
     private final ChannelRepository channelRepository;
     private final RecordAccountRepository recordAccountRepository;
     private final ChannelService channelService;
+    private final CalendarService calendarService;
 
     public Record getRecord(long id) {
         return recordRepository.findById(String.valueOf(id)).orElse(null);
@@ -45,8 +44,16 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
     }
 
-    public Record createRecord(String name) {
-        return recordRepository.save(new Record(name));
+    public Record createRecord(String name, String admin) {
+        Record record = new Record(name, admin);
+
+        record = recordRepository.save(record);
+
+        Calendar calendar = calendarService.createCalendar(record);
+        record.setCalendar(calendar);
+        record = recordRepository.save(record);
+
+        return record;
     }
 
     @Transactional
@@ -60,6 +67,7 @@ public class RecordService {
         recordRepository.delete(recordOpt.get()); // cascade JPA supprime les enfants
         return true;
     }
+
     public void archiveChannel(Record record, long channelId) {
         OpenChannel channel = channelRepository.findById(channelId).orElse(null);
         if (channel == null)

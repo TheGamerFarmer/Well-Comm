@@ -105,7 +105,10 @@ const BurgerScreen = () => {
                                     cursor: "pointer",
                                 }}
                             >
-                                <img src={iconSrc} alt={item.text} style={{ width: "24px", height: "24px", marginRight: "12px" }} />
+                                <Image src={iconSrc} alt={item.text}
+                                       width={24}
+                                       height={24}
+                                       style={{ marginRight: "12px" }} />
                                 <span>{item.text}</span>
                             </div>
                         </Link>
