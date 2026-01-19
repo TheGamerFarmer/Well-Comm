@@ -6,6 +6,7 @@ import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
+import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -18,17 +19,14 @@ import java.util.List;
 public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
     private final AccountRepository accountRepository;
+    private final RecordRepository recordRepository;
 
 
     public List<RecordAccount> getByRecordId(Long recordId) {
         return recordAccountRepository.findByRecordId(recordId);
     }
 
-    public RecordAccount getReccordAccount(long id) {
-        return recordAccountRepository.findById(id).orElse(null);
-    }
-
-    public RecordAccount createReccordAccount(Account account, Record record, @NotNull Role role) {
+    public void createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
                 role.getTitre(),
@@ -37,9 +35,8 @@ public class RecordAccountService {
         recordAccount = recordAccountRepository.save(recordAccount);
         account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
-        //record.getRecordAccounts().add(recordAccount);
-        //recordRepository.save(record);
-        return recordAccount;
+        record.getRecordAccounts().add(recordAccount);
+        recordRepository.save(record);
     }
 
     //update role record_account

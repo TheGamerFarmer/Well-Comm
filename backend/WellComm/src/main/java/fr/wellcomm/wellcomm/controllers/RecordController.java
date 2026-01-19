@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.entities.Session;
@@ -75,8 +76,7 @@ public class RecordController {
     public ResponseEntity<Record> createRecord(@PathVariable String userName,
                                                @PathVariable String name) {
         Record newRecord = recordService.createRecord(name, userName);
-        Role aide = Role.AIDANT;
-        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, aide);
+        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, Role.AIDANT);
         return ResponseEntity.ok(newRecord);
     }
 
@@ -147,7 +147,13 @@ public class RecordController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().get(recordId);
+        RecordAccount recordAccount = null;
+        Map<Long, RecordAccount> recordAccounts = account.getRecordAccounts();
+        for (Map.Entry<Long, RecordAccount> entry : recordAccounts.entrySet()) {
+            if (entry.getValue().getRecord().getId() == recordId){
+                recordAccount = entry.getValue();
+            }
+        }
         if (recordAccount == null)
             return ResponseEntity.badRequest().body("RecordAccount not found");
 
@@ -191,7 +197,7 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{recordId}")
+    @DeleteMapping("/delete/{recordId}")
     @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
                                               @PathVariable Long recordId) {

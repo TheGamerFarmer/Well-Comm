@@ -1,5 +1,6 @@
 // hooks/useCurrentDossier.ts
 import { useEffect, useState } from "react";
+import {API_BASE_URL} from "@/config";
 
 export function useCurrentDossier(userName: string | null) {
     const [currentDossier, setCurrentDossier] = useState<number | null>(null);
@@ -11,7 +12,7 @@ export function useCurrentDossier(userName: string | null) {
         const fetchCurrent = async () => {
             try {
                 const res = await fetch(
-                    `http://localhost:8080/api/${userName}/records/current-record`,
+                    `${API_BASE_URL}/api/${userName}/records/current-record`,
                     { credentials: "include" } // inclut le cookie httpOnly
                 );
 
