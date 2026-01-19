@@ -3,9 +3,12 @@ package fr.wellcomm.wellcomm.controllers;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
+import fr.wellcomm.wellcomm.services.SessionService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +26,8 @@ public class AccountController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final RecordService recordService;
     private final RecordAccountService recordAccountService;
+    private final SessionService sessionService;
+    private final AccountRepository accountRepository;
 
     @Getter
     @Setter
@@ -43,6 +48,12 @@ public class AccountController {
     @Setter
     public static class deleteRecordAccountRequest {
         private long recordId;
+    }
+
+    @Getter
+    @Setter
+    public static class LogoutRequest {
+        private String userName;
     }
 
     @GetMapping("/infos")
@@ -199,6 +210,18 @@ public class AccountController {
 
         recordAccountService.updateRoleRecordAccount(targetUserName, recordId, role);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<?> logout(LogoutRequest logoutRequest, HttpServletRequest request) {
+
+        String userName = logoutRequest.getUserName();
+        Account account = accountRepository.findById(userName).orElse(null);
+        if (account == null)
+            return ResponseEntity.badRequest().body("Account not found");
+
+        sessionService.logout(account);
         return ResponseEntity.ok().build();
     }
 
