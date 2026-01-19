@@ -24,14 +24,14 @@ export function useCurrentDossier(userName: string | null) {
                     setCurrentDossier(null);
                 }
             } catch (err) {
-                console.error(err);
+                console.log(err);
                 setCurrentDossier(null);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchCurrent();
+        fetchCurrent().then();
     }, [userName]);
 
     return { currentDossier, loading };

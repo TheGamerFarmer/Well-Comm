@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import fr.wellcomm.wellcomm.entities.*;
 import java.util.List;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
@@ -43,7 +42,7 @@ public static class RecordAccountResponse {
     public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") String userName,
                                                                                  @PathVariable Long recordId
     ) {
-        RecordAccount ra = recordAccountService.getRecordAccounts(userName, recordId);
+        RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
         return ResponseEntity.ok(ra.getPermissions());
     }
 

@@ -109,7 +109,9 @@ public class AccountController {
     //ajouter un assistant autre que la personne connecté à un dossier
     @PostMapping("/addAccess/current_record/{name}")
     @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable String userName, @RequestBody addRecordAccountRequest request, @PathVariable String name) {
+    public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable @SuppressWarnings("unused") String userName,
+                                                           @RequestBody addRecordAccountRequest request,
+                                                           @PathVariable String name) {
         Account account = accountService.getUser(name);
         if (account == null)
             return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
@@ -141,16 +143,8 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = new RecordAccount();
-        int i = 0;
-        while (i < account.getRecordAccounts().size()){
-            if (account.getRecordAccounts().get(i).getId() == request.getRecordId()){
-                recordAccount = account.getRecordAccounts().get(i);
-            }
-            i++;
-        }
-
-        if (i == account.getRecordAccounts().size())
+        RecordAccount recordAccount = account.getRecordAccounts().get(request.getRecordId());
+        if (recordAccount == null)
             return ResponseEntity.badRequest().body("Access not found");
 
         accountService.deleteRecordAccount(account, recordAccount);
@@ -175,7 +169,7 @@ public class AccountController {
                 return ResponseEntity.badRequest().body("Assistant introuvable");
             }
 
-         RecordAccount recordAccount = targetAccount.getRecordAccounts()
+         RecordAccount recordAccount = targetAccount.getRecordAccounts().values()
                     .stream()
                     .filter(ra -> ra.getRecord().getId() == recordId)
                     .findFirst()

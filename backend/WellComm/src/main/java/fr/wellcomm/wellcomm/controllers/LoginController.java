@@ -4,6 +4,7 @@ import fr.wellcomm.wellcomm.entities.Session;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
+import fr.wellcomm.wellcomm.services.CalendarService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class LoginController {
     private final AccountRepository accountRepository;
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final CalendarService calendarService;
 
     @Getter
     @Setter
@@ -45,9 +47,8 @@ public class LoginController {
 
         Account account = accountRepository.findById(userName).orElse(null);
 
-        if (account == null) {
+        if (account == null)
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
-        }
 
         if (passwordEncoder.matches(password, account.getPassword())) {
             String token = UUID.randomUUID().toString();
@@ -75,7 +76,6 @@ public class LoginController {
     @GetMapping("/isLogin")
     public boolean testLogin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
 
         return authentication != null
                 && authentication.isAuthenticated()

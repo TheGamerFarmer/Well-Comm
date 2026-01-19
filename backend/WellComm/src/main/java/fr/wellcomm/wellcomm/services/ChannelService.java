@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
+import fr.wellcomm.wellcomm.repositories.CloseChannelRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +19,12 @@ import java.util.Map;
 @AllArgsConstructor
 public class ChannelService {
     private final ChannelRepository channelRepository;
+    private final CloseChannelRepository closeChannelRepository;
     private final RecordAccountRepository recordAccountRepository;
     private final MessageRepository messageRepository;
     private final AccountRepository accountRepository;
+
+    // ========== OPEN CHANNELS ==========
 
     public OpenChannel getChannel(long id) {
         return channelRepository.findById(id).orElse(null);
@@ -54,6 +58,7 @@ public class ChannelService {
         return message;
     }
 
+<<<<<<< HEAD
     public Date lastMessage(@NotNull OpenChannel channel) {
         Map<Long, Message> messages = channel.getMessages();
         Date lastMessage = null;
@@ -65,3 +70,11 @@ public class ChannelService {
         return lastMessage;
     }
 }
+=======
+    // ========== CLOSE CHANNELS ==========
+
+    public CloseChannel getCloseChannel(long id) {
+        return closeChannelRepository.findById(id).orElse(null);
+    }
+}
+>>>>>>> main

@@ -4,9 +4,9 @@ import { API_BASE_URL } from "./config";
 
 export async function proxy(request: NextRequest) {
     const logPages = ["/login", "/register"];
-    const homePage = "/";
-    const nextJsPagesPrefix = "/_next"
-    const imagesPrefix = "/images"
+    const homePage = "/mesAides";
+    const nextJsPagesPrefix = "/_next";
+    const imagesPrefix = "/images";
 
     if (request.nextUrl.pathname.startsWith(nextJsPagesPrefix)
             || request.nextUrl.pathname.startsWith(imagesPrefix))
@@ -24,11 +24,11 @@ export async function proxy(request: NextRequest) {
 
     const isLoged = await response.json();
 
-    if (!response.ok && isLoged && logPages.includes(request.nextUrl.pathname))
-        return NextResponse.redirect(new URL("/", request.url));
+    if (!response.ok || (isLoged && logPages.includes(request.nextUrl.pathname)))
+        return NextResponse.redirect(new URL(homePage, request.url));
     else if (isLoged
                 || logPages.includes(request.nextUrl.pathname)
-                || homePage === request.nextUrl.pathname)
+                || "/" === request.nextUrl.pathname)
         return NextResponse.next();
     else {
         const urlSource = request.nextUrl.pathname + request.nextUrl.search;

@@ -14,6 +14,6 @@ export default async function logUser(userName: string, hashPassWord: string) : 
 
         return response.ok;
     } catch (err) {
-        console.error(err);
+        console.log(err);
     }
 }

@@ -11,4 +11,5 @@ public enum Permission {
     OPEN_CHANNEL,
     CLOSE_CHANNEL,
     DELETE_RECORD,
+    SEE_CALENDAR,
 }

@@ -10,6 +10,7 @@ import java.util.List;
 public enum Role {
     AIDANT("Aidant",
             Permission.EDIT_CALENDAR,
+            Permission.SEE_CALENDAR,
             Permission.ASSIGN_PERMISSIONS,
             Permission.INVITE,
             Permission.OPEN_CHANNEL,
@@ -19,6 +20,7 @@ public enum Role {
             Permission.DELETE_MESSAGE,
             Permission.DELETE_RECORD),
     EMPLOYEE("Employée",
+            Permission.SEE_CALENDAR,
             Permission.OPEN_CHANNEL,
             Permission.CLOSE_CHANNEL,
             Permission.SEND_MESSAGE,

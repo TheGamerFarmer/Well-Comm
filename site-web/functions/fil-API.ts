@@ -2,19 +2,6 @@ import { API_BASE_URL } from "@/config";
 
 export const categories = ["Santé", "Ménage", "Alimentation", "Maison", "Hygiène", "Autre"];
 
-export enum Permission {
-    SEND_MESSAGE = "SEND_MESSAGE",
-    DELETE_MESSAGE = "DELETE_MESSAGE",
-    OPEN_CHANNEL = "OPEN_CHANNEL",
-    CLOSE_CHANNEL = "CLOSE_CHANNEL",
-    IS_ADMIN = "IS_ADMIN",
-    MODIFY_MESSAGE = "MODIFY_MESSAGE",
-    IS_MEDECIN = "IS_MEDECIN",
-    EDIT_CALENDAR = "EDIT_CALENDAR",
-    ASSIGN_PERMISSIONS = "ASSIGN_PERMISSIONS",
-    INVITE = "INVITE",
-}
-
 export interface FilResponse {
     id: number;
     title: string;
@@ -66,13 +53,12 @@ export function capitalizeWords(str: string | undefined | null): string {
         .join(' ');
 }
 
-export async function getCurrentUser(): Promise<string | null> {
+export async function getCurrentUser(): Promise<string> {
     const userName = localStorage.getItem('username');
-    if (userName) {
+    if (userName)
         return userName;
-    } else {
-        return null;
-    }
+    else
+        return "null";
 }
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {
@@ -86,7 +72,7 @@ export async function getRecords(userName: string): Promise<DossierResponse[]> {
             return await response.json();
         }
     } catch (err) {
-        console.error("Erreur records:", err);
+        console.log("Erreur records:", err);
     }
     return [];
 }
@@ -109,7 +95,7 @@ export async function fetchAllChannels(
             new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
         );
     } catch (err) {
-        console.error("Erreur fetchAllChannels:", err);
+        console.log("Erreur fetchAllChannels:", err);
         return [];
     }
 }
@@ -130,7 +116,7 @@ export async function getChannels(userName: string, recordId: number, category: 
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -142,7 +128,7 @@ export async function getChannelContent(userName: string, recordId: number, chan
             cache: 'no-store'
         });
         if (response.ok) return await response.json();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.log(err); }
     return null;
 }
 
@@ -162,7 +148,7 @@ export async function getCloseChannels(userName: string, recordId: number, categ
             return data.opened_channels || [];
         }
     } catch (err) {
-        console.error("Erreur channels:", err);
+        console.log("Erreur channels:", err);
     }
     return [];
 }
@@ -210,7 +196,7 @@ export async function createChannel(
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur lors de la création du fil:", err);
+        console.log("Erreur lors de la création du fil:", err);
         return false;
     }
 }
@@ -227,7 +213,7 @@ export async function archiveChannel(userName: string, recordId: number, channel
         );
         return res.ok;
     } catch (err) {
-        console.error("Erreur archivage:", err);
+        console.log("Erreur archivage:", err);
         return false;
     }
 }
@@ -243,7 +229,7 @@ export async function addMessage(userName: string, recordId: number, channelId: 
         });
         if (response.ok) return await response.json();
     } catch (err) {
-        console.error("Erreur envoi message:", err);
+        console.log("Erreur envoi message:", err);
     }
     return null;
 }
@@ -257,7 +243,7 @@ export async function deleteMessage(userName: string, recordId: number, channelI
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur suppression message:", err);
+        console.log("Erreur suppression message:", err);
     }
     return false;
 }
@@ -273,33 +259,43 @@ export async function updateMessage(userName: string, recordId: number, channelI
         });
         return response.ok;
     } catch (err) {
-        console.error("Erreur modification message:", err);
+        console.log("Erreur modification message:", err);
         return false;
     }
 }
 
-export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
-    if (!userName || !recordId) return [];
+export async function fetchAllCloseChannels(
+    userName: string,
+    recordId: number,
+    selectedCategories: string[],
+    allAvailableCategories: string[]
+): Promise<FilResponse[]> {
+
+    const categoriesToFetch = selectedCategories.length === 0 ? allAvailableCategories : selectedCategories;
 
     try {
-        const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${recordId}/permissions`,
-            {
-                method: "GET",
-                credentials: "include",
-                cache: "no-store",
-            }
+        const promises = categoriesToFetch.map(cat => getCloseChannels(userName, recordId, cat));
+        const results = await Promise.all(promises);
+        const flatResults = results.flat();
+
+        return flatResults.sort((a, b) =>
+            new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()
         );
-
-        if (!res.ok) {
-            console.error("Erreur HTTP:", res.status);
-            return [];
-        }
-
-        const data = await res.json();
-        return Array.isArray(data) ? data : data.permissions ?? [];
     } catch (err) {
-        console.error("Erreur permissions:", err);
+        console.error("Erreur fetchAllCloseChannels:", err);
         return [];
     }
+}
+
+export async function getCloseChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
+        if (response.ok) return await response.json();
+    } catch (err) {
+        console.error("Erreur getCloseChannelContent:", err);
+    }
+    return null;
 }

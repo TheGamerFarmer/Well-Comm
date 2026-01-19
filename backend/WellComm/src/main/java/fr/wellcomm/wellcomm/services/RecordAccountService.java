@@ -1,26 +1,22 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Date;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class RecordAccountService {
     private final RecordAccountRepository recordAccountRepository;
-    private final RecordRepository recordRepository;
     private final AccountRepository accountRepository;
 
 
@@ -38,7 +34,8 @@ public class RecordAccountService {
                 role.getTitre(),
                 role.getPermission());
 
-        account.getRecordAccounts().add(recordAccount);
+        recordAccount = recordAccountRepository.save(recordAccount);
+        account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
         //record.getRecordAccounts().add(recordAccount);
         //recordRepository.save(record);
@@ -60,7 +57,7 @@ public class RecordAccountService {
     }
 
     //à comparer avec la fonction dans account
-    public RecordAccount getRecordAccounts(String userName, long id) {
+    public RecordAccount getRecordAccount(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
     }
 }
