@@ -22,6 +22,7 @@ function LoginForm() {
         const hashedPwd = encryptPassword(password);
 
         if (await logUser(userName, hashedPwd)) {
+            localStorage.setItem("username", userName);
             // Use router.push for client-side navigation inside event handlers
             router.push(callbackUrl);
         } else {

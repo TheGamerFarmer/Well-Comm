@@ -53,21 +53,13 @@ export function capitalizeWords(str: string | undefined | null): string {
         .join(' ');
 }
 
-export async function getCurrentUser(): Promise<string> {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/me`, {
-            credentials: 'include',
-            cache: 'no-store',
-            headers: { 'Accept': 'application/json' }
-        });
-        if (response.ok) {
-            const data = await response.json();
-            return data.userName;
-        }
-    } catch (err) {
-        console.error("Erreur identification:", err);
+export async function getCurrentUser(): Promise<string | null> {
+    const userName = localStorage.getItem('username');
+    if (userName) {
+        return userName;
+    } else {
+        return null;
     }
-    return "null";
 }
 
 export async function getRecords(userName: string): Promise<DossierResponse[]> {

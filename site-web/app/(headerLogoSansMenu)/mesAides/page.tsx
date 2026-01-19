@@ -233,7 +233,8 @@ export default function MesAides() {
                                 <strong>{dossierToDelete.name}</strong> sera supprimé définitivement.
                             </p>
                             <div className="flex gap-4 justify-between mb-4">
-                                <Button variant="secondary" type="button" onClickAction={() => {
+                                <Button variant="cancel" onClickAction={() => setDossierToDelete(null)} link={""}>Non</Button>
+                                <Button variant="validate" type="button" onClickAction={() => {
                                     if(!dossierToDelete?.id)
                                         return;
 
