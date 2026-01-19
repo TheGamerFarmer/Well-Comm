@@ -4,6 +4,7 @@ import fr.wellcomm.wellcomm.entities.Session;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
+import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.CalendarService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,7 @@ public class LoginController {
     private final AccountRepository accountRepository;
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final CalendarService calendarService;
+    private final AccountService accountService;
 
     @Getter
     @Setter
@@ -50,7 +51,14 @@ public class LoginController {
         if (account == null)
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
 
+        if (accountService.isAccountLocked(account)) {
+            return ResponseEntity.status(403).body("Nombre de tentatives dépassé.\n" +
+                    "Votre compte est temporairement bloqué afin de protéger vos données.");
+        }
+
         if (passwordEncoder.matches(password, account.getPassword())) {
+            accountService.resetFailedAttempts(account);
+
             String token = UUID.randomUUID().toString();
 
             sessionRepository.save(new Session(token,
@@ -69,8 +77,10 @@ public class LoginController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .build();
-        } else
-            return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
+        } else {
+            accountService.registerFailedAttempt(account);
+            return ResponseEntity.status(401).body("Nom d'utilisateur ou mot de passe incorrect");
+        }
     }
 
     @GetMapping("/isLogin")

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +24,9 @@ public class Account {
     private String password;
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<Long, RecordAccount> recordAccounts = new HashMap<>();
+    private int failedAttempts;
+    private LocalDateTime lockTime;
+    private boolean isLocked;
 
     public Account(String userName, String lastName, String firstName, String password) {
         this.userName = userName;
