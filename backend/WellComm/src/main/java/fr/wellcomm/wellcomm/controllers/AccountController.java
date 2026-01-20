@@ -37,7 +37,7 @@ public class AccountController {
     @Setter
     public static class addRecordAccountRequest {
         private long recordId;
-        private Role title;
+        private String title;
     }
 
     @Getter
@@ -100,7 +100,15 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle() == "Aidant") {
+            newAccess.setTitle(Role.AIDANT);
+        }
+        else if(request.getTitle() == "Employé") {
+            newAccess.setTitle(Role.EMPLOYEE);
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -130,7 +138,15 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle() == "Aidant") {
+            newAccess.setTitle(Role.AIDANT);
+        }
+        else if(request.getTitle() == "Employé") {
+            newAccess.setTitle(Role.EMPLOYEE);
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
