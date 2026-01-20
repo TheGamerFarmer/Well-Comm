@@ -33,7 +33,6 @@ public class AccountController {
     private final AccountRepository accountRepository;
     private final RecordAccountService recordAccountService;
     private final SessionService sessionService;
-    private final AccountRepository accountRepository;
 
     @Getter
     @Setter
