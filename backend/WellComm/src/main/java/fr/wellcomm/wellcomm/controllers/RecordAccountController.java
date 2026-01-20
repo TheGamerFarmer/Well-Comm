@@ -75,7 +75,7 @@ public static class ChangePermissionsRequest {
             @PathVariable Long recordId) {
 
         List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                .filter(ra -> !ra.getAccount().getUserName().equals(userName) && (ra.getTitle() == Role.EMPLOYEE))
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName) && ((ra.getTitle() == Role.EMPLOYEE) || (ra.getTitle() == Role.AIDANT)))
                 .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
                 .collect(Collectors.toList());
 
