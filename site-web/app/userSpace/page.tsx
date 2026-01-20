@@ -17,9 +17,9 @@ export default function UserSpace() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [userName, setUserName] = useState<string>("");
-    const [newUserName, setNewUserName] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
+    const [newUserName, setNewUserName] = useState<string>("");
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
     const router = useRouter();
 
     useEffect(() => {
@@ -33,17 +33,20 @@ export default function UserSpace() {
                 router.push("/login");
                 return;
             }
-
             const me = await meRes.json();
             setUserName(me.userName);
 
             const profile = await getUserProfile(me.userName);
-            if (profile)setProfile({
-                userName: me.userName,
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-            });
-
+            if (profile) {
+                setProfile({
+                    userName: me.userName,
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                });
+                setFirstName(profile.firstName);
+                setLastName(profile.lastName);
+                setNewUserName(me.userName);
+            }
         };
         loadProfile();
     }, []);
@@ -126,7 +129,7 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
                             <input
                                 type="text"
-                                value={profile?.firstName || ""}
+                                value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
@@ -135,7 +138,7 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
                             <input
                                 type="text"
-                                value={profile?.lastName || ""}
+                                value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
@@ -154,7 +157,7 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
-                                value={profile?.userName || ""}
+                                value={newUserName}
                                 onChange={(e) => setNewUserName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
