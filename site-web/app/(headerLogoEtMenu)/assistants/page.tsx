@@ -3,11 +3,9 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
-import { useCurrentDossier } from "@/hooks/useCurrentDossier";
+import {getCurrentUser} from "@/functions/fil-API";
+import { API_BASE_URL } from "@/config";
 
-import {
-    getCurrentUser,
-} from "@/functions/fil-API";
 import Image from "next/image";
 
 //"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
@@ -33,15 +31,26 @@ export default function AssistantsPage() {
         getCurrentUser().then(setUserName);
     }, []);
 
-    const { currentDossier } = useCurrentDossier(userName);
+    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
+
+
+    useEffect(() => {
+        const localRecordId = localStorage.getItem('activeRecordId');
+        if (localRecordId) {
+            const id = Number(localRecordId);
+            if (!isNaN(id)) {
+                setActiveRecordId(id);
+            }
+        }
+    }, [setActiveRecordId])
 
 
     //récupérer les assistans de currentDossier
     const fetchAssistants = useCallback(async () => {
-        if (!userName || !currentDossier) return;
+        if (!userName || !activeRecordId) return;
 
         const res = await fetch(
-            `http://localhost:8080/api/${userName}/recordsaccount/${currentDossier}`,
+            `http://localhost:8080/api/${userName}/recordsaccount/${activeRecordId}`,
             {credentials: "include"}
         );
 
@@ -52,18 +61,18 @@ export default function AssistantsPage() {
 
         const data: Invitation[] = await res.json();
         setInvitations(data);
-    }, [currentDossier, userName]);
+    }, [activeRecordId, userName]);
     
     //afficher la liste d'assistants quand on charge la page
     useEffect(() => {
         setTimeout(() => {
             fetchAssistants().then();
         }, 0);
-    }, [userName, currentDossier, fetchAssistants]);
+    }, [userName, activeRecordId, fetchAssistants]);
     
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
-        if (!userName || !currentDossier) {
+        if (!userName || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
@@ -79,7 +88,7 @@ export default function AssistantsPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    recordId: currentDossier,
+                    recordId: activeRecordId,
                     title: title,
                 }),
             }
@@ -95,12 +104,12 @@ export default function AssistantsPage() {
         await fetchAssistants();
         setIsOpen(false);
 
-        console.log("Accès ajouté au dossier", currentDossier);
+        console.log("Accès ajouté au dossier", activeRecordId);
     }
 
 //supprimer un assistant
     const removeAccess = async (name: string, id: number ) => {
-        if (!userName || !currentDossier) {
+        if (!userName || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
@@ -123,7 +132,7 @@ export default function AssistantsPage() {
 
     //mettre a jour le role d'un assistant
     const updateRoleAccess = async (name: string, id: number, title: string) => {
-        if (!userName || !currentDossier) {
+        if (!userName || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
@@ -150,15 +159,6 @@ export default function AssistantsPage() {
                     Assistants
                 </p>
                 <FilArianne/>
-
-                <div className="text-black">
-                    {currentDossier ? (
-                        <p>Dossier courant : {currentDossier}</p>
-                    ) : (
-                        <p>Aucun dossier sélectionné</p>
-                    )}
-                </div>
-
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
                             onClickAction={() => setIsOpen(true)}
@@ -174,7 +174,7 @@ export default function AssistantsPage() {
                             key={inv.id}
                             className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex flex-nowrap items-center gap-4 m-4">
-                                <Image
+                                <img
                                     src={`https://ui-avatars.com/api/?name=${inv.accountUserName}&background=0551ab&color=fff`}
                                     alt="avatar"
                                     className="w-12 h-12 rounded-full"
@@ -197,16 +197,14 @@ export default function AssistantsPage() {
                                 <select
                                     value={inv.title}
                                     onChange={(e) => {
-                                        if ( !currentDossier)
+                                        if ( !activeRecordId)
                                             return;
                                         
-                                        updateRoleAccess(inv.accountUserName, currentDossier, e.target.value).then()
+                                        updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
                                     }}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
-                                    <option>Aidant</option>
-                                    <option>Infirmier(e)</option>
-                                    <option>Aide soignant(e)</option>
-                                    <option>Aide à domicile</option>
+                                    <option value="Aidant">Aidant</option>
+                                    <option value="Employée">Employé</option>
                                 </select>
 
                                 <button
@@ -252,10 +250,8 @@ export default function AssistantsPage() {
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
-                                        <option>Aidant</option>
-                                        <option>Infirmier(e)</option>
-                                        <option>Aide soignant(e)</option>
-                                        <option>Aide à domicile</option>
+                                        <option value="AIDANT">Aidant</option>
+                                        <option value="EMPLOYEE">Employé</option>
                                     </select>
 
                                     <p className="text-red-500 font-bold text-center">{error}</p>
@@ -281,7 +277,7 @@ export default function AssistantsPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px] flex flex-col items-center gap-y-4">
 
-                        <Image src="/images/icon-attention2x.png" alt="Attention" width={50} />
+                        <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
 
                         <p className="font-bold text-blue-800 text-xl text-center">
                             Voulez-vous supprimer l’invitation de
@@ -301,10 +297,10 @@ export default function AssistantsPage() {
                             <Button
                                 variant="secondary"
                                 onClickAction={() => {
-                                    if (!invitationToDelete?.accountUserName || !currentDossier)
+                                    if (!invitationToDelete?.accountUserName || !activeRecordId)
                                         return;
                                     
-                                    removeAccess(invitationToDelete.accountUserName, currentDossier).then();
+                                    removeAccess(invitationToDelete.accountUserName, activeRecordId).then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui

@@ -29,7 +29,8 @@ public class RecordAccountService {
     public void createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
-                role.getTitre(),
+                role,
+                //role.getTitre(),
                 role.getPermission());
 
         recordAccount = recordAccountRepository.save(recordAccount);
@@ -37,10 +38,12 @@ public class RecordAccountService {
         accountRepository.save(account);
         record.getRecordAccounts().add(recordAccount);
         recordRepository.save(record);
+
+
     }
 
     //update role record_account
-    public void updateRoleRecordAccount(String accountUserName, Long recordId, String role) {
+    public void updateRoleRecordAccount(String accountUserName, Long recordId, Role role) {
         RecordAccount recordAccount =
                 recordAccountRepository
                 .findByAccountUserNameAndRecordId(accountUserName, recordId)

@@ -7,6 +7,7 @@ import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.SessionService;
+import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -125,7 +126,15 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle().equals("Aidant")) {
+            newAccess.setTitle(Role.AIDANT);
+        }
+        else if(request.getTitle().equals("Employé")) {
+            newAccess.setTitle(Role.EMPLOYEE);
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -155,7 +164,15 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle().equals("Aidant") || request.getTitle().equals("AIDANT")) {
+            newAccess.setTitle(Role.AIDANT);
+        }
+        else if(request.getTitle().equals("Employé") || request.getTitle().equals("EMPLOYEE")) {
+            newAccess.setTitle(Role.EMPLOYEE);
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -212,14 +229,22 @@ public class AccountController {
     }
 
     //modifier le role d'un assistant autre que la personne connecté
-    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
+    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{title}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
             @PathVariable String userName,
             @PathVariable String targetUserName,
             @PathVariable Long recordId,
-            @PathVariable String role
+            @PathVariable String title
     ) {
+        Role role;
+        if(title.equals("Aidant")) {
+            role = Role.AIDANT;
+        }
+        else {
+            role = Role.EMPLOYEE;
+        }
+
         Account account = accountService.getUser(userName);
                 if (account == null)
                     return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");

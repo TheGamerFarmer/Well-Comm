@@ -3,6 +3,7 @@ package fr.wellcomm.wellcomm.controllers;
 import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
+import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,7 +48,7 @@ public static class RecordAccountResponse {
 
             List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
                     .filter(ra -> !ra.getAccount().getUserName().equals(userName))
-                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
+                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(assistants);

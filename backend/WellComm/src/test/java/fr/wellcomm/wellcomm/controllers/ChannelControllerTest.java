@@ -7,6 +7,7 @@ import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class ChannelControllerTest {
 
         // Ajout de la permission SEND_MESSAGE
         List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, "ADMIN", permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT , permissions);
         recordAccountRepository.save(ra);
 
         // 2. Mock du comportement métier uniquement
@@ -105,7 +106,7 @@ public class ChannelControllerTest {
 
         // On donne une autre permission, mais pas SEND_MESSAGE
         List<Permission> permissions = List.of(Permission.IS_MEDECIN);
-        RecordAccount ra = new RecordAccount(userTest, record, "LECTEUR", permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN, permissions);
         recordAccountRepository.save(ra);
 
         OpenChannel mockChan = new OpenChannel();
