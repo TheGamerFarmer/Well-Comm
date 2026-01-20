@@ -4,20 +4,21 @@ import Link from 'next/link';
 import Image from 'next/image';
 import BurgerScreen from "@/components/BurgerScreen";
 import {useEffect, useState} from "react";
-import {getCurrentUser} from "@/functions/fil-API";
+import {getCurrentUserId} from "@/functions/fil-API";
+import { API_BASE_URL } from "@/config";
 
 export default function HeaderLoged() {
     const [isOpen, setIsOpen] = useState(false);
 
-    const [userName, setUserName] = useState<string | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
-        getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setUserId);
     }, []);
 
     async function logout() {
         try {
-            const response = await fetch(`http://localhost:8080/api/${userName}/logout`, {
+            const response = await fetch(`${API_BASE_URL}/api/${userId}/logout`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -29,7 +30,7 @@ export default function HeaderLoged() {
             });
 
             if (!response.ok) {
-                throw new Error("Erreur lors de la déconnexion");
+                console.log("Erreur lors de la déconnexion");
             }
 
             // Redirection après logout

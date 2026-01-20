@@ -61,12 +61,12 @@ public class AccountController {
         private String userName;
     }
 
-        @Getter
-        @Setter
-        public static class ChangePasswordRequest {
-            private String currentPassword;
-            private String newPassword;
-        }
+    @Getter
+    @Setter
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+    }
 
     @GetMapping("/infos")
     @PreAuthorize("#userId.toString() == authentication.name")
@@ -79,33 +79,16 @@ public class AccountController {
                 account.getLastName()));
     }
 
-    @GetMapping("/changePassword/{oldPassword}/{newPassword}")
-    @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<?> checkPassword(@PathVariable Long userId, @PathVariable String oldPassword, @PathVariable String newPassword) {
-        Account account = accountService.getUser(userId);
-        if (account == null)
-            return ResponseEntity.badRequest().body("User not found");
-
-        if (passwordEncoder.matches(oldPassword, account.getPassword())) {
-            account.setPassword(passwordEncoder.encode(newPassword));
-
-            accountService.saveUser(account);
-
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(403).body("Mot de passe incorrect");
-        }
-    }
-
     @PostMapping("/changePassword")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> changePassword(
             @PathVariable Long userId,
             @RequestBody ChangePasswordRequest request
     ) {
-        Account account = accountRepository
-                .findById(userId)
-                .orElseThrow();
+        Account account = accountService.getUser(userId);
+        if (account == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
             return ResponseEntity.status(403).body("Mot de passe actuel incorrect");
@@ -150,7 +133,6 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
-//ajouter un assistant autre que la personne connecté à un dossier
     @PostMapping("/addAccess/current_record/{name}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable @SuppressWarnings("unused") Long userId,
@@ -165,8 +147,8 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Dossier inexistant");
 
         Optional<RecordAccount> existing = recordAccountService.getByRecordId(request.getRecordId()).stream()
-            .filter(ra -> ra.getAccount().getUserName().equals(name))
-            .findFirst();
+                .filter(ra -> ra.getAccount().getUserName().equals(name))
+                .findFirst();
         if (existing.isPresent()) {
             return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");
         }
@@ -179,7 +161,6 @@ public class AccountController {
 
         return ResponseEntity.ok().build();
     }
-
 
     @DeleteMapping("/deleteAccess/")
     @PreAuthorize("#userId.toString() == authentication.name")
@@ -197,7 +178,6 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
-    //retirer un assistant autre que la personne connecté
     @DeleteMapping("/deleteAccess/current_record/{targetUserName}/{recordId}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> deleteRecordAccount(
@@ -205,32 +185,30 @@ public class AccountController {
             @PathVariable String targetUserName,
             @PathVariable Long recordId
     ) {
-        System.out.println("=====================");
         Account account = accountService.getUser(userId);
-                if (account == null)
-                    return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
+        if (account == null)
+            return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
         Account targetAccount = accountService.getUserByUserName(targetUserName);
-            if (targetAccount == null) {
-                return ResponseEntity.badRequest().body("Assistant introuvable");
-            }
+        if (targetAccount == null) {
+            return ResponseEntity.badRequest().body("Assistant introuvable");
+        }
 
-         RecordAccount recordAccount = targetAccount.getRecordAccounts().values()
-                    .stream()
-                    .filter(ra -> ra.getRecord().getId() == recordId)
-                    .findFirst()
-                    .orElse(null);
+        RecordAccount recordAccount = targetAccount.getRecordAccounts().values()
+                .stream()
+                .filter(ra -> ra.getRecord().getId() == recordId)
+                .findFirst()
+                .orElse(null);
 
-            if (recordAccount == null) {
-                return ResponseEntity.badRequest().body("Accès introuvable");
-            }
+        if (recordAccount == null) {
+            return ResponseEntity.badRequest().body("Accès introuvable");
+        }
 
-            accountService.deleteRecordAccount(targetAccount, recordAccount);
+        accountService.deleteRecordAccount(targetAccount, recordAccount);
 
-            return ResponseEntity.ok().build();
+        return ResponseEntity.ok().build();
     }
 
-    //modifier le role d'un assistant autre que la personne connecté
     @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
@@ -240,8 +218,8 @@ public class AccountController {
             @PathVariable String role
     ) {
         Account account = accountService.getUserByUserName(targetUserName);
-                if (account == null)
-                    return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
+        if (account == null)
+            return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
         recordAccountService.updateRoleRecordAccount(targetUserName, recordId, role);
 
@@ -249,7 +227,6 @@ public class AccountController {
     }
 
     @DeleteMapping("/logout")
-    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> logout(@PathVariable Long userId,LogoutRequest logoutRequest, HttpServletRequest request) {
 
         Account account = accountRepository.findById(userId).orElse(null);
