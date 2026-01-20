@@ -76,7 +76,7 @@ export default function UserSpace() {
 
     const handleSaveProfile = async () => {
         const ok = await changeUserInfos(
-            userName,   // тот userName, с которым пользователь вошёл
+            userName,
             newUserName,
             firstName,
             lastName
@@ -85,7 +85,7 @@ export default function UserSpace() {
         if (ok) {
             alert("Profil mis à jour avec succès!");
             if (newUserName !== userName) {
-                window.location.reload(); // т.к. username изменился
+                window.location.reload();
             }
         }
     };
