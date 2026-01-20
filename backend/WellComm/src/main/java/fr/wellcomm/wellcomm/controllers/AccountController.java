@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 
@@ -55,11 +54,6 @@ public class AccountController {
         private long recordId;
     }
 
-    @Getter
-    @Setter
-    public static class LogoutRequest {
-        private String userName;
-    }
 
     @Getter
     @Setter
@@ -212,7 +206,7 @@ public class AccountController {
     @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
-            @PathVariable Long userId,
+            @PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable String targetUserName,
             @PathVariable Long recordId,
             @PathVariable String role
@@ -227,7 +221,8 @@ public class AccountController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(@PathVariable Long userId,LogoutRequest logoutRequest, HttpServletRequest request) {
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<?> logout(@PathVariable Long userId) {
 
         Account account = accountRepository.findById(userId).orElse(null);
         if (account == null)

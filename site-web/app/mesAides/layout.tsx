@@ -18,20 +18,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         try {
             const response = await fetch(`${API_BASE_URL}/api/${userId}/logout`, {
                 method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userName: "john.doe", // ⚠️ à remplacer dynamiquement
-                }),
-                credentials: "include", // IMPORTANT si tu utilises des sessions/cookies
+                credentials: "include",
             });
-
             if (!response.ok) {
                 console.log("Erreur lors de la déconnexion");
             }
 
-            // Redirection après logout
             window.location.href = "/login";
         } catch (error) {
             console.error(error);
