@@ -119,7 +119,7 @@ export function useFilLogic() {
 
         const options: SockJSOptions = {
             sessionId: 10,
-            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            transports: ['websocket'],
             withCredentials: true
         };
 

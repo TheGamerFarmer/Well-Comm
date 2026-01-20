@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
@@ -34,6 +35,7 @@ public class ChannelController {
         private Date date;
         private String authorUserName;
         private String authorTitle;
+        @JsonProperty("isDeleted")
         private boolean isDeleted;
     }
 
@@ -72,7 +74,7 @@ public class ChannelController {
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<?> addMessage(
             @PathVariable Long userId,
-            @PathVariable long recordId,
+            @PathVariable @SuppressWarnings("unused") long recordId,
             @PathVariable long channelId,
             @RequestBody String content) {
 

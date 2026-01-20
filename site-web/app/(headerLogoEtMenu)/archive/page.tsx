@@ -190,7 +190,7 @@ export default function ArchivePage() {
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
-                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isDeleted = msg.isDeleted
 
                                 const msgDate = new Date(msg.date);
                                 const prevMsg = index > 0 ? sortedMessages[index - 1] : null;

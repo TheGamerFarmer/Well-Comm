@@ -216,7 +216,8 @@ export default function FilDeTransmissionPage() {
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
 
-                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isDeleted = msg.isDeleted
+                                console.log(msg.isDeleted)
                                 const isEditing = editingMessageId === msg.id;
 
                                 const msgDate = new Date(msg.date);
