@@ -106,7 +106,7 @@ export default function AssistantsPage() {
         if (!userName || !activeRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}`,
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/assistants`,
             {credentials: "include"}
         );
 

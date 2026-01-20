@@ -67,20 +67,35 @@ public static class ChangePermissionsRequest {
         return ResponseEntity.ok(ra.getPermissions());
     }
 
-    //liste des record_accounts d'un dossier
-    @GetMapping("/{recordId}")
+    //liste des record_accounts d'assistants d'un dossier
+    @GetMapping("/{recordId}/assistants")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<RecordAccountResponse>> getAssistantsByRecordId(
+            @PathVariable String userName,
+            @PathVariable Long recordId) {
+
+        List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName) && (ra.getTitle() == Role.EMPLOYEE))
+                .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(assistants);
+    }
+
+    //liste des record_accounts de médecin d'un dossier
+    @GetMapping("/{recordId}/medecin")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
-        @PathVariable String userName,
-        @PathVariable Long recordId) {
+            @PathVariable String userName,
+            @PathVariable Long recordId) {
 
-            List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                    .filter(ra -> !ra.getAccount().getUserName().equals(userName))
-                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
-                    .collect(Collectors.toList());
+        List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName) && (ra.getTitle() == Role.MEDECIN))
+                .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
+                .collect(Collectors.toList());
 
-            return ResponseEntity.ok(assistants);
-        }
+        return ResponseEntity.ok(assistants);
+    }
 
     @PutMapping("/{recordId}/changepermissions")
     @PreAuthorize("#userName == authentication.name and @securityService.hasRecordAccountPermission(T(fr.wellcomm.wellcomm.domain.Permission).ASSIGN_PERMISSIONS)")
@@ -97,6 +112,7 @@ public static class ChangePermissionsRequest {
         recordAccount.getPermissions().removeIf(permsrecordAccount -> !request.getPermissions().contains(permsrecordAccount));
         recordAccountRepository.save(recordAccount);
         return ResponseEntity.ok(recordAccount.getPermissions());
+}
 
     //liste des medecins
     @GetMapping("/{recordId}/medecins")
@@ -123,4 +139,3 @@ public static class ChangePermissionsRequest {
 
 
     }
-}

@@ -5,8 +5,8 @@ import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
-
 import Image from "next/image";
+import {getPermissions, Permission} from "@/functions/Permissions";
 
 type Invitation = {
     id: number;
@@ -16,21 +16,26 @@ type Invitation = {
     recordId: number;
 };
 
-export default function AssistantsPage() {
+export default function MedecinPage() {
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [title, setTitle] = useState<Invitation["title"]>("");
+    const [title, setTitle] = useState<Invitation["title"]>("Medecin");
     const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
     const [error, setError] = useState("");
+    const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
+    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
+    const [selectedMedecin, setSelectedMedecin] = useState<Invitation | null>(null);
+
 
     useEffect(() => {
         getCurrentUser().then(setUserName);
     }, []);
 
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
+
 
     useEffect(() => {
         const localRecordId = localStorage.getItem('activeRecordId');
@@ -42,18 +47,69 @@ export default function AssistantsPage() {
         }
     }, [setActiveRecordId])
 
+    useEffect(() => {
+        let medecinName: string | null = null; // ou "" si tu préfères
 
-    //récupérer les assistans de currentDossier
-    const fetchAssistants = useCallback(async () => {
+        if (selectedMedecin) {
+            medecinName = selectedMedecin.accountUserName;
+        }
+        if (!medecinName || !activeRecordId || ! userName) return;
+
+        const fetchPermissions = async () => {
+            try {
+                const res = await fetch(
+                    `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/autrepermissions/${medecinName}`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+
+                if (!res.ok) {
+                    console.log("Erreur chargement permissions");
+                    return;
+                }
+
+                const data: Permission[] = await res.json();
+                setSelectedPermissions(data);
+            } catch (error) {
+                console.error("Erreur fetch permissions", error);
+            }
+        };
+
+        fetchPermissions();
+    }, [username, activeRecordId, selectedMedecin]);
+
+
+    useEffect(() => {
+        if (!userName || !activeRecordId) {
+            setRecordAccount(null);
+            return;
+        }
+
+        getPermissions(userName, activeRecordId)
+            .then((permissions: Permission[]) => {
+                setRecordAccount({ permissions });
+            })
+            .catch(() => {
+                setRecordAccount({ permissions: [] });
+            });
+    }, [userName, activeRecordId]);
+
+    const permissions = recordAccount?.permissions ?? [];
+
+
+    //récupérer les médecins de currentDossier
+    const fetchMedecins = useCallback(async () => {
         if (!userName || !activeRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/medecins`,
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/medecin`,
             {credentials: "include"}
         );
 
         if (!res.ok) {
-            console.log("Erreur chargement assistants");
+            console.log("Erreur chargement medecins");
             return;
         }
 
@@ -61,12 +117,12 @@ export default function AssistantsPage() {
         setInvitations(data);
     }, [activeRecordId, userName]);
 
-    //afficher la liste d'assistants quand on charge la page
+    //afficher la liste des médecins quand on charge la page
     useEffect(() => {
         setTimeout(() => {
-            fetchAssistants().then();
+            fetchMedecins().then();
         }, 0);
-    }, [userName, activeRecordId, fetchAssistants]);
+    }, [userName, activeRecordId, fetchMedecins]);
 
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
@@ -99,13 +155,13 @@ export default function AssistantsPage() {
             return;
         }
 
-        await fetchAssistants();
+        await fetchMedecins();
         setIsOpen(false);
 
         console.log("Accès ajouté au dossier", activeRecordId);
     }
 
-//supprimer un assistant
+//supprimer un médecin
     const removeAccess = async (name: string, id: number ) => {
         if (!userName || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
@@ -123,12 +179,12 @@ export default function AssistantsPage() {
             return;
         }
 
-        await fetchAssistants();
+        await fetchMedecins();
         console.log("recordAccount supprimé ");
     };
 
 
-    //mettre a jour le role d'un assistant
+    //mettre a jour le role d'un médecin
     const updateRoleAccess = async (name: string, id: number, title: string) => {
         if (!userName || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
@@ -145,9 +201,46 @@ export default function AssistantsPage() {
             console.log(errorMessage);
             return;
         }
-        await fetchAssistants();
+        await fetchMedecins();
         console.log("recordAccount modifié ")
     }
+
+    const openPermissionsModal = (medecin: Invitation) => {
+        setSelectedMedecin(medecin);
+        setIsOpenPerms(true);
+    };
+
+    const togglePermission = (perm: Permission) => {
+        setSelectedPermissions((prev) =>
+            prev.includes(perm)
+                ? prev.filter((p) => p !== perm)
+                : [...prev, perm]
+        );
+    };
+
+    const savePermissions = async () => {
+        let medecinName: string | null = null; // ou "" si tu préfères
+
+        if (selectedMedecin) {
+            medecinName = selectedMedecin.accountUserName;
+        }
+        if (!selectedMedecin || !activeRecordId) return;
+
+        await fetch(
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/changepermissions`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userName: medecinName,
+                    permissions: selectedPermissions
+                }),
+            }
+        );
+
+        setIsOpenPerms(false);
+    };
 
     return (
 
@@ -157,6 +250,7 @@ export default function AssistantsPage() {
                     Médecins
                 </p>
                 <FilArianne/>
+                {permissions.includes(Permission.INVITE) && (
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
                             onClickAction={() => setIsOpen(true)}
@@ -164,8 +258,9 @@ export default function AssistantsPage() {
                         Ajouter un médecin
                     </Button>
                 </div>
+                )}
 
-                {/*liste des assistants*/}
+                {/*liste des médecins*/}
                 <div className=" space-y-4 bg-white rounded-lg shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] px-4 py-6">
                     {invitations.map((inv) => (
                         <div
@@ -188,16 +283,20 @@ export default function AssistantsPage() {
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
-                                <Button variant="secondary" type="button" onClickAction={() => setIsOpenPerms(true)} link={""}>
+                                {permissions.includes(Permission.ASSIGN_PERMISSIONS) && (
+                                <Button variant="secondary" type="button" onClickAction={() => openPermissionsModal(inv)} link={""}>
                                     Permissions
                                 </Button>
+                                    )}
 
+                                {permissions.includes(Permission.INVITE) && (
                                 <button
                                     onClick={() => setInvitationToDelete(inv)}
                                     className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">
 
                                     <svg className="m-4" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="#c10808" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M12 20h5c0.5 0 1 -0.5 1 -1v-14M12 20h-5c-0.5 0 -1 -0.5 -1 -1v-14"/><path d="M4 5h16"/><path d="M10 4h4M10 9v7M14 9v7"/></g></svg>
                                 </button>
+                                    )}
                             </div>
 
                         </div>
@@ -206,7 +305,7 @@ export default function AssistantsPage() {
 
 
 
-                {/* pop-up ajouter assistant*/}
+                {/* pop-up ajouter médecin*/}
                 {isOpen && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded-2xl w-[400px]">
@@ -222,7 +321,7 @@ export default function AssistantsPage() {
                             >
                                 <input
                                     type="text"
-                                    placeholder="Nom d'utilisateur de l'assistant"
+                                    placeholder="Nom d'utilisateur du médecin"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="border rounded-lg p-2 text-black"
@@ -298,28 +397,74 @@ export default function AssistantsPage() {
                         <form className="flex flex-col gap-3 p-4 m-4 rounded-lg border-2 border-solid border-[#20baa7]">
                             <div className="flex justify-between">
                                 <label htmlFor="permIsMedecin" className=" text-black"> Est un médecin </label><br/>
-                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"/>
+                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.IS_MEDECIN)}
+                                       onChange={() => togglePermission(Permission.IS_MEDECIN)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permModifierAgenda" className=" text-black"> Peut modifier l&#39;agenda </label><br/>
-                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.EDIT_CALENDAR)}
+                                       onChange={() => togglePermission(Permission.EDIT_CALENDAR)}/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permModifierAgenda" className=" text-black"> Peut voir l&#39;agenda </label><br/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.SEE_CALENDAR)}
+                                       onChange={() => togglePermission(Permission.SEE_CALENDAR)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permAssignerPerms" className=" text-black"> Peut assigner des permissions </label><br/>
-                                <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"/>
+                                <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.ASSIGN_PERMISSIONS)}
+                                       onChange={() => togglePermission(Permission.ASSIGN_PERMISSIONS)}/>
                             </div>
 
                             <div className="flex justify-between">
-                                <label htmlFor="permAddAssistant" className=" text-black"> Peut ajouter un(e) assistant(e) </label><br/>
-                                <input type="checkbox" id="permAddAssistant" name="permAddAssistant" value="PermAddAssistant" className=" scale-150"/>
+                                <label htmlFor="permAddMedecin" className=" text-black"> Peut ajouter un médecin) </label><br/>
+                                <input type="checkbox" id="permAddMedecin" name="permAddMedecin" value="PermAddMedecin" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.INVITE)}
+                                       onChange={() => togglePermission(Permission.INVITE)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut envoyer des messages </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.SEND_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.SEND_MESSAGE)}/>
                             </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut modifier des messages </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.MODIFY_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.MODIFY_MESSAGE)}/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut supprimer des messages </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.DELETE_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.DELETE_MESSAGE)}/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut ouvrir des fils </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.OPEN_CHANNEL)}
+                                       onChange={() => togglePermission(Permission.OPEN_CHANNEL)}/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut archiver des fils </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.CLOSE_CHANNEL)}
+                                       onChange={() => togglePermission(Permission.CLOSE_CHANNEL)}/>
+                            </div>
+
 
                         </form>
 
@@ -329,7 +474,7 @@ export default function AssistantsPage() {
                                 Annuler
                             </Button>
 
-                            <Button variant="primary" type="submit" onClickAction={() => setIsOpenPerms(false)} link={""}>
+                            <Button variant="primary" type="submit" onClickAction={savePermissions} link={""}>
                                 Confirmer
                             </Button>
                         </div>
