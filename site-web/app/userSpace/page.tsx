@@ -4,10 +4,9 @@ import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import { useRouter } from "next/navigation";
 import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/functions/user-api";
-import { API_BASE_URL } from "@/config";
 import {encryptPassword} from "@/functions/encryptPassword";
+import {getCurrentUserId} from "@/functions/fil-API";
 
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -16,42 +15,30 @@ export default function UserSpace() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [userName, setUserName] = useState<string>("");
-
-    const router = useRouter();
+    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
         const loadProfile = async () => {
-            const meRes = await fetch(`${API_BASE_URL}/api/me`, {
-                credentials: "include",
-                cache: "no-store",
-            });
+            const user = await getCurrentUserId();
+            setUserId(user);
 
-            if (!meRes.ok) {
-                router.push("/login");
-                return;
-            }
-
-            const me = await meRes.json();
-            setUserName(me.userName);
-
-            const profile = await getUserProfile(me.userName);
+            const profile = await getUserProfile(userId);
             if (profile)setProfile({
-                userName: me.userName,
+                userName: profile.userName,
                 firstName: profile.firstName,
                 lastName: profile.lastName,
             });
 
         };
-        loadProfile();
-    }, []);
+        loadProfile().then();
+    }, [userId]);
 
     const handleSavePassword = async () => {
         if (newPassword !== confirmPassword) {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
-        const ok = await changePassword(userName, encryptPassword(currentPassword), encryptPassword(newPassword));
+        const ok = await changePassword(userId, encryptPassword(currentPassword), encryptPassword(newPassword));
 
         if (ok) {
             alert("Mot de passe modifié avec succès !");
@@ -63,7 +50,7 @@ export default function UserSpace() {
     };
 
     const handleDeleteAccount = async () => {
-        const success = await deleteAccount(userName);
+        const success = await deleteAccount(userId);
 
         if (success) {
             window.location.replace("/login");
@@ -83,7 +70,7 @@ export default function UserSpace() {
                 <FilArianne />
             </div>
 
-            <div className="flex justify-center items-center flex-col bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
+            <div className="flex justify-center items-center flex-col bg-[#ffffff] w-full rounded-xl border-20 border-white">
                 <div className="p-8 relative overflow-visible">
                     <Image
                         src="/images/avatar.svg"
@@ -112,7 +99,7 @@ export default function UserSpace() {
                                 type="text"
                                 value={profile?.firstName || ""}
                                 readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div className="self-center">
@@ -121,7 +108,7 @@ export default function UserSpace() {
                                 type="text"
                                 value={profile?.lastName || ""}
                                 readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -140,7 +127,7 @@ export default function UserSpace() {
                                 type="text"
                                 value={profile?.userName || ""}
                                 readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
