@@ -36,7 +36,7 @@ export default function MesAides() {
 
         const fetchDossiers = async () => {
             const res = await fetch(
-                `${API_BASE_URL}/api/${userName}/`,
+                `${API_BASE_URL}/api/${userName}/records/`,
                 { credentials: "include" }
             );
 

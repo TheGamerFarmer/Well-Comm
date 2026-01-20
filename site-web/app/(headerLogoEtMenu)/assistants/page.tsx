@@ -203,10 +203,8 @@ export default function AssistantsPage() {
                                         updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
                                     }}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
-                                    <option>Aidant</option>
-                                    <option>Infirmier(e)</option>
-                                    <option>Aide soignant(e)</option>
-                                    <option>Aide à domicile</option>
+                                    <option value="AIDANT">Aidant</option>
+                                    <option value="EMPLOYEE">Employé</option>
                                 </select>
 
                                 <button
@@ -252,10 +250,8 @@ export default function AssistantsPage() {
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
-                                        <option>Aidant</option>
-                                        <option>Infirmier(e)</option>
-                                        <option>Aide soignant(e)</option>
-                                        <option>Aide à domicile</option>
+                                        <option value="AIDANT">Aidant</option>
+                                        <option value="EMPLOYEE">Employé</option>
                                     </select>
 
                                     <p className="text-red-500 font-bold text-center">{error}</p>

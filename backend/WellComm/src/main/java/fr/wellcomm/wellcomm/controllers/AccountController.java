@@ -6,6 +6,7 @@ import fr.wellcomm.wellcomm.entities.RecordAccount;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
+import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +37,7 @@ public class AccountController {
     @Setter
     public static class addRecordAccountRequest {
         private long recordId;
-        private String title;
+        private Role title;
     }
 
     @Getter
@@ -191,7 +192,7 @@ public class AccountController {
             @PathVariable String userName,
             @PathVariable String targetUserName,
             @PathVariable Long recordId,
-            @PathVariable String role
+            @PathVariable Role role
     ) {
         Account account = accountService.getUser(userName);
                 if (account == null)

@@ -55,8 +55,7 @@ public class LoginController {
 
             sessionRepository.save(new Session(token,
                     account,
-                    LocalDateTime.now().plusHours(24),
-                    null));
+                    LocalDateTime.now().plusHours(24)));
 
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
