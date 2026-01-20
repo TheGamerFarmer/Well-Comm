@@ -23,7 +23,7 @@ import fr.wellcomm.wellcomm.repositories.SessionRepository;
 
 
 @RestController
-@RequestMapping("/api/{userName}/records")
+@RequestMapping("/api/{userId}/records")
 @AllArgsConstructor
 public class RecordController {
     private final RecordService recordService;
@@ -46,7 +46,7 @@ public class RecordController {
     public static class DossierResponse {
         private Long id;
         private String name;
-        private String admin;
+        private Long admin;
     }
 
     @Getter
@@ -62,9 +62,9 @@ public class RecordController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable String userName) {
-        List<DossierResponse> dossiers = recordService.getRecords(userName).stream()
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable Long userId) {
+        List<DossierResponse> dossiers = recordService.getRecords(userId).stream()
                 .map(d -> new DossierResponse(d.getId(), d.getName(), d.getAdmin()))
                 .collect(Collectors.toList());
 
@@ -72,17 +72,18 @@ public class RecordController {
     }
 
     @PostMapping("/create/{name}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Record> createRecord(@PathVariable String userName,
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<Record> createRecord(@PathVariable Long userId,
                                                @PathVariable String name) {
-        Record newRecord = recordService.createRecord(name, userName);
-        recordAccountService.createReccordAccount(accountService.getUser(userName), newRecord, Role.AIDANT);
+
+        Record newRecord = recordService.createRecord(name, userId);
+        recordAccountService.createReccordAccount(accountService.getUser(userId), newRecord, Role.AIDANT);
         return ResponseEntity.ok(newRecord);
     }
 
     @GetMapping("/{recordId}/channels/{category}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable Long recordId,
             @PathVariable Category category) {
 
@@ -100,8 +101,8 @@ public class RecordController {
     }
 
     @GetMapping("/{recordId}/closechannels/{category}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
                                                                  @PathVariable Long recordId,
                                                                  @PathVariable Category category) {
 
@@ -119,8 +120,8 @@ public class RecordController {
     }
 
     @GetMapping("/{recordId}/channels/{category}/week")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") String userName,
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
                                                                  @PathVariable Long recordId,
                                                                  @PathVariable Category category) {
 
@@ -138,12 +139,13 @@ public class RecordController {
     }
 
     @PostMapping("/{recordId}/channels/new")
-    @PreAuthorize("#userName == authentication.name and" +
+    @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).OPEN_CHANNEL)")
-    public ResponseEntity<?> createChannel(@PathVariable String userName,
+    public ResponseEntity<?> createChannel(@PathVariable Long userId,
                                            @PathVariable long recordId,
                                            @RequestBody CreateFilRequest request) {
-        Account account = accountService.getUser(userName);
+        System.out.println("========================");
+        Account account = accountService.getUser(userId);
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
@@ -158,8 +160,6 @@ public class RecordController {
             return ResponseEntity.badRequest().body("RecordAccount not found");
 
         Record record = recordAccount.getRecord();
-        if (record == null)
-            return ResponseEntity.badRequest().body("Record not found");
 
         OpenChannel newChannel = recordService.createChannel(
                 record,
@@ -182,9 +182,9 @@ public class RecordController {
     }
 
     @PostMapping("/{recordId}/channels/{channelId}/archive")
-    @PreAuthorize("#userName == authentication.name and" +
+    @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).CLOSE_CHANNEL)")
-    public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable long recordId,
             @PathVariable long channelId) {
         Record record = recordService.getRecord(recordId);
@@ -198,8 +198,8 @@ public class RecordController {
     }
 
     @DeleteMapping("/delete/{recordId}")
-    @PreAuthorize("#userName == authentication.name and @securityService.deleteRecord()")
-    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") String userName,
+    @PreAuthorize("#userId.toString() == authentication.name and @securityService.deleteRecord()")
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") Long userId,
                                               @PathVariable Long recordId) {
         boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
@@ -210,9 +210,9 @@ public class RecordController {
     }
     //création d'une session quand on selectionne un dossier
     @PostMapping("/select/{recordId}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> selectRecord(
-            @PathVariable @SuppressWarnings("unused") String userName,
+            @PathVariable @SuppressWarnings("unused") Long userId,
             @CookieValue("token") String token,
             @PathVariable Long recordId
     ) {
@@ -229,9 +229,9 @@ public class RecordController {
 
     //return current-record
     @GetMapping("/current-record")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> getCurrentRecord(
-            @PathVariable @SuppressWarnings("unused") String userName,
+            @PathVariable @SuppressWarnings("unused") Long userId,
             @CookieValue("token") String token
     ) {
           // Récupère la session par le token

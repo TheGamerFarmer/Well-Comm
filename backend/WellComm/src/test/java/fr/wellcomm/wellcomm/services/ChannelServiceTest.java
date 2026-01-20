@@ -26,7 +26,7 @@ public class ChannelServiceTest {
         Account user = new Account();
         user.setUserName("testUser");
         accountService.saveUser(user);
-        Record record = recordService.createRecord("Dossier", "testUser");
+        Record record = recordService.createRecord("Dossier", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
         accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT",permissionList));
@@ -49,7 +49,7 @@ public class ChannelServiceTest {
         user.setUserName("testOrder");
         accountService.saveUser(user);
 
-        Record record = recordService.createRecord("Dossier Ordre", "testOrder");
+        Record record = recordService.createRecord("Dossier Ordre", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
         accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN",permissionList));

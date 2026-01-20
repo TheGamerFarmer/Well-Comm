@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface ReportRepository extends JpaRepository<Record, String> {
     // JpaRepository contient déjà les méthodes : findById, save, findAll, etc.
-    @Query("SELECT recordAccount.record FROM RecordAccount recordAccount WHERE recordAccount.account.userName = :userName")
-    List<Record> findRecordByUserUserName(@Param("userName") String userName);
+
+    @Query("SELECT recordAccount.record FROM RecordAccount recordAccount WHERE recordAccount.account.id = :userId")
+    List<Record> findRecordByUserId(@Param("userId") long userId);
 }

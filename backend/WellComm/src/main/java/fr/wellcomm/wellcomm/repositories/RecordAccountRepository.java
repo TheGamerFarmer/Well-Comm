@@ -13,6 +13,7 @@ public interface RecordAccountRepository extends JpaRepository<RecordAccount, Lo
     List<RecordAccount> findByAccount(Account account);
 
     Optional<RecordAccount> findByAccountUserNameAndRecordId(String userName, long recordId);
+    Optional<RecordAccount> findByAccountIdAndRecordId(Long userId, long recordId);
 
     List<RecordAccount> findByRecordId(Long recordId);
 

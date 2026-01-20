@@ -31,7 +31,7 @@ public class SecurityService {
 
     public boolean hasRecordPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -44,7 +44,7 @@ public class SecurityService {
 
     public boolean hasChannelPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -61,7 +61,7 @@ public class SecurityService {
 
     public boolean hasMessagePermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -82,7 +82,7 @@ public class SecurityService {
 
     public boolean hasEventPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -99,7 +99,7 @@ public class SecurityService {
 
     public boolean ownMessage() {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -112,7 +112,7 @@ public class SecurityService {
 
     public boolean deleteRecord() {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 

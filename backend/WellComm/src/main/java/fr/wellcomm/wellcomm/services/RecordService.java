@@ -36,8 +36,8 @@ public class RecordService {
         return recordAccountRepository.findByAccountUserNameAndRecordId(user.getUserName(), record.getId()).orElse(null);
     }
 
-    public List<Record> getRecords(String userName) {
-        return recordRepository.findRecordByUserUserName(userName);
+    public List<Record> getRecords(long userId) {
+        return recordRepository.findRecordByUserId(userId);
     }
 
     public List<OpenChannel> getChannelsOfCategory(long recordId, Category category) {
@@ -61,7 +61,7 @@ public class RecordService {
         return lastWeekChannels;
     }
 
-    public Record createRecord(String name, String admin) {
+    public Record createRecord(String name, Long admin) {
         Record record = new Record(name, admin);
 
         record = recordRepository.save(record);

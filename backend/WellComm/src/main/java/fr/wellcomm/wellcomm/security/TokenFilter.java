@@ -46,7 +46,7 @@ public class TokenFilter extends OncePerRequestFilter {
                 if (session.getExpirationDate().isAfter(LocalDateTime.now())) {
 
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            session.getAccount().getUserName(), null, new ArrayList<>()
+                            session.getAccount().getId(), null, new ArrayList<>()
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

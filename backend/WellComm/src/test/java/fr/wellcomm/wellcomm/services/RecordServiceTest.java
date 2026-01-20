@@ -19,6 +19,7 @@ public class RecordServiceTest {
     @Autowired private RecordService recordService;
     @Autowired private AccountService accountService;
     private Record testRecord;
+    private long userId;
 
     @BeforeEach
     void setUp() {
@@ -26,9 +27,10 @@ public class RecordServiceTest {
         Account testUser = new Account();
         testUser.setUserName("userTest");
         accountService.saveUser(testUser);
+        userId = testUser.getId();
 
         // 2. Création du Record
-        testRecord = recordService.createRecord("Dossier Global", "userTest");
+        testRecord = recordService.createRecord("Dossier Global", userId);
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
         List<Permission> permissionList = new ArrayList<>();
@@ -42,7 +44,7 @@ public class RecordServiceTest {
     @Test
     void testGetRecordsForUser() {
         // Teste si on retrouve bien le dossier lié à l'utilisateur
-        List<Record> records = recordService.getRecords("userTest");
+        List<Record> records = recordService.getRecords(userId);
         assertFalse(records.isEmpty());
         assertEquals("Dossier Global", records.getFirst().getName());
     }

@@ -23,8 +23,6 @@ public class ChannelService {
     private final MessageRepository messageRepository;
     private final AccountRepository accountRepository;
 
-    // ========== OPEN CHANNELS ==========
-
     public OpenChannel getChannel(long id) {
         return channelRepository.findById(id).orElse(null);
     }
@@ -46,7 +44,8 @@ public class ChannelService {
                 new Date(),
                 account,
                 userTitle,
-                channel);
+                channel,
+                false);
         message = messageRepository.save(message);
 
         channel.getMessages().put(message.getId(), message);
@@ -66,8 +65,6 @@ public class ChannelService {
         }
         return lastMessage;
     }
-
-    // ========== CLOSE CHANNELS ==========
 
     public CloseChannel getCloseChannel(long id) {
         return closeChannelRepository.findById(id).orElse(null);

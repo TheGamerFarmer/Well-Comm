@@ -27,12 +27,14 @@ public class Message {
     @JoinColumn(name = "channel_id", nullable = false)
     @JsonIgnore // Indispensable pour éviter la boucle infinie JSON
     private Channel channel;
+    private boolean isDeleted;
 
-    public Message(String content, Date date, Account author, String authorTitle, Channel channel) {
+    public Message(String content, Date date, Account author, String authorTitle, Channel channel, boolean isDeleted) {
         this.content = content;
         this.date = date;
         this.author = author;
         this.authorTitle = authorTitle;
         this.channel = channel;
+        this.isDeleted = isDeleted;
     }
 }

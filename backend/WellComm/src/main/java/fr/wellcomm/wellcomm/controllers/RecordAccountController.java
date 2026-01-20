@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/{userName}/recordsaccount")
+@RequestMapping("/api/{userId}/recordsaccount")
 @AllArgsConstructor
 public class RecordAccountController {
     private final RecordAccountService recordAccountService;
@@ -31,22 +31,22 @@ public static class RecordAccountResponse {
 }
 
     @GetMapping("/{recordId}/permissions")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") String userName,
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") Long userId,
                                                                                  @PathVariable Long recordId
     ) {
-        RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
+        RecordAccount ra = recordAccountService.getRecordAccount(userId, recordId);
         return ResponseEntity.ok(ra.getPermissions());
     }
 
     @GetMapping("/{recordId}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
-        @PathVariable String userName,
+        @PathVariable Long userId,
         @PathVariable Long recordId) {
 
             List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                    .filter(ra -> !ra.getAccount().getUserName().equals(userName))
+                    .filter(ra -> !ra.getAccount().getId().equals(userId))
                     .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 

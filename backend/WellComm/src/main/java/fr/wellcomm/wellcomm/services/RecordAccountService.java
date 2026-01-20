@@ -54,7 +54,7 @@ public class RecordAccountService {
     }
 
     //à comparer avec la fonction dans account
-    public RecordAccount getRecordAccount(String userName, long id) {
-        return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
+    public RecordAccount getRecordAccount(Long userId, long id) {
+        return recordAccountRepository.findByAccountIdAndRecordId(userId, id).orElse(null);
     }
 }
