@@ -38,8 +38,8 @@ public class RegistrationController {
 
         Account savedAccount = accountRepository.save(new Account(
                 request.getUserName(),
-                request.getLastName(),
                 request.getFirstName(),
+                request.getLastName(),
                 passwordEncoder.encode(request.getPassword())
         ));
 

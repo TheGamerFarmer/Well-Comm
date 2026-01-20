@@ -19,19 +19,24 @@ export default function UserSpace() {
 
     useEffect(() => {
         const loadProfile = async () => {
-            const user = await getCurrentUserId();
-            setUserId(user);
+            const id = await getCurrentUserId();
 
-            const profile = await getUserProfile(userId);
-            if (profile)setProfile({
-                userName: profile.userName,
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-            });
+            if (id === null)
+                return;
 
+            setUserId(id);
+            const profile = await getUserProfile(id);
+            if (profile) {
+                setProfile({
+                    userName: profile.userName,
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                });
+            }
         };
+
         loadProfile().then();
-    }, [userId]);
+    }, []);
 
     const handleSavePassword = async () => {
         if (newPassword !== confirmPassword) {

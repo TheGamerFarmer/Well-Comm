@@ -37,6 +37,7 @@ public class AccountController {
     @Setter
     @AllArgsConstructor
     public static class UserInfos {
+        private String userName;
         private String firstName;
         private String lastName;
     }
@@ -69,7 +70,7 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        return ResponseEntity.ok(new UserInfos(account.getFirstName(),
+        return ResponseEntity.ok(new UserInfos(account.getUserName(),account.getFirstName(),
                 account.getLastName()));
     }
 
