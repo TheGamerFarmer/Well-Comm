@@ -423,12 +423,6 @@ export default function AssistantsPage() {
                         <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Permissions</h2>
 
                         <form className="flex flex-col gap-3 p-4 m-4 rounded-lg border-2 border-solid border-[#20baa7]">
-                            <div className="flex justify-between">
-                                <label htmlFor="permIsMedecin" className=" text-black"> Est un médecin </label><br/>
-                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"
-                                       checked={selectedPermissions.includes(Permission.IS_MEDECIN)}
-                                       onChange={() => togglePermission(Permission.IS_MEDECIN)}/>
-                            </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permModifierAgenda" className=" text-black"> Peut modifier l&#39;agenda </label><br/>
