@@ -4,7 +4,7 @@ import { API_BASE_URL } from "./config";
 
 export default async function proxy(request: NextRequest) {
     const logPages = ["/login/", "/register/"];
-    const homePage = "/mesAides";
+    const homePage = "/mesAides/";
     const nextJsPagesPrefix = "/_next";
     const imagesPrefix = "/images";
 
