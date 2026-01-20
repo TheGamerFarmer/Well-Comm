@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.CalendarRepository;
+import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import jakarta.transaction.Transactional;
@@ -31,6 +32,7 @@ public class RecordController {
     private final RecordService recordService;
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
+    private final RecordRepository recordRepository;
     private final SessionRepository sessionRepository;
     private final CalendarRepository calendarRepository;
 
@@ -86,6 +88,7 @@ public class RecordController {
     public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId, @PathVariable String newname) {
         Record record = recordService.getRecord(recordId);
         record.setName(newname);
+        recordRepository.save(record);
         return ResponseEntity.ok().build();
     }
 
