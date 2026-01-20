@@ -72,7 +72,7 @@ public class AccountController {
 
     @Getter
     @Setter
-    public class UpdateProfileRequest {
+    public static class UpdateProfileRequest {
         private String userName;
         private String firstName;
         private String lastName;
@@ -110,30 +110,39 @@ public class AccountController {
     }
 
 
-    @PutMapping("/changeUserInfos")
+@PostMapping("/changeUserInfos")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> updateProfile(
             @PathVariable String userName,
             @RequestBody UpdateProfileRequest request
     ) {
-        Account account = accountService.getUser(userName);
+
+        System.out.println("\n\n\n\n");
+        System.out.println("PATH userName = " + userName);
+        System.out.println("BODY userName = " + request.getUserName());
+        System.out.println("BODY firstName = " + request.getFirstName());
+        System.out.println("BODY lastName = " + request.getLastName());
+        System.out.println("\n\n\n\n");
+
+        Account account = accountRepository
+                        .findById(userName)
+                        .orElseThrow();
+
         if (account == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
 
-//         if (!userName.equals(request.getUserName())) {
-//             if (accountRepository.existsById(request.getUserName())) {
-//                         return ResponseEntity.status(409).body("Account already exists");
-//
-//             account.setUserName(request.getUserName());
-//         }
-
         if (!userName.equals(request.getUserName())) {
-                    if (accountService.existsByUserName(request.getUserName())) {
-                        return ResponseEntity.status(409).body("Nom utilisateur déjà utilisé");
-                    }
-                    account.setUserName(request.getUserName());
-                }
+
+            System.out.println("\n\n\n\n");
+            System.out.println("check userName == newUserName");
+            if (accountRepository.existsById(request.getUserName())) {
+                System.out.println("newUserName already exists in DB");
+                return ResponseEntity.status(409).body("Account already exists");
+            }
+            System.out.println("newUserName doesn't exist in DB");
+            account.setUserName(request.getUserName());
+        }
 
         account.setFirstName(request.getFirstName());
         account.setLastName(request.getLastName());

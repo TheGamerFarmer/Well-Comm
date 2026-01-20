@@ -89,7 +89,7 @@ export async function changeUserInfos(
     try {
         const res = await fetch(`${API_BASE_URL}/api/${userName}/changeUserInfos`,
         {
-            method: "PUT",
+            method: "POST",
             credentials: "include",
             headers: {
             "Content-Type": "application/json",

@@ -165,8 +165,8 @@ export default function UserSpace() {
                     </div>
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
-                        <Button variant="cancel" link={""} onClickAction={handleSaveProfile} >Annuler</Button>
-                        <Button type="submit" link={""} variant={"primary"} onClickAction={handleSaveProfile}>Enregistrer</Button>
+                        <Button variant="cancel" link={""} onClickAction={handleSaveProfile}>Annuler</Button>
+                        <Button type="button" link={""} variant={"primary"} onClickAction={handleSaveProfile}>Enregistrer</Button>
                     </div>
 
                     <div className="mt-8">
