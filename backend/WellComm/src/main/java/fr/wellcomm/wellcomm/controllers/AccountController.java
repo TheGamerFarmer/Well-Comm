@@ -69,7 +69,7 @@ public class AccountController {
         }
 
     @GetMapping("/infos")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> getInfos(@PathVariable Long userId) {
         Account account = accountService.getUser(userId);
         if (account == null)
@@ -80,7 +80,7 @@ public class AccountController {
     }
 
     @GetMapping("/changePassword/{oldPassword}/{newPassword}")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> checkPassword(@PathVariable Long userId, @PathVariable String oldPassword, @PathVariable String newPassword) {
         Account account = accountService.getUser(userId);
         if (account == null)
@@ -98,7 +98,7 @@ public class AccountController {
     }
 
     @PostMapping("/changePassword")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> changePassword(
             @PathVariable Long userId,
             @RequestBody ChangePasswordRequest request
@@ -119,7 +119,7 @@ public class AccountController {
 
 
     @DeleteMapping("/deleteUser")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         Account account = accountService.getUser(userId);
         if (account == null)
@@ -131,7 +131,7 @@ public class AccountController {
     }
 
     @PostMapping("/addAccess")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> addRecordAccount(@PathVariable Long userId, @RequestBody addRecordAccountRequest request) {
         Account account = accountService.getUser(userId);
         if (account == null)
@@ -152,7 +152,7 @@ public class AccountController {
 
 //ajouter un assistant autre que la personne connecté à un dossier
     @PostMapping("/addAccess/current_record/{name}")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable @SuppressWarnings("unused") Long userId,
                                                            @RequestBody addRecordAccountRequest request,
                                                            @PathVariable String name) {
@@ -182,7 +182,7 @@ public class AccountController {
 
 
     @DeleteMapping("/deleteAccess/")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> deleteRecordAccount(@PathVariable Long userId, @RequestBody deleteRecordAccountRequest request) {
         Account account = accountService.getUser(userId);
         if (account == null)
@@ -199,12 +199,13 @@ public class AccountController {
 
     //retirer un assistant autre que la personne connecté
     @DeleteMapping("/deleteAccess/current_record/{targetUserName}/{recordId}")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> deleteRecordAccount(
             @PathVariable Long userId,
             @PathVariable String targetUserName,
             @PathVariable Long recordId
     ) {
+        System.out.println("=====================");
         Account account = accountService.getUser(userId);
                 if (account == null)
                     return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
@@ -231,7 +232,7 @@ public class AccountController {
 
     //modifier le role d'un assistant autre que la personne connecté
     @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
             @PathVariable Long userId,
             @PathVariable String targetUserName,
@@ -248,7 +249,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/logout")
-    @PreAuthorize("#userId == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> logout(@PathVariable Long userId,LogoutRequest logoutRequest, HttpServletRequest request) {
 
         Account account = accountRepository.findById(userId).orElse(null);
