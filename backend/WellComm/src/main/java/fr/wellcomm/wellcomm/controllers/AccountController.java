@@ -85,14 +85,26 @@ public class AccountController {
         Account account = accountService.getUser(userId);
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
-@PostMapping("/changePassword")
-    @PreAuthorize("#userName == authentication.name")
+
+        if (passwordEncoder.matches(oldPassword, account.getPassword())) {
+            account.setPassword(passwordEncoder.encode(newPassword));
+
+            accountService.saveUser(account);
+
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(403).body("Mot de passe incorrect");
+        }
+    }
+
+    @PostMapping("/changePassword")
+    @PreAuthorize("#userId == authentication.name")
     public ResponseEntity<?> changePassword(
-            @PathVariable String userName,
+            @PathVariable Long userId,
             @RequestBody ChangePasswordRequest request
     ) {
         Account account = accountRepository
-                .findById(userName)
+                .findById(userId)
                 .orElseThrow();
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
@@ -236,10 +248,10 @@ public class AccountController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(LogoutRequest logoutRequest, HttpServletRequest request) {
+    @PreAuthorize("#userId == authentication.name")
+    public ResponseEntity<?> logout(@PathVariable Long userId,LogoutRequest logoutRequest, HttpServletRequest request) {
 
-        String userName = logoutRequest.getUserName();
-        Account account = accountRepository.findById(userName).orElse(null);
+        Account account = accountRepository.findById(userId).orElse(null);
         if (account == null)
             return ResponseEntity.badRequest().body("Account not found");
 

@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Client } from "@stomp/stompjs";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Client} from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import {
-    getCurrentUser,
-    getRecords,
-    fetchAllChannels,
-    createChannel,
-    mapCategoryToEnum,
-    archiveChannel,
-    getChannelContent,
     addMessage,
-    deleteMessage,
-    FilResponse,
-    DossierResponse,
-    MessageResponse,
-    updateMessage,
+    archiveChannel,
     categories,
-    getCurrentUserId
+    createChannel,
+    deleteMessage,
+    DossierResponse,
+    fetchAllChannels,
+    FilResponse,
+    getChannelContent,
+    getCurrentUser,
+    getCurrentUserId,
+    getRecords,
+    mapCategoryToEnum,
+    MessageResponse,
+    updateMessage
 } from "@/functions/fil-API";
 
 interface SockJSOptions extends SockJS.Options {
@@ -103,7 +103,6 @@ export function useFilLogic() {
                 const content = await getChannelContent(currentUserId, activeRecordId, selectedChannel.id);
                 if (!ignore) {
                     if (content && content.messages) {
-                        console.log('📥 Messages chargés depuis API:', content.messages);
                         setMessages(content.messages);
                     } else {
                         setMessages([]);
@@ -130,50 +129,38 @@ export function useFilLogic() {
         });
 
         client.onConnect = () => {
-            console.log('✅ WebSocket connecté pour channel:', selectedChannel.id);
 
             client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
                 const data = JSON.parse(payload.body);
 
-                console.log('📩 WebSocket data reçue:', data);
-
                 if (data.type === 'UPDATE') {
-                    console.log('✏️ Type UPDATE détecté');
                     setMessages((prev) => {
-                        const updated = prev.map(m =>
+                        return prev.map(m =>
                             m.id === data.id
                                 ? {
                                     ...m,
                                     content: data.content,
-                                    // isDeleted ne change pas lors d'un UPDATE
                                 }
                                 : m
                         );
-                        console.log('📝 Messages après UPDATE:', updated);
-                        return updated;
                     });
                 }
                 else if (data.type === 'DELETE') {
-                    console.log('🗑️ Type DELETE détecté, isDeleted:', data.isDeleted);
                     setMessages((prev) => {
-                        const updated = prev.map(m =>
+                        return prev.map(m =>
                             m.id === data.id
                                 ? {
                                     ...m,
                                     content: data.content,
-                                    isDeleted: true  // ✅ Force à true
+                                    isDeleted: true
                                 }
                                 : m
                         );
-                        console.log('📝 Messages après DELETE:', updated);
-                        return updated;
                     });
                 }
                 else if (data.id) {
-                    console.log('➕ Nouveau message détecté');
                     setMessages((prev) => {
                         if (prev.some(m => m.id === data.id)) {
-                            console.log('⚠️ Message déjà présent, ignoré');
                             return prev;
                         }
                         const newMsg: MessageResponse = {
@@ -184,7 +171,6 @@ export function useFilLogic() {
                             authorUserName: data.authorUserName,
                             isDeleted: data.isDeleted || false
                         };
-                        console.log('📝 Messages après ajout:', [...prev, newMsg]);
                         return [...prev, newMsg];
                     });
                 }
@@ -229,11 +215,7 @@ export function useFilLogic() {
 
     const handleDeleteChatMessage = async (messageId: number | null) => {
         if (!selectedChannel || !activeRecordId || messageId==null) return;
-
-        const success = await deleteMessage(currentUserId, activeRecordId, selectedChannel.id, messageId);
-        if (success) {
-            console.log("Message envoyé pour suppression");
-        }
+        await deleteMessage(currentUserId, activeRecordId, selectedChannel.id, messageId);
     };
 
     const handleSaveEdit = async (id: number) => {
