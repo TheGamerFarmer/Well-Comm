@@ -5,7 +5,7 @@ import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
 import { useRouter } from "next/navigation";
-import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/functions/user-api";
+import { getUserProfile, UserProfile, changePassword, deleteAccount, changeUserInfos } from "@/functions/user-api";
 import { API_BASE_URL } from "@/config";
 import {encryptPassword} from "@/functions/encryptPassword";
 
@@ -17,7 +17,9 @@ export default function UserSpace() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [userName, setUserName] = useState<string>("");
-
+    const [newUserName, setNewUserName] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -54,7 +56,7 @@ export default function UserSpace() {
         const ok = await changePassword(userName, encryptPassword(currentPassword), encryptPassword(newPassword));
 
         if (ok) {
-            alert("Mot de passe modifié avec succès !");
+            alert("Mot de passe modifié avec succès!");
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
@@ -72,7 +74,21 @@ export default function UserSpace() {
         }
     };
 
+    const handleSaveProfile = async () => {
+        const ok = await changeUserInfos(
+            userName,   // тот userName, с которым пользователь вошёл
+            newUserName,
+            firstName,
+            lastName
+        );
 
+        if (ok) {
+            alert("Profil mis à jour avec succès!");
+            if (newUserName !== userName) {
+                window.location.reload(); // т.к. username изменился
+            }
+        }
+    };
 
 
 
@@ -111,7 +127,7 @@ export default function UserSpace() {
                             <input
                                 type="text"
                                 value={profile?.firstName || ""}
-                                readOnly
+                                onChange={(e) => setFirstName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
@@ -120,7 +136,7 @@ export default function UserSpace() {
                             <input
                                 type="text"
                                 value={profile?.lastName || ""}
-                                readOnly
+                                onChange={(e) => setLastName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
@@ -139,15 +155,15 @@ export default function UserSpace() {
                             <input
                                 type="text"
                                 value={profile?.userName || ""}
-                                readOnly
+                                onChange={(e) => setNewUserName(e.target.value)}
                                 className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
-                        <Button variant="cancel" link={""}>Annuler</Button>
-                        <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
+                        <Button variant="cancel" link={""} onClickAction={handleSaveProfile} >Annuler</Button>
+                        <Button type="submit" link={""} variant={"primary"} onClickAction={handleSaveProfile}>Enregistrer</Button>
                     </div>
 
                     <div className="mt-8">

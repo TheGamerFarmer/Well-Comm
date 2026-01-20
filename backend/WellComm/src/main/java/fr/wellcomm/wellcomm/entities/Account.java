@@ -34,4 +34,8 @@ public class Account {
         this.lastName = lastName;
         this.password = password;
     }
+
+    public boolean existsByUserName(String userName) {
+        return accountRepository.existsById(userName);
+    }
 }

@@ -61,11 +61,19 @@ public class AccountController {
         private String userName;
     }
 
-        @Getter
-        @Setter
-        public static class ChangePasswordRequest {
-            private String currentPassword;
-            private String newPassword;
+    @Getter
+    @Setter
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+        }
+
+    @Getter
+    @Setter
+    public class UpdateProfileRequest {
+        private String userName;
+        private String firstName;
+        private String lastName;
         }
 
     @GetMapping("/infos")
@@ -95,6 +103,40 @@ public class AccountController {
 
         account.setPassword(passwordEncoder.encode(request.getNewPassword()));
         accountRepository.save(account);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PutMapping("/{userName}/changeUserInfos")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> updateProfile(
+            @PathVariable String userName,
+            @RequestBody UpdateProfileRequest request
+    ) {
+        Account account = accountService.getUser(userName);
+        if (account == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+//         if (!userName.equals(request.getUserName())) {
+//             if (accountRepository.existsById(request.getUserName())) {
+//                         return ResponseEntity.status(409).body("Account already exists");
+//
+//             account.setUserName(request.getUserName());
+//         }
+
+        if (!userName.equals(request.getUserName())) {
+                    if (accountService.existsByUserName(request.getUserName())) {
+                        return ResponseEntity.status(409).body("Nom utilisateur déjà utilisé");
+                    }
+                    account.setUserName(request.getUserName());
+                }
+
+        account.setFirstName(request.getFirstName());
+        account.setLastName(request.getLastName());
+
+        accountService.saveUser(account);
 
         return ResponseEntity.ok().build();
     }
