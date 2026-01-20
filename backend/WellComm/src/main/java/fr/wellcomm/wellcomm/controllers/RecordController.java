@@ -74,6 +74,21 @@ public class RecordController {
         return ResponseEntity.ok(dossiers);
     }
 
+    @GetMapping("/{recordId}/name")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<String> getNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId) {
+        Record record = recordService.getRecord(recordId);
+        return ResponseEntity.ok(record.getName());
+    }
+
+    @PutMapping("/{recordId}/{newname}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId, @PathVariable String newname) {
+        Record record = recordService.getRecord(recordId);
+        record.setName(newname);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/create/{name}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Record> createRecord(@PathVariable String userName,
