@@ -40,6 +40,7 @@ public static class RecordAccountResponse {
         return ResponseEntity.ok(ra.getPermissions());
     }
 
+    //liste des record_accounts d'un dossier
     @GetMapping("/{recordId}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
@@ -53,6 +54,29 @@ public static class RecordAccountResponse {
 
             return ResponseEntity.ok(assistants);
         }
+
+    //liste des medecins
+    @GetMapping("/{recordId}/medecins")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<RecordAccountResponse>> getMedecinsByRecordId(
+            @PathVariable String userName,
+            @PathVariable Long recordId) {
+
+        List<RecordAccountResponse> medecins = recordAccountService.getByRecordId(recordId).stream()
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName))
+                .filter(ra -> ra.getTitle() == Role.MEDECIN)
+
+                .map(d -> new RecordAccountResponse(
+                        d.getId(),
+                        d.getCreatedAt(),
+                        d.getTitle().getTitre(),
+                        d.getAccount().getUserName(),
+                        d.getRecord().getId()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(medecins);
+    }
 
 
 }

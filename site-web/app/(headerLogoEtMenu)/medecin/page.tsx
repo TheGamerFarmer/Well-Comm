@@ -8,7 +8,6 @@ import { API_BASE_URL } from "@/config";
 
 import Image from "next/image";
 
-//"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
 type Invitation = {
     id: number;
     title: string;
@@ -22,7 +21,7 @@ export default function AssistantsPage() {
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [title, setTitle] = useState<Invitation["title"]>("Aidant");
+    const [title, setTitle] = useState<Invitation["title"]>("");
     const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
     const [error, setError] = useState("");
@@ -32,7 +31,6 @@ export default function AssistantsPage() {
     }, []);
 
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
-
 
     useEffect(() => {
         const localRecordId = localStorage.getItem('activeRecordId');
@@ -50,7 +48,7 @@ export default function AssistantsPage() {
         if (!userName || !activeRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}`,
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/medecins`,
             {credentials: "include"}
         );
 
@@ -62,14 +60,14 @@ export default function AssistantsPage() {
         const data: Invitation[] = await res.json();
         setInvitations(data);
     }, [activeRecordId, userName]);
-    
+
     //afficher la liste d'assistants quand on charge la page
     useEffect(() => {
         setTimeout(() => {
             fetchAssistants().then();
         }, 0);
     }, [userName, activeRecordId, fetchAssistants]);
-    
+
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
         if (!userName || !activeRecordId) {
@@ -156,14 +154,14 @@ export default function AssistantsPage() {
         <>
             <div className=" w-full p-6 md:p-10 font-sans min-h-screen bg-[#f1f2f2] ">
                 <p className="text-3xl font-bold text-[#0551ab]">
-                    Assistants
+                    Médecins
                 </p>
                 <FilArianne/>
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
                             onClickAction={() => setIsOpen(true)}
                             link={""}>
-                        Ajouter un(e) Assistant(e)
+                        Ajouter un médecin
                     </Button>
                 </div>
 
@@ -194,19 +192,6 @@ export default function AssistantsPage() {
                                     Permissions
                                 </Button>
 
-                                <select
-                                    value={inv.title}
-                                    onChange={(e) => {
-                                        if ( !activeRecordId)
-                                            return;
-                                        
-                                        updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
-                                    }}
-                                    className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
-                                    <option value="Aidant">Aidant</option>
-                                    <option value="Employée">Employé</option>
-                                </select>
-
                                 <button
                                     onClick={() => setInvitationToDelete(inv)}
                                     className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">
@@ -222,55 +207,45 @@ export default function AssistantsPage() {
 
 
                 {/* pop-up ajouter assistant*/}
-                    {isOpen && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                            <div className="bg-white p-6 rounded-2xl w-[400px]">
-                                <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
+                {isOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-2xl w-[400px]">
+                            <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
 
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        if (!username.trim()) return;
-                                        addAccessToCurrentRecord(title).then();
-                                    }}
-                                    className="flex flex-col gap-4"
-                                >
-                                    <input
-                                        type="text"
-                                        placeholder="Nom d'utilisateur de l'assistant"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        className="border rounded-lg p-2 text-black"
-                                        required
-                                    />
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (!username.trim()) return;
+                                    addAccessToCurrentRecord(title).then();
+                                }}
+                                className="flex flex-col gap-4"
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Nom d'utilisateur de l'assistant"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="border rounded-lg p-2 text-black"
+                                    required
+                                />
 
-                                    <select
-                                        id="title"
-                                        name="title"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
-                                        <option value="AIDANT">Aidant</option>
-                                        <option value="EMPLOYEE">Employé</option>
-                                    </select>
+                                <p className="text-red-500 font-bold text-center">{error}</p>
 
-                                    <p className="text-red-500 font-bold text-center">{error}</p>
+                                <div className="flex justify-center gap-3">
+                                    <Button variant="secondary" type="button" onClickAction={() => setIsOpen(false)} link={""}>
+                                        Annuler
+                                    </Button>
 
-                                    <div className="flex justify-center gap-3">
-                                        <Button variant="secondary" type="button" onClickAction={() => setIsOpen(false)} link={""}>
-                                            Annuler
-                                        </Button>
+                                    <Button variant="primary" type="submit" link={""}>
+                                        Ajouter
+                                    </Button>
+                                </div>
+                            </form>
 
-                                        <Button variant="primary" type="submit" link={""}>
-                                            Ajouter
-                                        </Button>
-                                    </div>
-                                </form>
-
-                            </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+            </div>
 
             {/*pop-up delete*/}
             {invitationToDelete && (
@@ -299,7 +274,7 @@ export default function AssistantsPage() {
                                 onClickAction={() => {
                                     if (!invitationToDelete?.accountUserName || !activeRecordId)
                                         return;
-                                    
+
                                     removeAccess(invitationToDelete.accountUserName, activeRecordId).then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
@@ -351,8 +326,8 @@ export default function AssistantsPage() {
                         <div className="flex justify-center gap-3">
 
                             <Button variant="secondary" type="button" onClickAction={() => setIsOpenPerms(false)} link={""}>
-                                    Annuler
-                                </Button>
+                                Annuler
+                            </Button>
 
                             <Button variant="primary" type="submit" onClickAction={() => setIsOpenPerms(false)} link={""}>
                                 Confirmer
