@@ -2,8 +2,8 @@ import {NextRequest} from "next/dist/server/web/spec-extension/request";
 import {NextResponse} from "next/dist/server/web/spec-extension/response";
 import { API_BASE_URL } from "./config";
 
-export async function proxy(request: NextRequest) {
-    const logPages = ["/login", "/register"];
+export default async function proxy(request: NextRequest) {
+    const logPages = ["/login/", "/register/"];
     const homePage = "/mesAides";
     const nextJsPagesPrefix = "/_next";
     const imagesPrefix = "/images";
