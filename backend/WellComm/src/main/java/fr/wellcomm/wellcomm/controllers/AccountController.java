@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
+import fr.wellcomm.wellcomm.entities.Account;
+import fr.wellcomm.wellcomm.services.AccountService;
 
 @RestController
 @RequestMapping("/api/{userName}")

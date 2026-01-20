@@ -81,4 +81,8 @@ public class AccountService {
             accountRepository.save(account);
         }
     }
+
+     public boolean existsByUserName(String userName) {
+            return accountRepository.existsById(userName);
+        }
 }
