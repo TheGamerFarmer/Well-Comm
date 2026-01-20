@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/config";
 
-export default async function logUser(userName: string, hashPassWord: string) : Promise<boolean | undefined> {
+export default async function logUser(userName: string, hashPassWord: string) {
     try {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
@@ -12,8 +12,14 @@ export default async function logUser(userName: string, hashPassWord: string) : 
             }),
         });
 
-        return response.ok;
+        if (response.ok) {
+            return { success: true };
+        } else {
+            const errorText = await response.text();
+            return { success: false, message: errorText };
+        }
     } catch (err) {
         console.log(err);
+        return { success: false, message: "Erreur de connexion au serveur" };
     }
 }
