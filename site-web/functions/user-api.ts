@@ -81,13 +81,13 @@ export async function deleteAccount(userName: string): Promise<boolean> {
 }
 
 export async function changeUserInfos(
-    currentUserName: string,
+    userName: string,
     newUserName: string,
     firstName: string,
     lastName: string
 ): Promise<boolean> {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/${currentUserName}/changeUserInfos`,
+        const res = await fetch(`${API_BASE_URL}/api/${userName}/changeUserInfos`,
         {
             method: "PUT",
             credentials: "include",

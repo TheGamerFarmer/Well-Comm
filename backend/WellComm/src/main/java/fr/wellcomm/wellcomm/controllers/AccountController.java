@@ -110,7 +110,7 @@ public class AccountController {
     }
 
 
-    @PutMapping("/{userName}/changeUserInfos")
+    @PutMapping("/changeUserInfos")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> updateProfile(
             @PathVariable String userName,
