@@ -4,8 +4,10 @@ import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.CalendarRepository;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +32,7 @@ public class RecordController {
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
     private final SessionRepository sessionRepository;
+    private final CalendarRepository calendarRepository;
 
     @Getter
     @Setter
@@ -197,10 +200,12 @@ public class RecordController {
         return ResponseEntity.ok().build();
     }
 
+    @Transactional
     @DeleteMapping("/delete/{recordId}")
     @PreAuthorize("#userId.toString() == authentication.name and @securityService.deleteRecord()")
     public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") Long userId,
                                               @PathVariable Long recordId) {
+        calendarRepository.deleteById(recordId);
         boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
             return ResponseEntity.noContent().build(); // 204

@@ -31,10 +31,10 @@ public class Account {
     private LocalDateTime lockTime;
     private boolean isLocked;
 
-    public Account(String userName, String lastName, String firstName, String password) {
+    public Account(String userName, String firstName, String lastName, String password) {
         this.userName = userName;
-        this.lastName = lastName;
         this.firstName = firstName;
+        this.lastName = lastName;
         this.password = password;
     }
 }
