@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 import static fr.wellcomm.wellcomm.domain.Permission.*;
@@ -260,7 +259,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(LogoutRequest logoutRequest, HttpServletRequest request) {
+    public ResponseEntity<?> logout(LogoutRequest logoutRequest) {
 
         String userName = logoutRequest.getUserName();
         Account account = accountRepository.findById(userName).orElse(null);
