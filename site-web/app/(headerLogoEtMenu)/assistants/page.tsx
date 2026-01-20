@@ -5,8 +5,9 @@ import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
-
 import Image from "next/image";
+import {getPermissions, Permission} from "@/functions/Permissions";
+
 
 //"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
 type Invitation = {
@@ -26,6 +27,8 @@ export default function AssistantsPage() {
     const [username, setUsername] = useState("");
     const [userName, setUserName] = useState<string | null>(null);
     const [error, setError] = useState("");
+    const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
+
 
     useEffect(() => {
         getCurrentUser().then(setUserName);
@@ -43,6 +46,23 @@ export default function AssistantsPage() {
             }
         }
     }, [setActiveRecordId])
+
+    useEffect(() => {
+        if (!userName || !activeRecordId) {
+            setRecordAccount(null);
+            return;
+        }
+
+        getPermissions(userName, activeRecordId)
+            .then((permissions: Permission[]) => {
+                setRecordAccount({ permissions });
+            })
+            .catch(() => {
+                setRecordAccount({ permissions: [] });
+            });
+    }, [userName, activeRecordId]);
+
+    const permissions = recordAccount?.permissions ?? [];
 
 
     //récupérer les assistans de currentDossier
@@ -159,6 +179,7 @@ export default function AssistantsPage() {
                     Assistants
                 </p>
                 <FilArianne/>
+                {permissions.includes(Permission.INVITE) && (
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
                             onClickAction={() => setIsOpen(true)}
@@ -166,6 +187,7 @@ export default function AssistantsPage() {
                         Ajouter un(e) Assistant(e)
                     </Button>
                 </div>
+                )}
 
                 {/*liste des assistants*/}
                 <div className=" space-y-4 bg-white rounded-lg shadow-[0_4px_6px_0_rgba(0,0,0,0.08)] px-4 py-6">
@@ -190,29 +212,35 @@ export default function AssistantsPage() {
                             </div>
 
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
+                                {permissions.includes(Permission.ASSIGN_PERMISSIONS) && (
                                 <Button variant="secondary" type="button" onClickAction={() => setIsOpenPerms(true)} link={""}>
                                     Permissions
                                 </Button>
+                                )}
 
+                                {permissions.includes(Permission.ASSIGN_PERMISSIONS) && (
                                 <select
                                     value={inv.title}
                                     onChange={(e) => {
                                         if ( !activeRecordId)
                                             return;
-                                        
+
                                         updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
                                     }}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
                                     <option value="Employée">Employé</option>
                                 </select>
+                                )}
 
+                                {permissions.includes(Permission.INVITE) && (
                                 <button
                                     onClick={() => setInvitationToDelete(inv)}
                                     className="text-red-600 font-bold cursor-pointer hover:bg-black/10 hover:scale-110 rounded-full transition delay-10 duration-300 ease-in-out">
 
                                     <svg className="m-4" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" stroke="#c10808" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"><path d="M12 20h5c0.5 0 1 -0.5 1 -1v-14M12 20h-5c-0.5 0 -1 -0.5 -1 -1v-14"/><path d="M4 5h16"/><path d="M10 4h4M10 9v7M14 9v7"/></g></svg>
                                 </button>
+                                )}
                             </div>
 
                         </div>
@@ -332,6 +360,11 @@ export default function AssistantsPage() {
                             </div>
 
                             <div className="flex justify-between">
+                                <label htmlFor="permModifierAgenda" className=" text-black"> Peut voir l&#39;agenda </label><br/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
                                 <label htmlFor="permAssignerPerms" className=" text-black"> Peut assigner des permissions </label><br/>
                                 <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"/>
                             </div>
@@ -345,6 +378,27 @@ export default function AssistantsPage() {
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut envoyer des messages </label><br/>
                                 <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
                             </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut modifier des messages </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut supprimer des messages </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut ouvrir des fils </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut supprimer des fils </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                            </div>
+
 
                         </form>
 
