@@ -6,6 +6,7 @@ import FilArianne from "@/components/FilArianne";
 import { useArchiveLogic } from "@/hooks/useArchiveLogic";
 import {capitalizeWords, MessageResponse} from "@/functions/fil-API";
 import {getPermissions, Permission} from "@/functions/Permissions";
+import {sanitize} from "@/functions/Sanitize";
 
 export default function ArchivePage() {
     const {
@@ -283,7 +284,7 @@ export default function ArchivePage() {
                                     type="text"
                                     placeholder="Recherche par titre"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => setSearchQuery(sanitize(e.target.value))}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
                                 />
                                 <svg className="absolute left-5 top-4 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

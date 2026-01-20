@@ -9,6 +9,7 @@ import {
     getCurrentUser,
 } from "@/functions/fil-API";
 import Image from "next/image";
+import {sanitize} from "@/functions/Sanitize";
 
 //"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
 type Invitation = {
@@ -200,7 +201,7 @@ export default function AssistantsPage() {
                                         if ( !currentDossier)
                                             return;
                                         
-                                        updateRoleAccess(inv.accountUserName, currentDossier, e.target.value).then()
+                                        updateRoleAccess(inv.accountUserName, currentDossier, sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option>Aidant</option>
@@ -241,7 +242,7 @@ export default function AssistantsPage() {
                                         type="text"
                                         placeholder="Nom d'utilisateur de l'assistant"
                                         value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => setUsername(sanitize(e.target.value))}
                                         className="border rounded-lg p-2 text-black"
                                         required
                                     />
@@ -250,7 +251,7 @@ export default function AssistantsPage() {
                                         id="title"
                                         name="title"
                                         value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
+                                        onChange={(e) => setTitle(sanitize(e.target.value))}
                                         className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
                                         <option>Aidant</option>
                                         <option>Infirmier(e)</option>
