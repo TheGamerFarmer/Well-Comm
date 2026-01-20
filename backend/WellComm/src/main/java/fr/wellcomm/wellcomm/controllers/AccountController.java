@@ -16,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
+import static fr.wellcomm.wellcomm.domain.Permission.*;
+
 @RestController
 @RequestMapping("/api/{userName}")
 @AllArgsConstructor
@@ -140,12 +142,15 @@ public class AccountController {
         newAccess.setRecord(record);
         if(request.getTitle().equals("Aidant") || request.getTitle().equals("AIDANT")) {
             newAccess.setTitle(Role.AIDANT);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
         }
         else if(request.getTitle().equals("Employé") || request.getTitle().equals("EMPLOYEE")) {
             newAccess.setTitle(Role.EMPLOYEE);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
         }
         else{
             newAccess.setTitle(Role.MEDECIN);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
         }
 
         accountService.addRecordAccount(account, newAccess);

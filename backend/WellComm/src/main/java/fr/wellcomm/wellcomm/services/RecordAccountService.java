@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
+import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -51,6 +52,7 @@ public class RecordAccountService {
 
         // Mise à jour du rôle
         recordAccount.setTitle(role);
+        recordAccount.setPermissions(recordAccount.getTitle().getPermission());
 
         // Sauvegarde
         recordAccountRepository.save(recordAccount);
@@ -59,5 +61,19 @@ public class RecordAccountService {
     //à comparer avec la fonction dans account
     public RecordAccount getRecordAccount(String userName, long id) {
         return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
+    }
+
+    public void addRecordAccountPermissions(String userName, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+        List<Permission> permissions = recordAccount.getPermissions();
+        permissions.add(permission);
+        recordAccount.setPermissions(permissions);
+    }
+
+    public void deleteRecordAccountPermissions(String userName, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+        List<Permission> permissions = recordAccount.getPermissions();
+        permissions.remove(permission);
+        recordAccount.setPermissions(permissions);
     }
 }
