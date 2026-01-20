@@ -19,14 +19,17 @@ function LoginForm() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage("");
+
         const hashedPwd = encryptPassword(password);
+        const result = await logUser(userName, hashedPwd);
 
-        if (await logUser(userName, hashedPwd)) {
+        if (result.success) {
             localStorage.setItem("username", userName);
-
+            //localStorage.setItem("userId",userId)
             router.push(callbackUrl);
         } else {
-            setErrorMessage("Nom d'utilisateur ou mot de passe incorrect");
+            setErrorMessage(result.message || "Une erreur est survenue");
         }
     };
 

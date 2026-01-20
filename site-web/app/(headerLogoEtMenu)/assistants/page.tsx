@@ -106,7 +106,7 @@ export default function AssistantsPage() {
         if (!userName || !activeRecordId) return;
 
         const res = await fetch(
-            `http://localhost:8080/api/${userName}/recordsaccount/${activeRecordId}`,
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}`,
             {credentials: "include"}
         );
 
@@ -134,7 +134,7 @@ export default function AssistantsPage() {
         }
 
         const res = await fetch(
-            `http://localhost:8080/api/${userName}/addAccess/current_record/${encodeURIComponent(
+            `${API_BASE_URL}/api/${userName}/addAccess/current_record/${encodeURIComponent(
                 username
             )}`,
             {
@@ -170,7 +170,7 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch(`http://localhost:8080/api/${userName}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userName}/deleteAccess/current_record/${name}/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -193,7 +193,7 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch (`http://localhost:8080/api/${userName}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${userName}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -301,7 +301,7 @@ export default function AssistantsPage() {
 
                                         updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
                                     }}
-                                    className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
+                                    className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
                                     <option value="Employée">Employé</option>
                                 </select>
