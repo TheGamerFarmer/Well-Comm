@@ -203,8 +203,8 @@ export default function AssistantsPage() {
                                         updateRoleAccess(inv.accountUserName, activeRecordId, e.target.value).then()
                                     }}
                                     className="flex flex-col border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
-                                    <option value="AIDANT">Aidant</option>
-                                    <option value="EMPLOYEE">Employé</option>
+                                    <option value="Aidant">Aidant</option>
+                                    <option value="Employée">Employé</option>
                                 </select>
 
                                 <button
@@ -277,7 +277,7 @@ export default function AssistantsPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-2xl w-[400px] flex flex-col items-center gap-y-4">
 
-                        <img src="/images/icon-attention2x.png" alt="Attention" width={50} />
+                        <Image src="/images/icons/attention.svg" alt="attention" width={48} height={48} priority />
 
                         <p className="font-bold text-blue-800 text-xl text-center">
                             Voulez-vous supprimer l’invitation de
