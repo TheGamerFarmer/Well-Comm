@@ -100,10 +100,10 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        if(request.getTitle() == "Aidant") {
+        if(request.getTitle().equals("Aidant")) {
             newAccess.setTitle(Role.AIDANT);
         }
-        else if(request.getTitle() == "Employé") {
+        else if(request.getTitle().equals("Employé")) {
             newAccess.setTitle(Role.EMPLOYEE);
         }
         else{
@@ -138,10 +138,10 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        if(request.getTitle() == "Aidant") {
+        if(request.getTitle().equals("Aidant") || request.getTitle().equals("AIDANT")) {
             newAccess.setTitle(Role.AIDANT);
         }
-        else if(request.getTitle() == "Employé") {
+        else if(request.getTitle().equals("Employé") || request.getTitle().equals("EMPLOYEE")) {
             newAccess.setTitle(Role.EMPLOYEE);
         }
         else{
