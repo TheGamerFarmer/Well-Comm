@@ -28,6 +28,8 @@ export default function AssistantsPage() {
     const [userName, setUserName] = useState<string | null>(null);
     const [error, setError] = useState("");
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
+    const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
+    const [selectedAssistant, setSelectedAssistant] = useState<Invitation | null>(null);
 
 
     useEffect(() => {
@@ -46,6 +48,40 @@ export default function AssistantsPage() {
             }
         }
     }, [setActiveRecordId])
+
+    useEffect(() => {
+        let assistantName: string | null = null; // ou "" si tu préfères
+
+        if (selectedAssistant) {
+            assistantName = selectedAssistant.accountUserName;
+        }
+        if (!assistantName || !activeRecordId || ! userName) return;
+
+        const fetchPermissions = async () => {
+            try {
+                const res = await fetch(
+                    `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/autrepermissions/${assistantName}`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+
+                if (!res.ok) {
+                    console.log("Erreur chargement permissions");
+                    return;
+                }
+
+                const data: Permission[] = await res.json();
+                setSelectedPermissions(data);
+            } catch (error) {
+                console.error("Erreur fetch permissions", error);
+            }
+        };
+
+        fetchPermissions();
+    }, [username, activeRecordId, selectedAssistant]);
+
 
     useEffect(() => {
         if (!userName || !activeRecordId) {
@@ -171,6 +207,44 @@ export default function AssistantsPage() {
         console.log("recordAccount modifié ")
     }
 
+    const openPermissionsModal = (assistant: Invitation) => {
+        setSelectedAssistant(assistant);
+        setIsOpenPerms(true);
+    };
+
+    const togglePermission = (perm: Permission) => {
+        setSelectedPermissions((prev) =>
+            prev.includes(perm)
+                ? prev.filter((p) => p !== perm)
+                : [...prev, perm]
+        );
+    };
+
+    const savePermissions = async () => {
+        let assistantName: string | null = null; // ou "" si tu préfères
+
+        if (selectedAssistant) {
+            assistantName = selectedAssistant.accountUserName;
+        }
+        if (!selectedAssistant || !activeRecordId) return;
+
+        await fetch(
+            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/changepermissions`,
+            {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userName: assistantName,
+                    permissions: selectedPermissions
+                }),
+            }
+        );
+
+        setIsOpenPerms(false);
+    };
+
+
     return (
 
         <>
@@ -213,7 +287,7 @@ export default function AssistantsPage() {
 
                             <div className="flex flex-col md:flex-row items-center gap-4 p-4">
                                 {permissions.includes(Permission.ASSIGN_PERMISSIONS) && (
-                                <Button variant="secondary" type="button" onClickAction={() => setIsOpenPerms(true)} link={""}>
+                                <Button variant="secondary" type="button" onClickAction={() => openPermissionsModal(inv)} link={""}>
                                     Permissions
                                 </Button>
                                 )}
@@ -351,52 +425,72 @@ export default function AssistantsPage() {
                         <form className="flex flex-col gap-3 p-4 m-4 rounded-lg border-2 border-solid border-[#20baa7]">
                             <div className="flex justify-between">
                                 <label htmlFor="permIsMedecin" className=" text-black"> Est un médecin </label><br/>
-                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"/>
+                                <input type="checkbox" id="permIsMedecin" name="permIsMedecin" value="PermIsMedecin" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.IS_MEDECIN)}
+                                       onChange={() => togglePermission(Permission.IS_MEDECIN)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permModifierAgenda" className=" text-black"> Peut modifier l&#39;agenda </label><br/>
-                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.EDIT_CALENDAR)}
+                                       onChange={() => togglePermission(Permission.EDIT_CALENDAR)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permModifierAgenda" className=" text-black"> Peut voir l&#39;agenda </label><br/>
-                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"/>
+                                <input type="checkbox" id="permModifierAgenda" name="permModifierAgenda" value="PermModifierAgenda" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.SEE_CALENDAR)}
+                                       onChange={() => togglePermission(Permission.SEE_CALENDAR)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permAssignerPerms" className=" text-black"> Peut assigner des permissions </label><br/>
-                                <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"/>
+                                <input type="checkbox" id="permAssignerPerms" name="permAssignerPerms" value="PermAssignerPerms" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.ASSIGN_PERMISSIONS)}
+                                       onChange={() => togglePermission(Permission.ASSIGN_PERMISSIONS)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permAddAssistant" className=" text-black"> Peut ajouter un(e) assistant(e) </label><br/>
-                                <input type="checkbox" id="permAddAssistant" name="permAddAssistant" value="PermAddAssistant" className=" scale-150"/>
+                                <input type="checkbox" id="permAddAssistant" name="permAddAssistant" value="PermAddAssistant" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.INVITE)}
+                                       onChange={() => togglePermission(Permission.INVITE)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut envoyer des messages </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.SEND_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.SEND_MESSAGE)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut modifier des messages </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.MODIFY_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.MODIFY_MESSAGE)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut supprimer des messages </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.DELETE_MESSAGE)}
+                                       onChange={() => togglePermission(Permission.DELETE_MESSAGE)}/>
                             </div>
 
                             <div className="flex justify-between">
                                 <label htmlFor="permSendMessage" className=" text-black"> Peut ouvrir des fils </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.OPEN_CHANNEL)}
+                                       onChange={() => togglePermission(Permission.OPEN_CHANNEL)}/>
                             </div>
 
                             <div className="flex justify-between">
-                                <label htmlFor="permSendMessage" className=" text-black"> Peut supprimer des fils </label><br/>
-                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"/>
+                                <label htmlFor="permSendMessage" className=" text-black"> Peut archiver des fils </label><br/>
+                                <input type="checkbox" id="permSendMessage" name="permSendMessage" value="PermSendMessage" className=" scale-150"
+                                       checked={selectedPermissions.includes(Permission.CLOSE_CHANNEL)}
+                                       onChange={() => togglePermission(Permission.CLOSE_CHANNEL)}/>
                             </div>
 
 
@@ -408,7 +502,7 @@ export default function AssistantsPage() {
                                     Annuler
                                 </Button>
 
-                            <Button variant="primary" type="submit" onClickAction={() => setIsOpenPerms(false)} link={""}>
+                            <Button variant="primary" type="submit" onClickAction={savePermissions} link={""}>
                                 Confirmer
                             </Button>
                         </div>

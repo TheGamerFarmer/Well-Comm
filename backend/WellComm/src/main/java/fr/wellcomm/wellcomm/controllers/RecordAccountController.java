@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
+import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RecordAccountController {
     private final RecordAccountService recordAccountService;
+    private final RecordAccountRepository recordAccountRepository;
 
 @Getter
 @Setter
@@ -31,12 +33,37 @@ public static class RecordAccountResponse {
     private Long recordId;
 }
 
+@Getter
+@Setter
+public static class PermissionsRequest {
+    public String userName;
+}
+
+
+@Getter
+@Setter
+public static class ChangePermissionsRequest {
+    public String userName;
+    public List<Permission> permissions;
+}
+
     @GetMapping("/{recordId}/permissions")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") String userName,
                                                                                  @PathVariable Long recordId
     ) {
         RecordAccount ra = recordAccountService.getRecordAccount(userName, recordId);
+        return ResponseEntity.ok(ra.getPermissions());
+    }
+
+    @GetMapping("/{recordId}/autrepermissions/{assistantName}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<Permission>> getautrePermissions(@PathVariable @SuppressWarnings("unused") String userName,
+                                                           @PathVariable Long recordId,
+                                                                @PathVariable String assistantName
+
+    ) {
+        RecordAccount ra = recordAccountService.getRecordAccount(assistantName, recordId);
         return ResponseEntity.ok(ra.getPermissions());
     }
 
@@ -54,5 +81,21 @@ public static class RecordAccountResponse {
             return ResponseEntity.ok(assistants);
         }
 
+    @PutMapping("/{recordId}/changepermissions")
+    @PreAuthorize("#userName == authentication.name and @securityService.hasRecordAccountPermission(T(fr.wellcomm.wellcomm.domain.Permission).ASSIGN_PERMISSIONS)")
+    public ResponseEntity<?> changePermissions(@PathVariable @SuppressWarnings("unused") String userName,
+                                                           @PathVariable Long recordId,
+                                                            @RequestBody ChangePermissionsRequest request
+    ) {
+        RecordAccount recordAccount = recordAccountService.getRecordAccount(request.userName, recordId);
+        for (Permission p : request.getPermissions()) {
+            if (!recordAccount.getPermissions().contains(p)) {
+                recordAccount.getPermissions().add(p);
+            }
+        }
+        recordAccount.getPermissions().removeIf(permsrecordAccount -> !request.getPermissions().contains(permsrecordAccount));
+        recordAccountRepository.save(recordAccount);
+        return ResponseEntity.ok(recordAccount.getPermissions());
 
+    }
 }
