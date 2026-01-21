@@ -10,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,6 +55,11 @@ public class RecordServiceTest {
     }
 
     @Test
+    void testDeleteRecord() {
+        assertTrue(recordService.deleteRecord(testRecord.getId()));
+    }
+
+    @Test
     void testCreateChannel() {
         Account user = new Account();
         user.setUserName("userTest");
@@ -72,7 +81,7 @@ public class RecordServiceTest {
                 .findFirst()
                 .orElse(null);
         assert firstMsg != null;
-        assertEquals("ADMIN", firstMsg.getAuthorTitle());
+        assertEquals("Aidant", firstMsg.getAuthorTitle());
         assertEquals("il a mal au dos", firstMsg.getContent());
     }
 
@@ -120,5 +129,52 @@ public class RecordServiceTest {
                 .orElse("");
 
         assertEquals("probleme regle", firstMessageContent);
+    }
+
+    @Test
+    void testGetChannelsOfCategoryClose() {
+        // On crée trois canaux
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        OpenChannel dos = recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
+        OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
+        OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Vite", testUser);
+        long dosId = dos.getId();
+        long salonId = salon.getId();
+
+        //Archivage de canaux avec catégories différentes
+        recordService.archiveChannel(testRecord, dosId);
+        recordService.archiveChannel(testRecord, salonId);
+
+        // On teste le filtre par catégorie
+        List<CloseChannel> closeChannels = recordService.getChannelsOfCategoryClose(testRecord.getId(), Category.Menage);
+
+        assertEquals(1, closeChannels.size());
+        assertEquals("salon", closeChannels.getFirst().getTitle());
+    }
+
+    @Test
+    void testGetLastWeekChannelsOfCategory() {
+        // On crée deux canaux de catégories différentes
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Hi", testUser);
+        OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
+
+        //Changement de la date
+        Date oneWeekAgo = Date.from(
+                LocalDateTime.now()
+                        .minusWeeks(2)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        cuisine.getLastMessage().setDate(oneWeekAgo);
+
+
+        // On teste le filtre par catégorie
+        List<OpenChannel> lastWeekChannels = recordService.getLastWeekChannelsOfCategory(testRecord.getId(), Category.Menage);
+
+        assertEquals(1, lastWeekChannels.size());
+        assertEquals("salon", lastWeekChannels.getFirst().getTitle());
     }
 }

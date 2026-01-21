@@ -61,7 +61,8 @@ public class RecordService {
         return lastWeekChannels;
     }
 
-    public Record createRecord(String name, Long admin) {
+    @Transactional
+    public Record createRecord(String name, long admin) {
         Record record = new Record(name, admin);
 
         record = recordRepository.save(record);
