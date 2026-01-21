@@ -4,8 +4,38 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
+import {API_BASE_URL} from "@/config";
+import {getRecordName} from "@/functions/record-api";
+import {Record} from "@/functions/record-api";
+
 
 export default function ProfilAide() {
+
+    const [record, setRecord] = useState<Record | null>(null);
+    const [recordName, setRecordName] = useState<string>("");
+
+    useEffect(() => {
+        const loadRecord = async () => {
+            const meRes = await fetch(`${API_BASE_URL}/api/me`, {
+                credentials: "include",
+                cache: "no-store",
+            });
+
+            const me = await meRes.json();
+            setRecordName(me.recordId);
+
+            const record = await getRecordName(me.userName, me.recordId);
+            if (record) {
+                setRecord({
+                    recordName: me.recordName,
+                });
+                // setNewUserName(me.userName);
+            }
+        };
+        loadRecord();
+    }, []);
+
+
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
@@ -19,7 +49,6 @@ export default function ProfilAide() {
                         DOSSIER PATIENT
                     </p>
                 </div>
-                {/*//photo de profil a decomenter quand les images seront recuperés */}
                 <div className="p-8 relative overflow-visible">
                     <Image
                         src="/images/avatar.svg"
@@ -45,7 +74,11 @@ export default function ProfilAide() {
 
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
-                            <input className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black" type="text"/>
+                            <input
+                                type="text"
+                                value={recordName}
+                                onChange={(e) => setRecordName(e.target.value)}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
 

@@ -83,7 +83,7 @@ public class RecordController {
         return ResponseEntity.ok(record.getName());
     }
 
-    @PutMapping("/{recordId}/{newname}")
+    @PostMapping("/{recordId}/{newname}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId, @PathVariable String newname) {
         Record record = recordService.getRecord(recordId);
