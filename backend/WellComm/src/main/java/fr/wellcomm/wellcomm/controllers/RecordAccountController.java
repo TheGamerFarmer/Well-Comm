@@ -77,8 +77,8 @@ public static class ChangePermissionsRequest {
             @PathVariable Long recordId) {
 
         List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                .filter(ra -> !ra.getAccount().getId().equals(userId) && ((ra.getTitle() == Role.EMPLOYEE) || (ra.getTitle() == Role.AIDANT)))
-                .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
+                .filter(ra -> !ra.getAccount().getId().equals(userId) && ((ra.getTitle().equals(Role.EMPLOYEE.getTitre())) || (ra.getTitle().equals(Role.AIDANT.getTitre()))))
+                .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(assistants);
@@ -91,8 +91,8 @@ public static class ChangePermissionsRequest {
         @PathVariable Long recordId) {
 
             List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                    .filter(ra -> !ra.getAccount().getId().equals(userId) && (ra.getTitle() == Role.MEDECIN))
-                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
+                    .filter(ra -> !ra.getAccount().getId().equals(userId) && (ra.getTitle().equals(Role.MEDECIN.getTitre())))
+                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 
         return ResponseEntity.ok(assistants);
@@ -124,12 +124,11 @@ public static class ChangePermissionsRequest {
 
         List<RecordAccountResponse> medecins = recordAccountService.getByRecordId(recordId).stream()
                 .filter(ra -> !ra.getAccount().getId().equals(userId))
-                .filter(ra -> ra.getTitle() == Role.MEDECIN)
-
+                .filter(ra -> ra.getTitle().equals(Role.MEDECIN.getTitre()))
                 .map(d -> new RecordAccountResponse(
                         d.getId(),
                         d.getCreatedAt(),
-                        d.getTitle().getTitre(),
+                        d.getTitle(),
                         d.getAccount().getUserName(),
                         d.getRecord().getId()
                 ))

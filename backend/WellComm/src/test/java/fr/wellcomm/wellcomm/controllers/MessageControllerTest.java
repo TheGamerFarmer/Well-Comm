@@ -80,12 +80,11 @@ public class MessageControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", 1L);
         record = recordRepository.save(record);
         System.out.println(record.getId());
 
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT , permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
 
         Date date = new Date();
@@ -97,16 +96,52 @@ public class MessageControllerTest {
                 new Date(),
                 userTest,
                 "ADMIN",
-                openChannel);
+                openChannel, false);
 
         // 3. Configuration du Mock pour retourner ce message
         when(messageService.getMessage(anyLong())).thenReturn(mockMsg);
         // 4. Exécution
-        mockMvc.perform(put("/api/userTest/records/" + record.getId() + "/channels/1/messages/1/update")
+        mockMvc.perform(put("/api/0/records/" + record.getId() + "/channels/1/messages/1/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("Tentative"))
                 .andExpect(status().isOk());
 
         verify(messageService).modifyContent(any(Message.class), eq("Tentative"));
+    }
+
+
+    @Test
+    @WithMockUser(username = "userTest")
+    void testdeleteMessage() throws Exception {
+        // 1. Création des données
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", 1L);
+        record = recordRepository.save(record);
+        System.out.println(record.getId());
+
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
+
+        Date date = new Date();
+        OpenChannel openChannel = new OpenChannel("nourriture", date, Category.Menage, record);
+        channelRepository.save(openChannel);
+
+        // 2. Mock du comportement métier uniquement
+        Message mockMsg = new Message("Hello",
+                new Date(),
+                userTest,
+                "ADMIN",
+                openChannel, false);
+
+        // 3. Configuration du Mock pour retourner ce message
+        when(messageService.getMessage(anyLong())).thenReturn(mockMsg);
+        // 4. Exécution
+        mockMvc.perform(delete("/api/0/records/" + record.getId() + "/channels/1/messages/1/delete"))
+                .andExpect(status().isOk());
+
+        verify(messageService).modifyContent(any(Message.class), eq("Ce message a été supprimé\u200B"));
     }
 }

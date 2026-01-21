@@ -29,9 +29,7 @@ public class RecordAccountService {
     public RecordAccount createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
-                role,
-                //role.getTitre(),
-                role.getPermission());
+                role);
 
         recordAccount = recordAccountRepository.save(recordAccount);
         account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
@@ -50,8 +48,8 @@ public class RecordAccountService {
                 .orElseThrow(() -> new RuntimeException("Access not found"));
 
         // Mise à jour du rôle
-        recordAccount.setTitle(role);
-        recordAccount.setPermissions(recordAccount.getTitle().getPermission());
+        recordAccount.setTitle(role.getTitre());
+        recordAccount.setPermissions(recordAccount.getPermissions());
 
         // Sauvegarde
         recordAccountRepository.save(recordAccount);
@@ -60,19 +58,5 @@ public class RecordAccountService {
     //à comparer avec la fonction dans account
     public RecordAccount getRecordAccount(Long userId, long id) {
         return recordAccountRepository.findByAccountIdAndRecordId(userId, id).orElse(null);
-    }
-
-    public void addRecordAccountPermissions(Long userId, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userId, recordId);
-        List<Permission> permissions = recordAccount.getPermissions();
-        permissions.add(permission);
-        recordAccount.setPermissions(permissions);
-    }
-
-    public void deleteRecordAccountPermissions(Long userId, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userId, recordId);
-        List<Permission> permissions = recordAccount.getPermissions();
-        permissions.remove(permission);
-        recordAccount.setPermissions(permissions);
     }
 }

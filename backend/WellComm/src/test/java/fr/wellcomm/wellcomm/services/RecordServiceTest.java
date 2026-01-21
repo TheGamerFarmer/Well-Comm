@@ -5,6 +5,7 @@ import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class RecordServiceTest {
     @Autowired private AccountService accountService;
     private Record testRecord;
     private long userId;
+    @Autowired private AccountRepository accountRepository;
 
     @BeforeEach
     void setUp() {
@@ -38,9 +40,7 @@ public class RecordServiceTest {
         testRecord = recordService.createRecord("Dossier Global", userId);
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT,permissionList);
+        RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT);
 
         // 4. On l'ajoute à l'utilisateur
         accountService.addRecordAccount(testUser, access);
@@ -63,8 +63,8 @@ public class RecordServiceTest {
     void testCreateChannel() {
         Account user = new Account();
         user.setUserName("userTest");
-        accountService.saveUser(user);
-        // Teste la création d'un channel et vérifie si le rôle "ADMIN" est bien récupéré
+        user = accountRepository.save(user);
+        // Teste la création d'un channel et vérifie si le rôle "Aidant" est bien récupéré
         OpenChannel channel = recordService.createChannel(
                 testRecord,
                 "Mal de dos",
@@ -90,6 +90,7 @@ public class RecordServiceTest {
         // On crée deux canaux de catégories différentes
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
         recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
 
@@ -105,6 +106,7 @@ public class RecordServiceTest {
         // 1. Création du channel
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", testUser);
         long channelId = channel.getId();
 
@@ -136,6 +138,7 @@ public class RecordServiceTest {
         // On crée trois canaux
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         OpenChannel dos = recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
         OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
         OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Vite", testUser);
@@ -158,6 +161,7 @@ public class RecordServiceTest {
         // On crée deux canaux de catégories différentes
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Hi", testUser);
         OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
 

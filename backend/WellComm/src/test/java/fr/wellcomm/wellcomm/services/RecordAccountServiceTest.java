@@ -23,7 +23,7 @@ public class RecordAccountServiceTest {
     void testRecordAccountService() {
         Account testUser = new Account();
         testUser.setUserName("userTest");
-        testRecord = recordService.createRecord("Dossier Global", "userTest");
+        testRecord = recordService.createRecord("Dossier Global", 1);
 
         //1. test createRecordAccount
         RecordAccount recordAccount = recordAccountService.createReccordAccount(testUser, testRecord, Role.AIDANT);
@@ -35,7 +35,7 @@ public class RecordAccountServiceTest {
         assertEquals(1, recordsaccount.size());
 
         //3. test getRecordAccount
-        RecordAccount recordAccount2 = recordAccountService.getRecordAccount(testUser.getUserName(), testRecord.getId());
+        RecordAccount recordAccount2 = recordAccountService.getRecordAccount(testUser.getId(), testRecord.getId());
         assertEquals(recordAccount, recordAccount2);
 
         //4. test updateRoleRecordAccount
