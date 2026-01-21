@@ -27,7 +27,9 @@ function LoginForm() {
 
         if (result.success) {
             localStorage.setItem("username", userName);
-            //localStorage.setItem("userId",userId)
+            if (result.userId) {
+                localStorage.setItem("userId", result.userId.toString());
+            }
             router.push(callbackUrl);
         } else {
             setErrorMessage(result.message || "Une erreur est survenue");

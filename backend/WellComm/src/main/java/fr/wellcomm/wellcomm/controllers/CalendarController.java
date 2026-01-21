@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/{userName}/records/{recordId}/calendar")
+@RequestMapping("/api/{userId}/records/{recordId}/calendar")
 @AllArgsConstructor
 public class CalendarController {
     private final RecordService recordService;
@@ -56,9 +56,9 @@ public class CalendarController {
     }
 
     @GetMapping("/startDate/{timeStart}/endDate/{timeEnd}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
             //"@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
-    public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                              @PathVariable long recordId,
                                                              @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeStart,
                                                              @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeEnd) {
@@ -70,9 +70,9 @@ public class CalendarController {
     }
 
     @PostMapping("/event")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
             //"@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
-    public ResponseEntity<EventDTO> createEvent(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<EventDTO> createEvent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                 @PathVariable long recordId,
                                                 @RequestBody EventDTO dto) {
         Calendar calendar = recordService.getRecord(recordId).getCalendar();
@@ -89,9 +89,9 @@ public class CalendarController {
     }
 
     @PutMapping("/event/{eventId}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
             //"@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
-    public ResponseEntity<Void> updateEvent(@PathVariable @SuppressWarnings("unused")  String userName,
+    public ResponseEntity<Void> updateEvent(@PathVariable @SuppressWarnings("unused")  Long userId,
                                             @PathVariable @SuppressWarnings("unused") String recordId,
                                             @PathVariable long eventId,
                                             @RequestBody EventDTO dto) {
@@ -102,9 +102,9 @@ public class CalendarController {
     }
 
     @DeleteMapping("/event/{eventId}")
-    @PreAuthorize("#userName == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name")
             //"@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
-    public ResponseEntity<Void> deleteEvent(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<Void> deleteEvent(@PathVariable @SuppressWarnings("unused") Long userId,
                                             @PathVariable @SuppressWarnings("unused") String recordId,
                                             @PathVariable long eventId) {
         calendarService.deleteEvent(eventService.getEvent(eventId));

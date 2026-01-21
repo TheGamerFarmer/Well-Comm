@@ -27,7 +27,7 @@ public class ChannelServiceTest {
         Account user = new Account();
         user.setUserName("testUser");
         accountService.saveUser(user);
-        Record record = recordService.createRecord("Dossier", "testUser");
+        Record record = recordService.createRecord("Dossier", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));
@@ -36,7 +36,7 @@ public class ChannelServiceTest {
         // 1. Test addMessage
         Message newMessage = channelService.addMessage(channel, "probleme regle", user);
         assertNotNull(newMessage);
-        assertEquals("AIDANT", newMessage.getAuthorTitle());
+        assertEquals("Aidant", newMessage.getAuthorTitle());
 
         // 2. Test getLastMessage
         Message last = channel.getLastMessage();
@@ -50,7 +50,7 @@ public class ChannelServiceTest {
         user.setUserName("testOrder");
         accountService.saveUser(user);
 
-        Record record = recordService.createRecord("Dossier Ordre", "testOrder");
+        Record record = recordService.createRecord("Dossier Ordre", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));

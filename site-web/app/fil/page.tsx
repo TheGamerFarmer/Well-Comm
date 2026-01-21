@@ -12,7 +12,7 @@ import {sanitize} from "@/functions/Sanitize";
 
 export default function FilDeTransmissionPage() {
     const {
-        categories, records, channels, currentUserName, messages,
+        categories, records, channels, currentUserName,currentUserId, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,
         isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
@@ -35,19 +35,19 @@ export default function FilDeTransmissionPage() {
     }, [setActiveRecordId]);
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) {
+        if (!currentUserId || !activeRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(currentUserName, activeRecordId)
+        getPermissions(currentUserId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [currentUserName, activeRecordId]);
+    }, [currentUserId, activeRecordId]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
@@ -217,7 +217,7 @@ export default function FilDeTransmissionPage() {
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
 
-                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isDeleted = msg.isDeleted
                                 const isEditing = editingMessageId === msg.id;
 
                                 const msgDate = new Date(msg.date);

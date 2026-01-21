@@ -3,8 +3,9 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
-import {getCurrentUser} from "@/functions/fil-API";
+import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 import { API_BASE_URL } from "@/config";
+import { getCurrentUserId } from "@/functions/fil-API";
 import Image from "next/image";
 import {sanitize} from "@/functions/Sanitize";
 import {getPermissions, Permission} from "@/functions/Permissions";
@@ -26,7 +27,8 @@ export default function AssistantsPage() {
     const [invitations, setInvitations] = useState<Invitation[]>([]);
     const [title, setTitle] = useState<Invitation["title"]>("Aidant");
     const [username, setUsername] = useState("");
-    const [userName, setUserName] = useState<string | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const [currentRecordId, setCurrentRecordId] = useState<number | null>(null);
     const [error, setError] = useState("");
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
     const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
@@ -34,21 +36,11 @@ export default function AssistantsPage() {
 
 
     useEffect(() => {
-        getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setCurrentUserId);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useCurrentDossier().then(setCurrentRecordId);
+
     }, []);
-
-    const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
-
-
-    useEffect(() => {
-        const localRecordId = localStorage.getItem('activeRecordId');
-        if (localRecordId) {
-            const id = Number(localRecordId);
-            if (!isNaN(id)) {
-                setActiveRecordId(id);
-            }
-        }
-    }, [setActiveRecordId])
 
     useEffect(() => {
         let assistantName: string | null = null; // ou "" si tu préfères
@@ -56,12 +48,12 @@ export default function AssistantsPage() {
         if (selectedAssistant) {
             assistantName = selectedAssistant.accountUserName;
         }
-        if (!assistantName || !activeRecordId || ! userName) return;
+        if (!assistantName || !currentRecordId || ! currentUserId) return;
 
         const fetchPermissions = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/autrepermissions/${assistantName}`,
+                    `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/autrepermissions/${assistantName}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -80,34 +72,34 @@ export default function AssistantsPage() {
             }
         };
 
-        fetchPermissions();
-    }, [username, activeRecordId, selectedAssistant]);
+        fetchPermissions().then();
+    }, [username, currentRecordId, selectedAssistant, currentUserId]);
 
 
     useEffect(() => {
-        if (!userName || !activeRecordId) {
+        if (!currentUserId || !currentRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(userName, activeRecordId)
+        getPermissions(currentUserId, currentRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [userName, activeRecordId]);
+    }, [currentUserId, currentRecordId]);
 
     const permissions = recordAccount?.permissions ?? [];
 
 
     //récupérer les assistans de currentDossier
     const fetchAssistants = useCallback(async () => {
-        if (!userName || !activeRecordId) return;
+        if (!currentUserId || !currentRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/assistants`,
+            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/assistants`,
             {credentials: "include"}
         );
 
@@ -118,24 +110,24 @@ export default function AssistantsPage() {
 
         const data: Invitation[] = await res.json();
         setInvitations(data);
-    }, [activeRecordId, userName]);
+    }, [currentRecordId, currentUserId]);
     
     //afficher la liste d'assistants quand on charge la page
     useEffect(() => {
         setTimeout(() => {
             fetchAssistants().then();
         }, 0);
-    }, [userName, activeRecordId, fetchAssistants]);
+    }, [currentUserId, currentRecordId, fetchAssistants]);
     
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
-        if (!userName || !activeRecordId) {
+        if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/addAccess/current_record/${encodeURIComponent(
+            `${API_BASE_URL}/api/${currentUserId}/addAccess/current_record/${encodeURIComponent(
                 username
             )}`,
             {
@@ -145,7 +137,7 @@ export default function AssistantsPage() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    recordId: activeRecordId,
+                    recordId: currentRecordId,
                     title: title,
                 }),
             }
@@ -161,17 +153,17 @@ export default function AssistantsPage() {
         await fetchAssistants();
         setIsOpen(false);
 
-        console.log("Accès ajouté au dossier", activeRecordId);
+        console.log("Accès ajouté au dossier", currentRecordId);
     }
 
 //supprimer un assistant
     const removeAccess = async (name: string, id: number ) => {
-        if (!userName || !activeRecordId) {
+        if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userName}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/deleteAccess/current_record/${name}/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -189,12 +181,12 @@ export default function AssistantsPage() {
 
     //mettre a jour le role d'un assistant
     const updateRoleAccess = async (name: string, id: number, title: string) => {
-        if (!userName || !activeRecordId) {
+        if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${userName}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -227,10 +219,10 @@ export default function AssistantsPage() {
         if (selectedAssistant) {
             assistantName = selectedAssistant.accountUserName;
         }
-        if (!selectedAssistant || !activeRecordId) return;
+        if (!selectedAssistant || !currentRecordId) return;
 
         await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/changepermissions`,
+            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/changepermissions`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -254,6 +246,15 @@ export default function AssistantsPage() {
                     Assistants
                 </p>
                 <FilArianne/>
+
+                <div className="text-black">
+                    {currentRecordId ? (
+                        <p>Dossier courant : {currentRecordId}</p>
+                    ) : (
+                        <p>Aucun dossier sélectionné</p>
+                    )}
+                </div>
+
                 {permissions.includes(Permission.INVITE) && (
                 <div className="flex flex-col items-end my-4">
                     <Button variant="validate" type="button"
@@ -271,6 +272,7 @@ export default function AssistantsPage() {
                             key={inv.id}
                             className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex flex-nowrap items-center gap-4 m-4">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={`https://ui-avatars.com/api/?name=${inv.accountUserName}&background=0551ab&color=fff`}
                                     alt="avatar"
@@ -297,10 +299,10 @@ export default function AssistantsPage() {
                                 <select
                                     value={inv.title}
                                     onChange={(e) => {
-                                        if ( !activeRecordId)
+                                        if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(inv.accountUserName, activeRecordId, sanitize(e.target.value)).then()
+                                        updateRoleAccess(inv.accountUserName, currentRecordId, sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
@@ -400,10 +402,10 @@ export default function AssistantsPage() {
                             <Button
                                 variant="secondary"
                                 onClickAction={() => {
-                                    if (!invitationToDelete?.accountUserName || !activeRecordId)
+                                    if (!invitationToDelete?.accountUserName || !currentRecordId)
                                         return;
                                     
-                                    removeAccess(invitationToDelete.accountUserName, activeRecordId).then();
+                                    removeAccess(invitationToDelete.accountUserName, currentRecordId).then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui

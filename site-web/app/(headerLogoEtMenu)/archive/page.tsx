@@ -10,7 +10,7 @@ import {sanitize} from "@/functions/Sanitize";
 
 export default function ArchivePage() {
     const {
-        categories, records, channels, currentUserName, messages,
+        categories, records, channels, currentUserName,currentUserId, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,
     } = useArchiveLogic();
@@ -29,19 +29,19 @@ export default function ArchivePage() {
     }, [setActiveRecordId]);
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) {
+        if (!currentUserId || !activeRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(currentUserName, activeRecordId)
+        getPermissions(currentUserId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [currentUserName, activeRecordId]);
+    }, [currentUserId, activeRecordId]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
@@ -191,7 +191,7 @@ export default function ArchivePage() {
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
-                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isDeleted = msg.isDeleted
 
                                 const msgDate = new Date(msg.date);
                                 const prevMsg = index > 0 ? sortedMessages[index - 1] : null;

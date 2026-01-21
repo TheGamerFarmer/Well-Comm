@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/api/{userId}/records/{recordId}")
 @AllArgsConstructor
 public class ChannelController {
     private final ChannelService channelService;
@@ -33,6 +35,8 @@ public class ChannelController {
         private Date date;
         private String authorUserName;
         private String authorTitle;
+        @JsonProperty("isDeleted")
+        private boolean isDeleted;
     }
 
     @Getter
@@ -45,18 +49,16 @@ public class ChannelController {
         private List<MessageInfos> messages;
     }
 
-    // ========== OPEN CHANNELS ==========
-
-    @GetMapping("/api/{userName}/records/{recordId}/channels/{channelId}/")
-    @PreAuthorize("#userName == authentication.name and" +
+    @GetMapping("/channels/{channelId}/")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
-    public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                                           @PathVariable Long channelId) {
         OpenChannel channel = channelService.getChannel(channelId);
 
         List<MessageInfos> messages = channel.getMessages().values().stream()
-                .map(m -> new MessageInfos(m.getId(), m.getContent(), m.getDate(), m.getAuthor().getUserName(), m.getAuthorTitle()))
+                .map(m -> new MessageInfos(m.getId(), m.getContent(), m.getDate(), m.getAuthor().getUserName(), m.getAuthorTitle(),m.isDeleted()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new ChannelInfos(
@@ -67,16 +69,16 @@ public class ChannelController {
         ));
     }
 
-    @PostMapping("/api/{userName}/records/{recordId}/channels/{channelId}/messages")
-    @PreAuthorize("#userName == authentication.name and" +
+    @PostMapping("/channels/{channelId}/messages")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<?> addMessage(
-            @PathVariable String userName,
-            @PathVariable long recordId,
+            @PathVariable Long userId,
+            @PathVariable @SuppressWarnings("unused") long recordId,
             @PathVariable long channelId,
             @RequestBody String content) {
 
-        Account account = accountService.getUser(userName);
+        Account account = accountService.getUser(userId);
         if (account == null) return ResponseEntity.badRequest().body("User not found");
 
         OpenChannel channel = channelService.getChannel(channelId);
@@ -89,7 +91,8 @@ public class ChannelController {
                 msg.getContent(),
                 msg.getDate(),
                 msg.getAuthor().getUserName(),
-                msg.getAuthorTitle()
+                msg.getAuthorTitle(),
+                msg.isDeleted()
         );
 
         String destination = "/topic/messages/" + channelId;
@@ -98,12 +101,11 @@ public class ChannelController {
         return ResponseEntity.ok(response);
     }
 
-    // ========== CLOSE CHANNELS ==========
 
-    @GetMapping("/api/{userName}/records/{recordId}/closechannels/{channelId}/")
-    @PreAuthorize("#userName == authentication.name")
+    @GetMapping("/closechannels/{channelId}/")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<ChannelInfos> getCloseChannelContent(
-            @PathVariable @SuppressWarnings("unused") String userName,
+            @PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable @SuppressWarnings("unused") long recordId,
             @PathVariable Long channelId) {
 
@@ -118,7 +120,8 @@ public class ChannelController {
                         m.getContent(),
                         m.getDate(),
                         m.getAuthor().getUserName(),
-                        m.getAuthorTitle()
+                        m.getAuthorTitle(),
+                        m.isDeleted()
                 ))
                 .collect(Collectors.toList());
 

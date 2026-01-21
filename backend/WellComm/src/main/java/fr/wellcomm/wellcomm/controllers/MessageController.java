@@ -12,18 +12,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/{userName}/records/{recordId}/channels/{channelId}/messages/{messageId}")
+@RequestMapping("/api/{userId}/records/{recordId}/channels/{channelId}/messages/{messageId}")
 @AllArgsConstructor
 public class MessageController {
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @PutMapping("/update")
-    @PreAuthorize("#userName == authentication.name and " +
+    @PreAuthorize("#userId.toString() == authentication.name and " +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or " +
             "@securityService.ownMessage())")
-    public ResponseEntity<?> modifyContent(@PathVariable String userName,
-                                           @PathVariable long recordId,
+    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") Long userId,
+                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                            @PathVariable long channelId,
                                            @PathVariable Long messageId,
                                            @RequestBody String newContent) {
@@ -47,19 +47,30 @@ public class MessageController {
     }
 
     @DeleteMapping("/delete")
-    @PreAuthorize("#userName == authentication.name and" +
+    @PreAuthorize("#userId.toString() == authentication.name and" +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
                     "@securityService.ownMessage())")
-    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") String userName,
+    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") Long userId,
                                            @PathVariable @SuppressWarnings("unused") long recordId,
-                                           @PathVariable @SuppressWarnings("unused") long channelId,
+                                           @PathVariable long channelId,
                                            @PathVariable Long messageId) {
+
         Message message = messageService.getMessage(messageId);
-        if (message == null) return ResponseEntity.badRequest().body("Message not found");
+        if (message == null) {
+            return ResponseEntity.badRequest().body("Message not found");
+        }
 
+        messageService.deleteMessage(message);
 
-        String deletedContent = "Ce message a été supprimé\u200B";
+        String destination = "/topic/messages/" + channelId;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", messageId);
+        payload.put("type", "DELETE");
+        payload.put("content", "Ce message a été supprimé\u200B");
+        payload.put("isDeleted", true);
 
-        return modifyContent(userName,recordId,channelId,messageId,deletedContent);
+        messagingTemplate.convertAndSend(destination, (Object) payload);
+
+        return ResponseEntity.ok().build();
     }
 }

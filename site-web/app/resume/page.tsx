@@ -16,7 +16,7 @@ import {sanitize} from "@/functions/Sanitize";
 
 export default function ResumePage() {
     const {
-        categories, records, currentUserName, messages,
+        categories, records, currentUserName,currentUserId, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, selectedChannel, setSelectedChannel,
         newMessage, setNewMessage, handleSendChatMessage,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
@@ -40,19 +40,19 @@ export default function ResumePage() {
     }, [setActiveRecordId]);
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) {
+        if (!currentUserId || !activeRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(currentUserName, activeRecordId)
+        getPermissions(currentUserId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [currentUserName, activeRecordId]);
+    }, [currentUserId, activeRecordId]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
@@ -85,7 +85,7 @@ export default function ResumePage() {
     };
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) return;
+        if (!currentUserId || !activeRecordId) return;
 
         const fetchChannels = async () => {
             setIsLoading(true);
@@ -99,7 +99,7 @@ export default function ResumePage() {
                     : selectedCategories;
 
             for (const cat of catsToFetch) {
-                const data = await getLastWeekChannels(currentUserName, activeRecordId, cat);
+                const data = await getLastWeekChannels(currentUserId, activeRecordId, cat);
                 allChannels = [...allChannels, ...data];
             }
 
@@ -112,7 +112,7 @@ export default function ResumePage() {
         };
 
         fetchChannels().then();
-    }, [currentUserName, activeRecordId, selectedCategories, categories]);
+    }, [currentUserId, activeRecordId, selectedCategories, categories]);
 
     useEffect(() => {
         if (permissions.includes(Permission.IS_MEDECIN)) {

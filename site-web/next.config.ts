@@ -1,11 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+    //app android
+    /*
+    output: 'export',
+    trailingSlash: true,
+    basePath: '',
+    assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+    distDir: '.next',
+     */
+
     images: {
         unoptimized: true,
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'ui-avatars.com',
+                port: '',
+                pathname: '/api/**',
+            },
+        ],
     },
-    trailingSlash: true,
 };
 
 export default nextConfig;

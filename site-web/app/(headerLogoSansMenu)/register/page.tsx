@@ -49,8 +49,12 @@ function RegisterForm() {
             });
 
             if (response.ok) {
-                await logUser(userName, hashedPwd);
-                localStorage.setItem("username", userName);
+                const result = await logUser(userName, hashedPwd);
+                if(result.success)
+                    localStorage.setItem("username", userName);
+                if (result.userId) {
+                    localStorage.setItem("userId", result.userId.toString());
+                }
                 router.push(callbackUrl);
             } else {
                 setErrorMessage("L'utilisateur existe déjà");

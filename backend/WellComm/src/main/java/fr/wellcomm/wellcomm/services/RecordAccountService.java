@@ -1,6 +1,5 @@
 package fr.wellcomm.wellcomm.services;
 
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -27,7 +26,7 @@ public class RecordAccountService {
         return recordAccountRepository.findByRecordId(recordId);
     }
 
-    public void createReccordAccount(Account account, Record record, @NotNull Role role) {
+    public RecordAccount createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
                 role,
@@ -39,7 +38,7 @@ public class RecordAccountService {
         accountRepository.save(account);
         record.getRecordAccounts().add(recordAccount);
         recordRepository.save(record);
-
+        return recordAccount;
 
     }
 
@@ -59,19 +58,19 @@ public class RecordAccountService {
     }
 
     //à comparer avec la fonction dans account
-    public RecordAccount getRecordAccount(String userName, long id) {
-        return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
+    public RecordAccount getRecordAccount(Long userId, long id) {
+        return recordAccountRepository.findByAccountIdAndRecordId(userId, id).orElse(null);
     }
 
-    public void addRecordAccountPermissions(String userName, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+    public void addRecordAccountPermissions(Long userId, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userId, recordId);
         List<Permission> permissions = recordAccount.getPermissions();
         permissions.add(permission);
         recordAccount.setPermissions(permissions);
     }
 
-    public void deleteRecordAccountPermissions(String userName, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+    public void deleteRecordAccountPermissions(Long userId, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userId, recordId);
         List<Permission> permissions = recordAccount.getPermissions();
         permissions.remove(permission);
         recordAccount.setPermissions(permissions);

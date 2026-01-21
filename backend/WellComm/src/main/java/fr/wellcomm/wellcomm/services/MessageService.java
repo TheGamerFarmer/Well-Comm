@@ -23,7 +23,9 @@ public class MessageService {
     }
 
     public void deleteMessage(Message message) {
-        messageRepository.delete(message);
+        message.setDeleted(true);
+        message.setContent("Ce message a été supprimé\u200B");
+        messageRepository.save(message);
     }
 
     public long getNbMessage(Long channelId) {
