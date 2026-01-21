@@ -1,35 +1,25 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.*;
-import fr.wellcomm.wellcomm.repositories.AccountRepository;
-import fr.wellcomm.wellcomm.repositories.ChannelRepository;
-import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
-import fr.wellcomm.wellcomm.services.ChannelService;
+import fr.wellcomm.wellcomm.repositories.*;
 import fr.wellcomm.wellcomm.services.MessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
-
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,30 +28,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @Transactional
+@AutoConfigureMockMvc
 public class MessageControllerTest {
+    @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private WebApplicationContext context;
-
     @Autowired
     private RecordRepository recordRepository;
-
     @Autowired
     private AccountRepository accountRepository;
-
     @Autowired
     private ChannelRepository channelRepository;
-
-
     @Autowired
     private RecordAccountRepository recordAccountRepository;
-
+    @SuppressWarnings("unused")
     @Autowired
     private ObjectMapper objectMapper;
-
+    @SuppressWarnings("unused")
     @MockitoBean
     private MessageService messageService;
+    @Autowired
+    private MessageRepository messageRepository;
 
     @BeforeEach
     void setup() {
@@ -73,16 +61,14 @@ public class MessageControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "userTest")
     void testmodifyMessage() throws Exception {
         // 1. Création des données
         Account userTest = new Account();
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", 1L);
+        Record record = new Record("Dossier Secret", userTest.getId());
         record = recordRepository.save(record);
-        System.out.println(record.getId());
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
@@ -101,7 +87,8 @@ public class MessageControllerTest {
         // 3. Configuration du Mock pour retourner ce message
         when(messageService.getMessage(anyLong())).thenReturn(mockMsg);
         // 4. Exécution
-        mockMvc.perform(put("/api/0/records/" + record.getId() + "/channels/1/messages/1/update")
+        mockMvc.perform(put("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + openChannel.getId() + "/messages/" + mockMsg.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("Tentative"))
                 .andExpect(status().isOk());
@@ -111,16 +98,14 @@ public class MessageControllerTest {
 
 
     @Test
-    @WithMockUser(username = "userTest")
     void testdeleteMessage() throws Exception {
         // 1. Création des données
         Account userTest = new Account();
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", 1L);
+        Record record = new Record("Dossier Secret", userTest.getId());
         record = recordRepository.save(record);
-        System.out.println(record.getId());
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
@@ -135,13 +120,15 @@ public class MessageControllerTest {
                 userTest,
                 "ADMIN",
                 openChannel, false);
+        messageRepository.save(mockMsg);
 
         // 3. Configuration du Mock pour retourner ce message
         when(messageService.getMessage(anyLong())).thenReturn(mockMsg);
         // 4. Exécution
-        mockMvc.perform(delete("/api/0/records/" + record.getId() + "/channels/1/messages/1/delete"))
+        mockMvc.perform(delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + openChannel.getId() + "/messages/" + mockMsg.getId())
+                        .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString())))
                 .andExpect(status().isOk());
 
-        verify(messageService).modifyContent(any(Message.class), eq("Ce message a été supprimé\u200B"));
+        verify(messageService).deleteMessage(any(Message.class));
     }
 }

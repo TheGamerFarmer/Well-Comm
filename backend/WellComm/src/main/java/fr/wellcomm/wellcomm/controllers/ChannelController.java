@@ -49,7 +49,7 @@ public class ChannelController {
         private List<MessageInfos> messages;
     }
 
-    @GetMapping("/channels/{channelId}/")
+    @GetMapping("/channels/{channelId}")
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
     public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") Long userId,
@@ -102,7 +102,7 @@ public class ChannelController {
     }
 
 
-    @GetMapping("/closechannels/{channelId}/")
+    @GetMapping("/closechannels/{channelId}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<ChannelInfos> getCloseChannelContent(
             @PathVariable @SuppressWarnings("unused") Long userId,
