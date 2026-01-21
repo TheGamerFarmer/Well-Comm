@@ -63,15 +63,15 @@ public class RecordAccountService {
         return recordAccountRepository.findByAccountIdAndRecordId(userId, id).orElse(null);
     }
 
-    public void addRecordAccountPermissions(String userName, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+    public void addRecordAccountPermissions(Long userId, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userId, recordId);
         List<Permission> permissions = recordAccount.getPermissions();
         permissions.add(permission);
         recordAccount.setPermissions(permissions);
     }
 
-    public void deleteRecordAccountPermissions(String userName, long recordId, Permission permission) {
-        RecordAccount recordAccount = getRecordAccount(userName, recordId);
+    public void deleteRecordAccountPermissions(Long userId, long recordId, Permission permission) {
+        RecordAccount recordAccount = getRecordAccount(userId, recordId);
         List<Permission> permissions = recordAccount.getPermissions();
         permissions.remove(permission);
         recordAccount.setPermissions(permissions);

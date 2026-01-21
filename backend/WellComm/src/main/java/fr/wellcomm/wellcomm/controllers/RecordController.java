@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
-import fr.wellcomm.wellcomm.entities.Session;
-import fr.wellcomm.wellcomm.repositories.SessionRepository;
 
 
 @RestController
@@ -33,7 +31,6 @@ public class RecordController {
     private final AccountService accountService;
     private final RecordAccountService recordAccountService;
     private final RecordRepository recordRepository;
-    private final SessionRepository sessionRepository;
     private final CalendarRepository calendarRepository;
 
     @Getter
@@ -77,15 +74,15 @@ public class RecordController {
     }
 
     @GetMapping("/{recordId}/name")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<String> getNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId) {
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<String> getNameRecord(@PathVariable @SuppressWarnings("unused") Long userId, @PathVariable long recordId) {
         Record record = recordService.getRecord(recordId);
         return ResponseEntity.ok(record.getName());
     }
 
     @PutMapping("/{recordId}/{newname}")
-    @PreAuthorize("#userName == authentication.name")
-    public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") String userName, @PathVariable long recordId, @PathVariable String newname) {
+    @PreAuthorize("#userId.toString() == authentication.name")
+    public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") Long userId, @PathVariable long recordId, @PathVariable String newname) {
         Record record = recordService.getRecord(recordId);
         record.setName(newname);
         recordRepository.save(record);
@@ -231,41 +228,4 @@ public class RecordController {
             return ResponseEntity.notFound().build(); // 404
         }
     }
-    //création d'une session quand on selectionne un dossier
-    @PostMapping("/select/{recordId}")
-    @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<?> selectRecord(
-            @PathVariable @SuppressWarnings("unused") Long userId,
-            @CookieValue("token") String token,
-            @PathVariable Long recordId
-    ) {
-          // Vérifie que la session existe pour ce token
-          Session session = sessionRepository.findById(token)
-                  .orElseThrow(() -> new RuntimeException("Session invalide"));
-
-
-          // Enregistre le recordId sélectionné
-          session.setCurrentRecordId(recordId);
-          sessionRepository.save(session);
-          return ResponseEntity.ok().build();
-      }
-
-    //return current-record
-    @GetMapping("/current-record")
-    @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<?> getCurrentRecord(
-            @PathVariable @SuppressWarnings("unused") Long userId,
-            @CookieValue("token") String token
-    ) {
-          // Récupère la session par le token
-          Session session = sessionRepository.findById(token)
-                            .orElseThrow(() -> new RuntimeException("Session invalide"));
-
-          Long currentRecordId = session.getCurrentRecordId();
-          if (currentRecordId == null) {
-              return ResponseEntity.noContent().build(); // 204 si aucun dossier sélectionné
-          }
-
-          return ResponseEntity.ok(currentRecordId); // Retourne juste l'ID du dossier courant
-      }
 }

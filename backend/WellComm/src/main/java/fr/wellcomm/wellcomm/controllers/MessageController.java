@@ -1,7 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.entities.*;
-import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,8 @@ public class MessageController {
     @PreAuthorize("#userId.toString() == authentication.name and " +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or " +
             "@securityService.ownMessage())")
-    public ResponseEntity<?> modifyContent(@PathVariable Long userId,
-                                           @PathVariable long recordId,
+    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") Long userId,
+                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                            @PathVariable long channelId,
                                            @PathVariable Long messageId,
                                            @RequestBody String newContent) {
@@ -51,8 +50,8 @@ public class MessageController {
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
                     "@securityService.ownMessage())")
-    public ResponseEntity<?> deleteMessage(@PathVariable Long userId,
-                                           @PathVariable long recordId,
+    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") Long userId,
+                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                            @PathVariable long channelId,
                                            @PathVariable Long messageId) {
 

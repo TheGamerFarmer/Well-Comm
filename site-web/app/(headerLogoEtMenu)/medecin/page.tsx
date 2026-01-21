@@ -3,7 +3,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
-import {getCurrentUser} from "@/functions/fil-API";
+import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Image from "next/image";
 import {getPermissions, Permission} from "@/functions/Permissions";
@@ -23,7 +23,7 @@ export default function MedecinPage() {
     const [invitations, setInvitations] = useState<Invitation[]>([]);
     const [title, setTitle] = useState<Invitation["title"]>("Medecin");
     const [username, setUsername] = useState("");
-    const [userName, setUserName] = useState<string | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
     const [error, setError] = useState("");
     const [recordAccount, setRecordAccount] = useState<{ permissions: Permission[] } | null>(null);
     const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
@@ -31,7 +31,7 @@ export default function MedecinPage() {
 
 
     useEffect(() => {
-        getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setUserId);
     }, []);
 
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
@@ -42,6 +42,7 @@ export default function MedecinPage() {
         if (localRecordId) {
             const id = Number(localRecordId);
             if (!isNaN(id)) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setActiveRecordId(id);
             }
         }
@@ -53,12 +54,12 @@ export default function MedecinPage() {
         if (selectedMedecin) {
             medecinName = selectedMedecin.accountUserName;
         }
-        if (!medecinName || !activeRecordId || ! userName) return;
+        if (!medecinName || !activeRecordId || ! userId) return;
 
         const fetchPermissions = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/autrepermissions/${medecinName}`,
+                    `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/autrepermissions/${medecinName}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -77,34 +78,35 @@ export default function MedecinPage() {
             }
         };
 
-        fetchPermissions();
-    }, [username, activeRecordId, selectedMedecin]);
+        fetchPermissions().then();
+    }, [username, activeRecordId, selectedMedecin, userId]);
 
 
     useEffect(() => {
-        if (!userName || !activeRecordId) {
+        if (!userId || !activeRecordId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(userName, activeRecordId)
+        getPermissions(userId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [userName, activeRecordId]);
+    }, [userId, activeRecordId]);
 
     const permissions = recordAccount?.permissions ?? [];
 
 
     //récupérer les médecins de currentDossier
     const fetchMedecins = useCallback(async () => {
-        if (!userName || !activeRecordId) return;
+        if (!userId || !activeRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/medecin`,
+            `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/medecin`,
             {credentials: "include"}
         );
 
@@ -115,24 +117,24 @@ export default function MedecinPage() {
 
         const data: Invitation[] = await res.json();
         setInvitations(data);
-    }, [activeRecordId, userName]);
+    }, [activeRecordId, userId]);
 
     //afficher la liste des médecins quand on charge la page
     useEffect(() => {
         setTimeout(() => {
             fetchMedecins().then();
         }, 0);
-    }, [userName, activeRecordId, fetchMedecins]);
+    }, [userId, activeRecordId, fetchMedecins]);
 
 //ajouter un assitant au dossier
     const addAccessToCurrentRecord = async (title: string) => {
-        if (!userName || !activeRecordId) {
+        if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/addAccess/current_record/${encodeURIComponent(
+            `${API_BASE_URL}/api/${userId}/addAccess/current_record/${encodeURIComponent(
                 username
             )}`,
             {
@@ -163,12 +165,12 @@ export default function MedecinPage() {
 
 //supprimer un médecin
     const removeAccess = async (name: string, id: number ) => {
-        if (!userName || !activeRecordId) {
+        if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userName}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/deleteAccess/current_record/${name}/${id}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -186,12 +188,12 @@ export default function MedecinPage() {
 
     //mettre a jour le role d'un médecin
     const updateRoleAccess = async (name: string, id: number, title: string) => {
-        if (!userName || !activeRecordId) {
+        if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${userName}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${userId}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -227,7 +229,7 @@ export default function MedecinPage() {
         if (!selectedMedecin || !activeRecordId) return;
 
         await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/changepermissions`,
+            `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/changepermissions`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -267,6 +269,7 @@ export default function MedecinPage() {
                             key={inv.id}
                             className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex flex-nowrap items-center gap-4 m-4">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={`https://ui-avatars.com/api/?name=${inv.accountUserName}&background=0551ab&color=fff`}
                                     alt="avatar"

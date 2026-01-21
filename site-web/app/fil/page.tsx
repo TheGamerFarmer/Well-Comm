@@ -217,7 +217,6 @@ export default function FilDeTransmissionPage() {
                                 const isMe = msg.authorUserName === currentUserName;
 
                                 const isDeleted = msg.isDeleted
-                                console.log(msg.isDeleted)
                                 const isEditing = editingMessageId === msg.id;
 
                                 const msgDate = new Date(msg.date);

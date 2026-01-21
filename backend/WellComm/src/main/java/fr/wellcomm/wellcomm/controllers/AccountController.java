@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Optional;
 
-import static fr.wellcomm.wellcomm.domain.Permission.*;
-
-
 @RestController
 @RequestMapping("/api/{userId}")
 @AllArgsConstructor
@@ -107,37 +104,21 @@ public class AccountController {
     }
 
 
-@PostMapping("/changeUserInfos")
-    @PreAuthorize("#userName == authentication.name")
+    @PostMapping("/changeUserInfos")
+    @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateProfile(
-            @PathVariable String userName,
+            @PathVariable Long userId,
             @RequestBody UpdateProfileRequest request
     ) {
-
-        System.out.println("\n\n\n\n");
-        System.out.println("PATH userName = " + userName);
-        System.out.println("BODY userName = " + request.getUserName());
-        System.out.println("BODY firstName = " + request.getFirstName());
-        System.out.println("BODY lastName = " + request.getLastName());
-        System.out.println("\n\n\n\n");
-
         Account account = accountRepository
-                        .findById(userName)
+                        .findById(userId)
                         .orElseThrow();
 
-        if (account == null) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+        if (!account.getUserName().equals(request.getUserName())) {
 
-        if (!userName.equals(request.getUserName())) {
-
-            System.out.println("\n\n\n\n");
-            System.out.println("check userName == newUserName");
-            if (accountRepository.existsById(request.getUserName())) {
-                System.out.println("newUserName already exists in DB");
+            if (accountRepository.existsByUserName(request.userName)) {
                 return ResponseEntity.status(409).body("Account already exists");
             }
-            System.out.println("newUserName doesn't exist in DB");
             account.setUserName(request.getUserName());
         }
 
@@ -296,10 +277,6 @@ public class AccountController {
         else {
             role = Role.EMPLOYEE;
         }
-
-        Account account = accountService.getUser(userName);
-                if (account == null)
-                    return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
         recordAccountService.updateRoleRecordAccount(targetUserName, recordId, role);
 

@@ -50,12 +50,12 @@ export default function AssistantsPage() {
         if (selectedAssistant) {
             assistantName = selectedAssistant.accountUserName;
         }
-        if (!assistantName || !activeRecordId || ! userName) return;
+        if (!assistantName || !currentRecordId || ! currentUserId) return;
 
         const fetchPermissions = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/${userName}/recordsaccount/${activeRecordId}/autrepermissions/${assistantName}`,
+                    `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/autrepermissions/${assistantName}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -75,23 +75,23 @@ export default function AssistantsPage() {
         };
 
         fetchPermissions();
-    }, [username, activeRecordId, selectedAssistant]);
+    }, [username, currentRecordId, selectedAssistant, currentUserId]);
 
 
     useEffect(() => {
-        if (!userName || !activeRecordId) {
+        if (!currentUserId || !currentRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(userName, activeRecordId)
+        getPermissions(currentUserId, currentRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [userName, activeRecordId]);
+    }, [currentUserId, currentRecordId]);
 
     const permissions = recordAccount?.permissions ?? [];
 
@@ -101,7 +101,7 @@ export default function AssistantsPage() {
         if (!currentUserId || !currentRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}`,
+            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/assistants`,
             {credentials: "include"}
         );
 
@@ -221,10 +221,10 @@ export default function AssistantsPage() {
         if (selectedAssistant) {
             assistantName = selectedAssistant.accountUserName;
         }
-        if (!selectedAssistant || !activeRecordId) return;
+        if (!selectedAssistant || !currentRecordId) return;
 
         await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${activeRecordId}/changepermissions`,
+            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/changepermissions`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -274,6 +274,7 @@ export default function AssistantsPage() {
                             key={inv.id}
                             className="flex flex-col md:flex-row justify-between items-left p-4 rounded-lg bg-[#f6f6f6]">
                             <div className="flex flex-nowrap items-center gap-4 m-4">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={`https://ui-avatars.com/api/?name=${inv.accountUserName}&background=0551ab&color=fff`}
                                     alt="avatar"
