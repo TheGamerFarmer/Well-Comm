@@ -114,7 +114,7 @@ export async function fetchAllChannels(
 export async function getChannels(userId: number | null, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${categoryEnum}`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/categorys/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -134,7 +134,7 @@ export async function getChannels(userId: number | null, recordId: number, categ
 
 export async function getChannelContent(userId: number | null, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -146,7 +146,7 @@ export async function getChannelContent(userId: number | null, recordId: number,
 export async function getCloseChannels(userId: number | null, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/${categoryEnum}`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/categorys/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -167,7 +167,7 @@ export async function getCloseChannels(userId: number | null, recordId: number, 
 export async function getLastWeekChannels(userId: number, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${categoryEnum}/week`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/categorys/${categoryEnum}/week`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -247,7 +247,7 @@ export async function addMessage(userId: number | null, recordId: number, channe
 
 export async function deleteMessage(userId: number | null, recordId: number, channelId: number, messageId: number): Promise<boolean> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}`, {
             method: 'DELETE',
             credentials: 'include',
             cache: 'no-store',
@@ -261,7 +261,7 @@ export async function deleteMessage(userId: number | null, recordId: number, cha
 
 export async function updateMessage(userId: number | null, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}`, {
             method: 'PUT',
             credentials: 'include',
             cache: 'no-store',
@@ -300,7 +300,7 @@ export async function fetchAllCloseChannels(
 
 export async function getCloseChannelContent(userId: number | null, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/${channelId}/`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/${channelId}`, {
             credentials: 'include',
             cache: 'no-store'
         });

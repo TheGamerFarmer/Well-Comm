@@ -312,7 +312,7 @@ export default function MedecinPage() {
                 {isOpen && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded-2xl w-[400px]">
-                            <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau aidé</h2>
+                            <h2 className="text-lg font-bold mb-4 text-[#0551ab]">Nouveau médecin</h2>
 
                             <form
                                 onSubmit={(e) => {

@@ -57,6 +57,7 @@ public class MessageServiceTest {
     void testDeleteMessage() {
         messageService.deleteMessage(testMessage); //
         Message deleted = messageRepository.findById(testMessage.getId()).orElse(null);
-        assertNull(messageService.getMessage(deleted.getId())); //
+        assertNotNull(deleted);
+        assertEquals("Ce message a été supprimé\u200B", deleted.getContent()); //
     }
 }
