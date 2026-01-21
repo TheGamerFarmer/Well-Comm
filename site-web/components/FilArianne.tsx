@@ -32,6 +32,9 @@ const breadcrumbTree: Record<string, BreadcrumbNode> = {
                             assistants: { label: "Assistants" },
                             calendrier: { label: "Calendrier" },
                             fil: { label: "Fil de transmission" },
+                            resume: { label: "Résumé" },
+                            archive: { label: "Archives" },
+                            calendar: { label: "Calendrier" },
                             medecin: { label: "Médecins" }
                         }
                     }
@@ -86,7 +89,7 @@ export default function Breadcrumb() {
         <nav aria-label="Breadcrumb" className="text-sm text-gray-500 my-4">
             <ol className="flex items-center flex-wrap">
                 {breadcrumbPath?.map((item, index) => {
-                    const isLast = index === breadcrumbPath.length - 1;
+                    const isLast = index === (breadcrumbPath?.length ?? 0) - 1;
                     const displayLabel =
                         item.key === "dossier" && activeRecordName
                             ? activeRecordName
