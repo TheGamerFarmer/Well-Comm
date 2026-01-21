@@ -2,14 +2,20 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +25,8 @@ public class RecordServiceTest {
     @Autowired private RecordService recordService;
     @Autowired private AccountService accountService;
     private Record testRecord;
+    private long userId;
+    @Autowired private AccountRepository accountRepository;
 
     @BeforeEach
     void setUp() {
@@ -26,14 +34,13 @@ public class RecordServiceTest {
         Account testUser = new Account();
         testUser.setUserName("userTest");
         accountService.saveUser(testUser);
+        userId = testUser.getId();
 
         // 2. Création du Record
-        testRecord = recordService.createRecord("Dossier Global", "userTest");
+        testRecord = recordService.createRecord("Dossier Global", userId);
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        RecordAccount access = new RecordAccount(testUser, testRecord, "ADMIN",permissionList);
+        RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT);
 
         // 4. On l'ajoute à l'utilisateur
         accountService.addRecordAccount(testUser, access);
@@ -42,17 +49,22 @@ public class RecordServiceTest {
     @Test
     void testGetRecordsForUser() {
         // Teste si on retrouve bien le dossier lié à l'utilisateur
-        List<Record> records = recordService.getRecords("userTest");
+        List<Record> records = recordService.getRecords(userId);
         assertFalse(records.isEmpty());
         assertEquals("Dossier Global", records.getFirst().getName());
+    }
+
+    @Test
+    void testDeleteRecord() {
+        assertTrue(recordService.deleteRecord(testRecord.getId()));
     }
 
     @Test
     void testCreateChannel() {
         Account user = new Account();
         user.setUserName("userTest");
-        accountService.saveUser(user);
-        // Teste la création d'un channel et vérifie si le rôle "ADMIN" est bien récupéré
+        user = accountRepository.save(user);
+        // Teste la création d'un channel et vérifie si le rôle "Aidant" est bien récupéré
         OpenChannel channel = recordService.createChannel(
                 testRecord,
                 "Mal de dos",
@@ -69,7 +81,7 @@ public class RecordServiceTest {
                 .findFirst()
                 .orElse(null);
         assert firstMsg != null;
-        assertEquals("ADMIN", firstMsg.getAuthorTitle());
+        assertEquals("Aidant", firstMsg.getAuthorTitle());
         assertEquals("il a mal au dos", firstMsg.getContent());
     }
 
@@ -78,6 +90,7 @@ public class RecordServiceTest {
         // On crée deux canaux de catégories différentes
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
         recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
 
@@ -93,6 +106,7 @@ public class RecordServiceTest {
         // 1. Création du channel
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         OpenChannel channel = recordService.createChannel(testRecord, "A Archiver", Category.Menage, "probleme regle", testUser);
         long channelId = channel.getId();
 
@@ -117,5 +131,54 @@ public class RecordServiceTest {
                 .orElse("");
 
         assertEquals("probleme regle", firstMessageContent);
+    }
+
+    @Test
+    void testGetChannelsOfCategoryClose() {
+        // On crée trois canaux
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
+        OpenChannel dos = recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
+        OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
+        OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Vite", testUser);
+        long dosId = dos.getId();
+        long salonId = salon.getId();
+
+        //Archivage de canaux avec catégories différentes
+        recordService.archiveChannel(testRecord, dosId);
+        recordService.archiveChannel(testRecord, salonId);
+
+        // On teste le filtre par catégorie
+        List<CloseChannel> closeChannels = recordService.getChannelsOfCategoryClose(testRecord.getId(), Category.Menage);
+
+        assertEquals(1, closeChannels.size());
+        assertEquals("salon", closeChannels.getFirst().getTitle());
+    }
+
+    @Test
+    void testGetLastWeekChannelsOfCategory() {
+        // On crée deux canaux de catégories différentes
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
+        OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Hi", testUser);
+        OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
+
+        //Changement de la date
+        Date oneWeekAgo = Date.from(
+                LocalDateTime.now()
+                        .minusWeeks(2)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        cuisine.getLastMessage().setDate(oneWeekAgo);
+
+
+        // On teste le filtre par catégorie
+        List<OpenChannel> lastWeekChannels = recordService.getLastWeekChannelsOfCategory(testRecord.getId(), Category.Menage);
+
+        assertEquals(1, lastWeekChannels.size());
+        assertEquals("salon", lastWeekChannels.getFirst().getTitle());
     }
 }

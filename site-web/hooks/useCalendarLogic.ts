@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import FullCalendar from "@fullcalendar/react";
-import {getCurrentUser} from "@/functions/fil-API";
+import {getCurrentUser, getCurrentUserId} from "@/functions/fil-API";
 import {DateSelectArg, EventClickArg} from "@fullcalendar/core";
 import {deleteEventRequest, getEventsRequest, saveEditsRequest} from "@/functions/Calendar-API";
 import {getPermissions, Permission} from "@/functions/Permissions";
@@ -33,6 +33,7 @@ export function useCalendarLogic() {
     ];
 
     const [userName, setUserName] = useState<string>("null");
+    const [userId, setUserId] = useState<number | null>(null);
     const calendarRef = useRef<FullCalendar>(null);
 
     useEffect(() => {
@@ -47,11 +48,11 @@ export function useCalendarLogic() {
     }, []);
 
     useEffect(() => {
-        getPermissions(userName, activeRecordId)
+        getPermissions(userId, activeRecordId)
             .then((permission: Permission[]) => {
                 setHasEditPermission(permission.includes(Permission.EDIT_CALENDAR));
             })
-    }, [userName, activeRecordId])
+    }, [userId, activeRecordId])
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -79,6 +80,7 @@ export function useCalendarLogic() {
 
     useEffect(() => {
         getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setUserId);
     }, []);
 
     function handleSelect(selectInfo: DateSelectArg) {
@@ -126,7 +128,7 @@ export function useCalendarLogic() {
             ...changeInfo.event.extendedProps
         };
 
-        saveEditsRequest(userName, activeRecordId, false, updatedEvent, calendarRef);
+        saveEditsRequest(userId, activeRecordId, false, updatedEvent, calendarRef).then();
     }
 
     function formatDisplayTime (iso: string){
@@ -144,8 +146,8 @@ export function useCalendarLogic() {
         return `${date}T${time}:00`;
     }
 
-    async function fetchEvents(userName: string, activeRecordId: number, fetchInfo: { start: Date; end: Date }, successCallback: (events: MyEvent[]) => void, failureCallback: (error: Error) => void) : Promise<void> {
-        if (!userName) {
+    async function fetchEvents(userId: number | null, activeRecordId: number, fetchInfo: { start: Date; end: Date }, successCallback: (events: MyEvent[]) => void, failureCallback: (error: Error) => void) : Promise<void> {
+        if (!userId) {
             successCallback([]);
             return;
         }
@@ -153,7 +155,7 @@ export function useCalendarLogic() {
         const start = fetchInfo.start.toISOString().split('.')[0];
         const end = fetchInfo.end.toISOString().split('.')[0];
 
-        const response = await getEventsRequest(userName, activeRecordId, start, end)
+        const response = await getEventsRequest(userId, activeRecordId, start, end)
 
         if (!response.ok) {
             failureCallback(new Error())
@@ -165,26 +167,26 @@ export function useCalendarLogic() {
     }
 
     async function saveEdits () {
-        if (!editData || !userName)
+        if (!editData || !userId)
             return;
 
         setIsEditing(false);
         setIsCreating(false);
         setSelectedEvent(null);
 
-        await saveEditsRequest(userName, activeRecordId, isCreating, editData, calendarRef);
+        await saveEditsRequest(userId, activeRecordId, isCreating, editData, calendarRef);
     }
 
     async function deleteEvent() {
         setIsEditing(false)
         setEditData(null);
 
-        await deleteEventRequest(userName, activeRecordId, editData.id, calendarRef);
+        await deleteEventRequest(userId, activeRecordId, editData.id, calendarRef);
     }
 
     const getEvents = useCallback((fetchInfo: { start: Date; end: Date }, successCallback: (events: MyEvent[]) => void, failureCallback: (error: Error) => void) => {
-        fetchEvents(userName, activeRecordId, fetchInfo, successCallback, failureCallback).then();
-    }, [userName, activeRecordId]);
+        fetchEvents(userId, activeRecordId, fetchInfo, successCallback, failureCallback).then();
+    }, [userId, activeRecordId]);
 
     return {
         selectedEvent, setSelectedEvent,

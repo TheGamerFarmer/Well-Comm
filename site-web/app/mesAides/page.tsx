@@ -4,23 +4,24 @@ import React, { useEffect, useState } from "react";
 import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
-import {getCurrentUser} from "@/functions/fil-API";
+import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import { fetchWithCert} from "@/functions/fetchWithCert";
 import Link from "next/link";
+import {sanitize} from "@/functions/Sanitize";
 
 type Dossier = {
     id: number;
     name: string;
-    admin: string;
+    admin: number;
 };
 
 export default function MesAides() {
 
-    const [userName, setUserName] = useState<string | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
-        getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setUserId);
     }, []);
 
     const [dossiers, setDossiers] = useState<Dossier[]>([]);
@@ -33,11 +34,11 @@ export default function MesAides() {
        Chargement des dossiers
        ======================= */
     useEffect(() => {
-        if (!userName) return;
+        if (!userId) return;
 
         const fetchDossiers = async () => {
             const res = await fetchWithCert(
-                `${API_BASE_URL}/api/${userName}/records/`,
+                `${API_BASE_URL}/api/${userId}/records/`,
                 { credentials: "include" }
             );
 
@@ -52,7 +53,7 @@ export default function MesAides() {
         };
 
         fetchDossiers().then();
-    }, [userName]);
+    }, [userId]);
 
     /* =======================
        Création d’un dossier
@@ -62,7 +63,7 @@ export default function MesAides() {
         if (!name.trim()) return;
 
         const res = await fetchWithCert(
-            `${API_BASE_URL}/api/${userName}/records/create/${encodeURIComponent(
+            `${API_BASE_URL}/api/${userId}/records/create/${encodeURIComponent(
                 name
             )}`,
             {
@@ -100,7 +101,7 @@ export default function MesAides() {
         if (!id) return;
 
         const res = await fetchWithCert(
-            `${API_BASE_URL}/api/${userName}/records/delete/${id}`,
+            `${API_BASE_URL}/api/${userId}/records/delete/${id}`,
             {
                 method: "DELETE",
                 credentials: "include",
@@ -115,7 +116,7 @@ export default function MesAides() {
         // Mise à jour de la liste côté front
         setDossiers(dossiers.filter(d => d.id !== id));
 
-        console.log("Dossier supprimé ✅");
+        console.log("Dossier supprimé ");
     }
 
     return (
@@ -154,7 +155,7 @@ export default function MesAides() {
                             {dossier.name}
 
                             <div className="ml-auto">
-                                {userName && dossier.admin === userName && (
+                                {userId && dossier.admin === userId && (
                                 <button type="button" className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform" onClick={(e) => {
                                     e.preventDefault(); // empêche la navigation
                                     e.stopPropagation(); // empêche le click parent

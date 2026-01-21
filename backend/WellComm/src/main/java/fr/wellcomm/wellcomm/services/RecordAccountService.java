@@ -26,35 +26,37 @@ public class RecordAccountService {
         return recordAccountRepository.findByRecordId(recordId);
     }
 
-    public void createReccordAccount(Account account, Record record, @NotNull Role role) {
+    public RecordAccount createReccordAccount(Account account, Record record, @NotNull Role role) {
         RecordAccount recordAccount = new RecordAccount(account,
                 record,
-                role.getTitre(),
-                role.getPermission());
+                role);
 
         recordAccount = recordAccountRepository.save(recordAccount);
         account.getRecordAccounts().put(recordAccount.getId(), recordAccount);
         accountRepository.save(account);
         record.getRecordAccounts().add(recordAccount);
         recordRepository.save(record);
+        return recordAccount;
+
     }
 
     //update role record_account
-    public void updateRoleRecordAccount(String accountUserName, Long recordId, String role) {
+    public void updateRoleRecordAccount(String accountUserName, Long recordId, Role role) {
         RecordAccount recordAccount =
                 recordAccountRepository
                 .findByAccountUserNameAndRecordId(accountUserName, recordId)
                 .orElseThrow(() -> new RuntimeException("Access not found"));
 
         // Mise à jour du rôle
-        recordAccount.setTitle(role);
+        recordAccount.setTitle(role.getTitre());
+        recordAccount.setPermissions(recordAccount.getPermissions());
 
         // Sauvegarde
         recordAccountRepository.save(recordAccount);
     }
 
     //à comparer avec la fonction dans account
-    public RecordAccount getRecordAccount(String userName, long id) {
-        return recordAccountRepository.findByAccountUserNameAndRecordId(userName, id).orElse(null);
+    public RecordAccount getRecordAccount(Long userId, long id) {
+        return recordAccountRepository.findByAccountIdAndRecordId(userId, id).orElse(null);
     }
 }

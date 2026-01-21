@@ -4,33 +4,40 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import { API_BASE_URL } from "@/config";
-import {getCurrentUser} from "@/functions/fil-API";
+import {getRecordName} from "@/functions/record-api";
+import {useCurrentDossier} from "@/hooks/useCurrentDossier";
+import {getCurrentUserId} from "@/functions/fil-API";
+import {sanitize} from "@/functions/Sanitize";
+import {API_BASE_URL} from "@/config";
 import {fetchWithCert} from "@/functions/fetchWithCert";
 
 export default function ProfilAide() {
-    const [assisted, setAssisted] = useState({firstName: "", lastName: "", dateOfBirth: "", mobileNumber: "", information: ""});
-    const [activeRecordId] = useState<number | null>(null);
-    const [assistedId] = useState<number | null>(null);
-    const [userName, setUserName] = useState<string | null>(null);
+    const [recordName, setRecordName] = useState("");
+    const [recordId, setRecordId] = useState<number | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
-        getCurrentUser().then(setUserName);
+        getCurrentUserId().then(setUserId);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useCurrentDossier().then(setRecordId);
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    useEffect(() => {
+        getRecordName(userId, recordId).then(setRecordName);
+    }, [recordId, userId]);
 
-        await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${activeRecordId}/assisted/${assistedId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                ...assisted,
-                recordId: 1
-            }),
-        });
+    const handleSaveRecordName = async () => {
+        const res = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/${recordName}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+
+        if (!res.ok) {
+            setErrorMessage("Le changement de nom a échoué");
+        }
     };
 
     return (
@@ -39,13 +46,12 @@ export default function ProfilAide() {
                 <p className="font-bold text-[#0551ab] text-2xl">L&#39;aidé</p>
                 <FilArianne/>
             </div>
-            <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-[100%] rounded-xl border-20 border-[#f4f4f4] md:border-white ">
-                <div className="w-full h-[66px] mb-[22px] pt-4 pb-4 pl-[23px] rounded-xl bg-gradient-to-r from-[#45bbb1] to-[#215a9e]">
-                    <p className="w-[229px] h-[34px] font-montserrat text-xl font-bold leading-[1.7px] text-left text-[#fff]">
+            <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-full rounded-xl border-20 border-[#f4f4f4] md:border-white ">
+                <div className="w-full h-[66px] mb-[22px] pt-4 pb-4 pl-[23px] rounded-xl bg-linear-to-r from-[#45bbb1] to-[#215a9e]">
+                    <p className="w-[229px] h-[34px] font-montserrat text-xl font-bold leading-[1.7px] text-left text-white">
                         DOSSIER PATIENT
                     </p>
                 </div>
-                {/*//photo de profil a decomenter quand les images seront recuperés */}
                 <div className="p-8 relative overflow-visible">
                     <Image
                         src="/images/avatar.svg"
@@ -66,44 +72,25 @@ export default function ProfilAide() {
 
                 </div>
 
-                <form onSubmit={handleSubmit} className="mx-auto  ">
+                <form className="mx-auto  ">
                     <div className="flex flex-col md:flex-row md:gap-4">
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
-                            <input type="text" value={assisted.firstName} onChange={(e) => setAssisted({ ...assisted, firstName: e.target.value })}
-                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex  flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                        </div>
+
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
-                            <input type="text" value={assisted.lastName} onChange={(e) => setAssisted({ ...assisted, lastName: e.target.value })}
-                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                            <input
+                                type="text"
+                                value={recordName}
+                                onChange={(e) => setRecordName(sanitize(e.target.value))}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:gap-4">
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>
-                            <input type="date" value={assisted.dateOfBirth} onChange={(e) => setAssisted({ ...assisted, dateOfBirth: e.target.value })}
-                                   className=" w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                        </div>
-                        <div className="self-center">
-                            <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Numéro de téléphone</label>
-                            <input type="tel" value={assisted.mobileNumber} onChange={(e) => setAssisted({ ...assisted, mobileNumber: e.target.value })}
-                                   className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row md:gap-4">
-                    <div className="self-center">
-                        <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Informations complémentaires</label>
-                        <textarea value={assisted.information} onChange={(e) => setAssisted({ ...assisted, information: e.target.value })}
-                                  className="w-[280px] md:w-[300px] h-[100px] bg-white self-stretch  flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
-                    </div>
-                    </div>
+                    {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
                         <Button variant="cancel" link={""}>Annuler</Button>
-                        <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
+                        <Button type="button" link={""} variant={"primary"}
+                                onClickAction={handleSaveRecordName} >Enregistrer</Button>
                     </div>
                 </form>
 

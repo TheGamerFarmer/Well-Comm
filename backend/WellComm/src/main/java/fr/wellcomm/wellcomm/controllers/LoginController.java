@@ -4,7 +4,7 @@ import fr.wellcomm.wellcomm.entities.Session;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
-import fr.wellcomm.wellcomm.services.CalendarService;
+import fr.wellcomm.wellcomm.services.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -30,7 +29,7 @@ public class LoginController {
     private final AccountRepository accountRepository;
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final CalendarService calendarService;
+    private final AccountService accountService;
 
     @Getter
     @Setter
@@ -45,18 +44,24 @@ public class LoginController {
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
 
-        Account account = accountRepository.findById(userName).orElse(null);
+        Account account = accountRepository.findByUserName(userName).orElse(null);
 
         if (account == null)
             return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
 
+        if (accountService.isAccountLocked(account)) {
+            return ResponseEntity.status(403).body("Nombre de tentatives dépassé.\n" +
+                    "Votre compte est temporairement bloqué afin de protéger vos données.");
+        }
+
         if (passwordEncoder.matches(password, account.getPassword())) {
+            accountService.resetFailedAttempts(account);
+
             String token = UUID.randomUUID().toString();
 
             sessionRepository.save(new Session(token,
                     account,
-                    LocalDateTime.now().plusHours(24),
-                    null));
+                    LocalDateTime.now().plusHours(24)));
 
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
@@ -66,11 +71,18 @@ public class LoginController {
                     .sameSite("Strict")
                     .build();
 
+            Map<String, Object> responseBody = Map.of(
+                    "id", account.getId(),
+                    "userName", account.getUserName()
+            );
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .build();
-        } else
-            return ResponseEntity.status(401).body("Utilisateur ou mot de passe incorrect");
+                    .body(responseBody);
+        } else {
+            accountService.registerFailedAttempt(account);
+            return ResponseEntity.status(401).body("Nom d'utilisateur ou mot de passe incorrect");
+        }
     }
 
     @GetMapping("/isLogin")

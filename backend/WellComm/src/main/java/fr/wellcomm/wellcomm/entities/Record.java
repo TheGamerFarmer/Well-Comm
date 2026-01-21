@@ -20,7 +20,7 @@ public class Record {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
-    private String admin;
+    private Long admin;
     //Relation vers Fil (Un dossier a plusieurs fils)
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "id")
@@ -37,7 +37,7 @@ public class Record {
     @JoinColumn(name = "calendar_id")
     private Calendar calendar;
 
-    public Record(String name, String admin) {
+    public Record(String name, Long admin) {
         this.name = name;
         this.admin = admin;
     }

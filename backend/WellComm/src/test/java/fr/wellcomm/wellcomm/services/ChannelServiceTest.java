@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.Test;
@@ -26,16 +27,14 @@ public class ChannelServiceTest {
         Account user = new Account();
         user.setUserName("testUser");
         accountService.saveUser(user);
-        Record record = recordService.createRecord("Dossier", "testUser");
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT",permissionList));
+        Record record = recordService.createRecord("Dossier", user.getId());
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
         OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
         // 1. Test addMessage
         Message newMessage = channelService.addMessage(channel, "probleme regle", user);
         assertNotNull(newMessage);
-        assertEquals("AIDANT", newMessage.getAuthorTitle());
+        assertEquals("Aidant", newMessage.getAuthorTitle());
 
         // 2. Test getLastMessage
         Message last = channel.getLastMessage();
@@ -49,10 +48,8 @@ public class ChannelServiceTest {
         user.setUserName("testOrder");
         accountService.saveUser(user);
 
-        Record record = recordService.createRecord("Dossier Ordre", "testOrder");
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN",permissionList));
+        Record record = recordService.createRecord("Dossier Ordre", user.getId());
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
 
         // Le premier message est créé ici (Message Index 0)
         OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", user);

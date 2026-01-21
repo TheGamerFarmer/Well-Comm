@@ -23,6 +23,7 @@ export interface MessageResponse {
     date: string;
     authorTitle?: string;
     authorUserName?: string;
+    isDeleted: boolean;
 }
 
 export interface ChannelContentResponse {
@@ -62,9 +63,19 @@ export async function getCurrentUser(): Promise<string> {
         return "null";
 }
 
-export async function getRecords(userName: string): Promise<DossierResponse[]> {
+export async function getCurrentUserId(): Promise<number | null> {
+    const userId = localStorage.getItem('userId');
+
+    if (userId) {
+        return Number(userId);
+    }
+
+    return null;
+}
+
+export async function getRecords(userId: number): Promise<DossierResponse[]> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/`, {
             credentials: 'include',
             cache: 'no-store',
             headers: { 'Accept': 'application/json' }
@@ -73,13 +84,13 @@ export async function getRecords(userName: string): Promise<DossierResponse[]> {
             return await response.json();
         }
     } catch (err) {
-        console.error("Erreur records:", err);
+        console.log("Erreur records:", err);
     }
     return [];
 }
 
 export async function fetchAllChannels(
-    userName: string,
+    userId: number | null,
     recordId: number,
     selectedCategories: string[],
     allAvailableCategories: string[]
@@ -88,7 +99,7 @@ export async function fetchAllChannels(
     const categoriesToFetch = selectedCategories.length === 0 ? allAvailableCategories : selectedCategories;
 
     try {
-        const promises = categoriesToFetch.map(cat => getChannels(userName, recordId, cat));
+        const promises = categoriesToFetch.map(cat => getChannels(userId, recordId, cat));
         const results = await Promise.all(promises);
         const flatResults = results.flat();
 
@@ -101,10 +112,10 @@ export async function fetchAllChannels(
     }
 }
 
-export async function getChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
+export async function getChannels(userId: number | null, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${categoryEnum}`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -122,9 +133,9 @@ export async function getChannels(userName: string, recordId: number, category: 
     return [];
 }
 
-export async function getChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
+export async function getChannelContent(userId: number | null, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -133,10 +144,10 @@ export async function getChannelContent(userName: string, recordId: number, chan
     return null;
 }
 
-export async function getCloseChannels(userName: string, recordId: number, category: string): Promise<FilResponse[]> {
+export async function getCloseChannels(userId: number | null, recordId: number, category: string): Promise<FilResponse[]> {
     const categoryEnum = mapCategoryToEnum(category);
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${categoryEnum}`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/${categoryEnum}`, {
             credentials: 'include',
             cache: 'no-store'
         });
@@ -154,16 +165,37 @@ export async function getCloseChannels(userName: string, recordId: number, categ
     return [];
 }
 
+export async function getLastWeekChannels(userId: number, recordId: number, category: string): Promise<FilResponse[]> {
+    const categoryEnum = mapCategoryToEnum(category);
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${categoryEnum}/week`, {
+            credentials: 'include',
+            cache: 'no-store'
+        });
+
+        if (response.status === 204) return [];
+
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) return data;
+            return data.opened_channels || [];
+        }
+    } catch (err) {
+        console.error("Erreur channels:", err);
+    }
+    return [];
+}
+
 
 export async function createChannel(
-    userName: string,
+    userId: number | null,
     recordId: number,
     title: string,
     category: string,
     message: string
 ): Promise<boolean> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/new`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/new`, {
             method: 'POST',
             credentials: 'include',
             cache: 'no-store',
@@ -181,10 +213,10 @@ export async function createChannel(
     }
 }
 
-export async function archiveChannel(userName: string, recordId: number, channelId: number): Promise<boolean> {
+export async function archiveChannel(userId: number | null, recordId: number, channelId: number): Promise<boolean> {
     try {
         const res = await fetchWithCert(
-            `${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/archive`,
+            `${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/archive`,
             {
                 method: "POST",
                 credentials: "include",
@@ -198,9 +230,9 @@ export async function archiveChannel(userName: string, recordId: number, channel
     }
 }
 
-export async function addMessage(userName: string, recordId: number, channelId: number, content: string): Promise<MessageResponse | null> {
+export async function addMessage(userId: number | null, recordId: number, channelId: number, content: string): Promise<MessageResponse | null> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages`, {
             method: 'POST',
             credentials: 'include',
             cache: 'no-store',
@@ -214,9 +246,9 @@ export async function addMessage(userName: string, recordId: number, channelId: 
     return null;
 }
 
-export async function deleteMessage(userName: string, recordId: number, channelId: number, messageId: number): Promise<boolean> {
+export async function deleteMessage(userId: number | null, recordId: number, channelId: number, messageId: number): Promise<boolean> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}/delete`, {
             method: 'DELETE',
             credentials: 'include',
             cache: 'no-store',
@@ -228,9 +260,9 @@ export async function deleteMessage(userName: string, recordId: number, channelI
     return false;
 }
 
-export async function updateMessage(userName: string, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
+export async function updateMessage(userId: number | null, recordId: number, channelId: number, messageId: number, content: string): Promise<boolean> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/channels/${channelId}/messages/${messageId}/update`, {
             method: 'PUT',
             credentials: 'include',
             cache: 'no-store',
@@ -245,7 +277,7 @@ export async function updateMessage(userName: string, recordId: number, channelI
 }
 
 export async function fetchAllCloseChannels(
-    userName: string,
+    userId: number | null,
     recordId: number,
     selectedCategories: string[],
     allAvailableCategories: string[]
@@ -254,7 +286,7 @@ export async function fetchAllCloseChannels(
     const categoriesToFetch = selectedCategories.length === 0 ? allAvailableCategories : selectedCategories;
 
     try {
-        const promises = categoriesToFetch.map(cat => getCloseChannels(userName, recordId, cat));
+        const promises = categoriesToFetch.map(cat => getCloseChannels(userId, recordId, cat));
         const results = await Promise.all(promises);
         const flatResults = results.flat();
 
@@ -267,9 +299,9 @@ export async function fetchAllCloseChannels(
     }
 }
 
-export async function getCloseChannelContent(userName: string, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
+export async function getCloseChannelContent(userId: number | null, recordId: number, channelId: number): Promise<ChannelContentResponse | null> {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/${userName}/records/${recordId}/closechannels/${channelId}/`, {
+        const response = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/closechannels/${channelId}/`, {
             credentials: 'include',
             cache: 'no-store'
         });

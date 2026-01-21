@@ -8,6 +8,10 @@ import fr.wellcomm.wellcomm.repositories.ReportRepository;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import lombok.AllArgsConstructor;
@@ -32,8 +36,8 @@ public class RecordService {
         return recordAccountRepository.findByAccountUserNameAndRecordId(user.getUserName(), record.getId()).orElse(null);
     }
 
-    public List<Record> getRecords(String userName) {
-        return recordRepository.findRecordByUserUserName(userName);
+    public List<Record> getRecords(long userId) {
+        return recordRepository.findRecordByUserId(userId);
     }
 
     public List<OpenChannel> getChannelsOfCategory(long recordId, Category category) {
@@ -44,7 +48,21 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
     }
 
-    public Record createRecord(String name, String admin) {
+    public List<OpenChannel> getLastWeekChannelsOfCategory(long recordId, Category category) {
+        List<OpenChannel> channels = channelRepository.findByDossierIdAndCategorie(recordId, category);
+        List<OpenChannel> lastWeekChannels = new ArrayList<>();
+        Date oneWeekAgo = Date.from(LocalDateTime.now().minusDays(7).atZone(ZoneId.systemDefault()).toInstant());
+        for (OpenChannel channel : channels) {
+            Date lastMessageDate = channelService.lastMessage(channel);
+            if (lastMessageDate != null && lastMessageDate.after(oneWeekAgo)) {
+                lastWeekChannels.add(channel);
+            }
+        }
+        return lastWeekChannels;
+    }
+
+    @Transactional
+    public Record createRecord(String name, long admin) {
         Record record = new Record(name, admin);
 
         record = recordRepository.save(record);

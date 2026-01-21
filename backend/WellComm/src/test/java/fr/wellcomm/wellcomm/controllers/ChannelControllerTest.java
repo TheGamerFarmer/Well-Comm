@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
@@ -7,6 +8,7 @@ import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.Date;
@@ -42,6 +49,9 @@ public class ChannelControllerTest {
     @Autowired
     private RecordAccountRepository recordAccountRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockitoBean
     private ChannelService channelService;
 
@@ -59,36 +69,32 @@ public class ChannelControllerTest {
     void testRealPermissionSuccess() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
-        userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Médical", "userTest");
+        Record record = new Record("Dossier Médical", userTest.getId());
         record = recordRepository.save(record);
 
-        // Ajout de la permission SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, "ADMIN", permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
 
         // 2. Mock du comportement métier uniquement
         OpenChannel mockChan = new OpenChannel();
         mockChan.setRecord(record);
-        mockChan.setId(1L);
 
         Message mockMsg = new Message("Hello",
                 new Date(),
                 new Account(),
                 "ADMIN",
-                mockChan);
+                mockChan, false);
 
         // 2. Configuration du Mock pour retourner ce message
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
         when(channelService.addMessage(any(), any(), any())).thenReturn(mockMsg);
 
         // 3. Exécution
-        mockMvc.perform(post("/api/userTest/records/" + record.getId() + "/channels/1/messages")
+        mockMvc.perform(post("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId() + "/messages")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("Hello"))
+                        .content(mockMsg.getContent()))
                 .andExpect(status().isOk());
     }
 
@@ -100,12 +106,10 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", 0L);
         record = recordRepository.save(record);
 
-        // On donne une autre permission, mais pas SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.IS_MEDECIN);
-        RecordAccount ra = new RecordAccount(userTest, record, "LECTEUR", permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
         recordAccountRepository.save(ra);
 
         OpenChannel mockChan = new OpenChannel();
@@ -113,9 +117,123 @@ public class ChannelControllerTest {
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
 
         // 2. Exécution : Doit être bloqué (403 Forbidden)
-        mockMvc.perform(post("/api/userTest/records/" + record.getId() + "/channels/1/messages")
+        mockMvc.perform(post("/api/0/records/" + record.getId() + "/channels/1/messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("Tentative"))
                 .andExpect(status().isForbidden());
+    }
+
+
+    @Test
+    @WithMockUser(username = "userTest")
+    void testgetChannelContent() throws Exception {
+        // 1. Création des données
+        Account userTest = new Account();
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", userTest.getId());
+        record = recordRepository.save(record);
+
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
+        recordAccountRepository.save(ra);
+
+        OpenChannel mockChan = new OpenChannel();
+        mockChan.setRecord(record);
+        mockChan.setCategory(Category.Menage);
+        when(channelService.getChannel(anyLong())).thenReturn(mockChan);
+
+        // 2. Exécution
+        MvcResult result = mockMvc.perform(get("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        ChannelController.ChannelInfos infos = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ChannelController.ChannelInfos.class
+        );
+
+        //Vérifie qu'il n'y a aucun message
+        assertEquals(0, infos.getMessages().size());
+    }
+
+
+    @Test
+    @WithMockUser(username = "userTest")
+    void testgetCloseChannelContent() throws Exception {
+        // 1. Création des données
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", 0L);
+        record = recordRepository.save(record);
+
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
+        recordAccountRepository.save(ra);
+
+        CloseChannel mockChan = new CloseChannel();
+        mockChan.setRecord(record);
+        mockChan.setCategory(Category.Menage);
+        when(channelService.getCloseChannel(anyLong())).thenReturn(mockChan);
+
+        // 2. Exécution
+        MvcResult result = mockMvc.perform(get("/api/0/records/" + record.getId() + "/closechannels/1/")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        ChannelController.ChannelInfos infos = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ChannelController.ChannelInfos.class
+        );
+
+        //Vérifie qu'il n'y a aucun message
+        assertEquals(0, infos.getMessages().size());
+    }
+
+    @Test
+    @WithMockUser(username = "userTest")
+    void testaddMessage() throws Exception {
+        // 1. Création des données
+        Account userTest = new Account();
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", userTest.getId());
+        record = recordRepository.save(record);
+        System.out.println(record.getId());
+
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
+
+        // 2. Mock du comportement métier uniquement
+        OpenChannel mockChan = new OpenChannel();
+        mockChan.setRecord(record);
+
+        Message mockMsg = new Message("Hello",
+                new Date(),
+                new Account(),
+                "ADMIN",
+                mockChan, false);
+
+        // 3. Configuration du Mock pour retourner ce message
+        when(channelService.getChannel(anyLong())).thenReturn(mockChan);
+        when(channelService.addMessage(any(), any(), any())).thenReturn(mockMsg);
+        // 4. Exécution
+        MvcResult result = mockMvc.perform(post("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId() + "/messages")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mockMsg.getContent()))
+                .andExpect(status().isOk()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+
+        ChannelController.MessageInfos infos = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ChannelController.MessageInfos.class
+        );
+
+        assertEquals("Hello", infos.getContent());
     }
 }

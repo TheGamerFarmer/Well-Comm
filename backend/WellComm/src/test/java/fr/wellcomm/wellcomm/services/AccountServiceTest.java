@@ -4,6 +4,7 @@ import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
+import fr.wellcomm.wellcomm.domain.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,14 +26,12 @@ public class AccountServiceTest {
         user.setUserName("testUser");
         accountService.saveUser(user);
 
-        Account found = accountService.getUser("testUser");
+        Account found = accountService.getUser(user.getId());
         assertNotNull(found);
 
         // 2. Test RecordAccount
-        Record record = recordService.createRecord("Dossier A", "testUser");
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        RecordAccount ra = new RecordAccount(user, record, "Manager", permissionList);
+        Record record = recordService.createRecord("Dossier A", user.getId());
+        RecordAccount ra = new RecordAccount(user, record, Role.AIDANT);
 
         accountService.addRecordAccount(user, ra);
         assertEquals(1, found.getRecordAccounts().size());
@@ -43,6 +42,6 @@ public class AccountServiceTest {
 
         // 4. Test Delete User
         accountService.deleteUser(user);
-        assertNull(accountService.getUser("testUser"));
+        assertNull(accountService.getUser(user.getId()));
     }
 }

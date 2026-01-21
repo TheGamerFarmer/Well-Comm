@@ -31,7 +31,7 @@ public class SecurityService {
 
     public boolean hasRecordPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -44,7 +44,7 @@ public class SecurityService {
 
     public boolean hasChannelPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -61,28 +61,27 @@ public class SecurityService {
 
     public boolean hasMessagePermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
-
         Message message = messageService.getMessage(Long.parseLong(params.get("channelId")));
         if (message == null)
             return false;
-
+        System.out.println(message.getId());
+        System.out.println(message.getChannel().getId());
+        System.out.println(Long.parseLong(params.get("channelId")));
         Channel channel = message.getChannel();
         if (channel.getId() != Long.parseLong(params.get("channelId")))
             return false;
-
         Record record = channel.getRecord();
         if (record.getId() != Long.parseLong(params.get("recordId")))
             return false;
-
         return hasPermission(account, record, permission);
     }
 
     public boolean hasEventPermission(Permission permission) {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -99,7 +98,7 @@ public class SecurityService {
 
     public boolean ownMessage() {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 
@@ -110,9 +109,22 @@ public class SecurityService {
         return message.getAuthor().getUserName().equals(account.getUserName());
     }
 
+    public boolean hasRecordAccountPermission(Permission permission) {
+        Map<String, String> params = getPathVars();
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
+        if (account == null)
+            return false;
+
+        Record record = recordService.getRecord(Long.parseLong(params.get("recordId")));
+        if (record == null)
+            return false;
+
+        return hasPermission(account, record, permission);
+    }
+
     public boolean deleteRecord() {
         Map<String, String> params = getPathVars();
-        Account account = accountService.getUser(params.get("userName"));
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
 

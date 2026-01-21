@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ButtonMain";
 import { DateTimeInput } from './DateTimeInput';
 import { ColorPicker } from './ColorPicker';
+import {sanitize} from "@/functions/Sanitize";
 
 interface EventModalProps {
     selectedEvent: any;
@@ -13,7 +14,7 @@ interface EventModalProps {
     setIsCreating: (value: boolean) => void;
     setSelectedEvent: (event: any) => void;
     hasEditPermission: boolean;
-    formatDisplayTime: (iso: string) => string;
+    formatDisplayTime: (iso:string) => string;
     joinISO: (date: string, time: string) => string;
     splitISO: (iso: string) => { date: string; time: string };
     saveEdits: () => void;
@@ -39,7 +40,7 @@ export function EventModal(props: EventModalProps) {
                                 className="text-xl sm:text-2xl font-black w-full border-b-2 sm:border-b-4 border-black outline-none bg-gray-50 text-[#0551ab]"
                                 placeholder="Titre de l'événement"
                                 value={props.editData.title}
-                                onChange={(e) => props.setEditData({...props.editData, title: e.target.value})}
+                                onChange={(e) => props.setEditData({...props.editData, title: sanitize(e.target.value)})}
                             />
                             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 items-start sm:items-center text-sm">
                                 <DateTimeInput
@@ -97,7 +98,7 @@ export function EventModal(props: EventModalProps) {
                                 className="w-full text-sm sm:text-l border-2 sm:border-4 border-gray-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 min-h-[150px] sm:min-h-[200px] outline-none focus:border-black text-black"
                                 placeholder="Description de l'événement"
                                 value={props.editData.description}
-                                onChange={(e) => props.setEditData({...props.editData, description: e.target.value})}
+                                onChange={(e) => props.setEditData({...props.editData, description: sanitize(e.target.value)})}
                             />
                         ) : (
                             <p className="text-sm sm:text-l text-black leading-relaxed whitespace-pre-line font-semibold">
@@ -115,7 +116,7 @@ export function EventModal(props: EventModalProps) {
                                 className="w-full text-sm sm:text-l font-black border-b-2 sm:border-b-4 border-gray-100 outline-none focus:border-black text-black pb-2"
                                 placeholder="Lieu de l'événement"
                                 value={props.editData.location}
-                                onChange={(e) => props.setEditData({...props.editData, location: e.target.value})}
+                                onChange={(e) => props.setEditData({...props.editData, location: sanitize(e.target.value)})}
                             />
                         ) : (
                             <p className="text-sm sm:text-l text-black font-semibold">

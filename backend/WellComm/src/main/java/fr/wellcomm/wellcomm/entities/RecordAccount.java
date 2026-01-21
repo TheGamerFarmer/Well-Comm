@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,8 @@ public class RecordAccount {
     @ManyToOne
     @JsonIgnore
     private Record record;
+
+    @Column(nullable = false)
     private String title;
     @ElementCollection(targetClass = Permission.class)
     @CollectionTable(name = "record_permissions", joinColumns = @JoinColumn(name = "record_account_id"))
@@ -40,10 +43,10 @@ public class RecordAccount {
             this.createdAt = LocalDateTime.now();
         }
 
-    public RecordAccount(Account account, Record record, String title, List<Permission> permissions) {
+    public RecordAccount(Account account, Record record, Role role) {
         this.account = account;
         this.record = record;
-        this.title = title;
-        this.permissions = permissions;
+        this.title = role.getTitre();
+        this.permissions = role.getPermission();
     }
 }
