@@ -16,12 +16,12 @@ export enum Permission {
     SEE_CALENDAR = "SEE_CALENDAR",
 }
 
-export async function getPermissions(userName: string, recordId: number): Promise<Permission[]> {
-    if (!userName || !recordId) return [];
+export async function getPermissions(userId: number | null, recordId: number): Promise<Permission[]> {
+    if (!userId || !recordId) return [];
 
     try {
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/recordsaccount/${recordId}/permissions`,
+            `${API_BASE_URL}/api/${userId}/recordsaccount/${recordId}/permissions`,
             {
                 method: "GET",
                 credentials: "include",

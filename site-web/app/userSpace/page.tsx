@@ -4,10 +4,9 @@ import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import { useRouter } from "next/navigation";
 import { getUserProfile, UserProfile, changePassword, deleteAccount, changeUserInfos } from "@/functions/user-api";
-import { API_BASE_URL } from "@/config";
 import {encryptPassword} from "@/functions/encryptPassword";
+import {getCurrentUserId} from "@/functions/fil-API";
 
 export default function UserSpace() {
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -16,39 +15,33 @@ export default function UserSpace() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
     const [userName, setUserName] = useState<string>("");
-    const [newUserName, setNewUserName] = useState<string>("");
     const [firstName, setFirstName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("");
-    const router = useRouter();
 
     useEffect(() => {
         const loadProfile = async () => {
-            const meRes = await fetch(`${API_BASE_URL}/api/me`, {
-                credentials: "include",
-                cache: "no-store",
-            });
+            const id = await getCurrentUserId();
 
-            if (!meRes.ok) {
-                router.push("/login");
+            if (id === null)
                 return;
-            }
-            const me = await meRes.json();
-            setUserName(me.userName);
 
-            const profile = await getUserProfile(me.userName);
+            setUserId(id);
+            const profile = await getUserProfile(id);
             if (profile) {
                 setProfile({
-                    userName: me.userName,
+                    userName: profile.userName,
                     firstName: profile.firstName,
                     lastName: profile.lastName,
                 });
                 setFirstName(profile.firstName);
                 setLastName(profile.lastName);
-                setNewUserName(me.userName);
+                setUserName(profile.userName);
             }
         };
-        loadProfile();
+
+        loadProfile().then();
     }, []);
 
     const handleSavePassword = async () => {
@@ -56,7 +49,7 @@ export default function UserSpace() {
             alert("Les nouveaux mots de passe ne correspondent pas!");
             return;
         }
-        const ok = await changePassword(userName, encryptPassword(currentPassword), encryptPassword(newPassword));
+        const ok = await changePassword(userId, encryptPassword(currentPassword), encryptPassword(newPassword));
 
         if (ok) {
             alert("Mot de passe modifié avec succès!");
@@ -68,7 +61,7 @@ export default function UserSpace() {
     };
 
     const handleDeleteAccount = async () => {
-        const success = await deleteAccount(userName);
+        const success = await deleteAccount(userId);
 
         if (success) {
             window.location.replace("/login");
@@ -78,18 +71,17 @@ export default function UserSpace() {
     };
 
     const handleSaveProfile = async () => {
+
         const ok = await changeUserInfos(
+            userId,
             userName,
-            newUserName,
             firstName,
             lastName
         );
 
         if (ok) {
             alert("Profil mis à jour avec succès!");
-            if (newUserName !== userName) {
-                window.location.reload();
-            }
+            localStorage.setItem('username', userName);
         }
     };
 
@@ -102,7 +94,7 @@ export default function UserSpace() {
                 <FilArianne />
             </div>
 
-            <div className="flex justify-center items-center flex-col bg-[#ffffff] w-[100%] rounded-xl border-20 border-white">
+            <div className="flex justify-center items-center flex-col bg-[#ffffff] w-full rounded-xl border-20 border-white">
                 <div className="p-8 relative overflow-visible">
                     <Image
                         src="/images/avatar.svg"
@@ -131,7 +123,7 @@ export default function UserSpace() {
                                 type="text"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div className="self-center">
@@ -140,7 +132,7 @@ export default function UserSpace() {
                                 type="text"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -157,9 +149,9 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
-                                value={newUserName}
-                                onChange={(e) => setNewUserName(e.target.value)}
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>

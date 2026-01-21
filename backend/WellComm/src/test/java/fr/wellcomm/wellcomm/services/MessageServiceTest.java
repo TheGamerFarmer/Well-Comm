@@ -20,12 +20,12 @@ public class MessageServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 1. Créer un Record pour l'arborescence
-        Record record = recordService.createRecord("Dossier de Test", "testUser");
-
-        // 2. Créer un Channel
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        // 1. Créer un Record pour l'arborescence
+        Record record = recordService.createRecord("Dossier de Test", testUser.getId());
+
+        // 2. Créer un Channel
         testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", testUser);
 
         // 3. Récupérer le message créé par createChannel

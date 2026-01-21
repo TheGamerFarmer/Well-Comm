@@ -5,7 +5,6 @@ import { Button } from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useFilLogic } from "@/hooks/useFilLogic";
 import {
-    mapCategoryToEnum,
     capitalizeWords,
     MessageResponse,
     FilResponse,
@@ -13,15 +12,15 @@ import {
 } from "@/functions/fil-API";
 import Image from "next/image";
 import {getPermissions, Permission} from "@/functions/Permissions";
+import {sanitize} from "@/functions/Sanitize";
 
 export default function ResumePage() {
     const {
-        categories, records, currentUserName, messages,
+        categories, records, currentUserName,currentUserId, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, selectedChannel, setSelectedChannel,
-        isOpen, setIsOpen, formData, setFormData, handleCreateSubmit,
         newMessage, setNewMessage, handleSendChatMessage,handleDeleteChatMessage,messageToDelete,setMessageToDelete,
-        setChannelToArchive, showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal,
+        showArchiveModal, setShowArchiveModal, confirmArchive,setShowDeleteMessageModal,showDeleteMessageModal,
         editingMessageId, setEditingMessageId, editingContent, setEditingContent, handleSaveEdit
     } = useFilLogic();
 
@@ -41,19 +40,19 @@ export default function ResumePage() {
     }, [setActiveRecordId]);
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) {
+        if (!currentUserId || !activeRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(currentUserName, activeRecordId)
+        getPermissions(currentUserId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [currentUserName, activeRecordId]);
+    }, [currentUserId, activeRecordId]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
@@ -86,7 +85,7 @@ export default function ResumePage() {
     };
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) return;
+        if (!currentUserId || !activeRecordId) return;
 
         const fetchChannels = async () => {
             setIsLoading(true);
@@ -100,7 +99,7 @@ export default function ResumePage() {
                     : selectedCategories;
 
             for (const cat of catsToFetch) {
-                const data = await getLastWeekChannels(currentUserName, activeRecordId, cat);
+                const data = await getLastWeekChannels(currentUserId, activeRecordId, cat);
                 allChannels = [...allChannels, ...data];
             }
 
@@ -112,8 +111,8 @@ export default function ResumePage() {
             setIsLoading(false);
         };
 
-        fetchChannels();
-    }, [currentUserName, activeRecordId, selectedCategories, categories]);
+        fetchChannels().then();
+    }, [currentUserId, activeRecordId, selectedCategories, categories]);
 
     useEffect(() => {
         if (permissions.includes(Permission.IS_MEDECIN)) {
@@ -309,7 +308,7 @@ export default function ResumePage() {
                                                         <textarea
                                                             className="w-full p-3 text-black rounded-xl border-2 border-blue-200 focus:border-[#0551ab] outline-none resize-none font-semibold text-sm md:text-base bg-white"
                                                             value={editingContent}
-                                                            onChange={(e) => setEditingContent(e.target.value)}
+                                                            onChange={(e) => setEditingContent(sanitize(e.target.value))}
                                                             autoFocus
                                                             rows={2}
                                                         />
@@ -374,7 +373,7 @@ export default function ResumePage() {
                                         <input
                                             type="text"
                                             value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            onChange={(e) => setNewMessage(sanitize(e.target.value))}
                                             placeholder="Ecrivez votre message ici"
                                             className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base placeholder:text-xs md:placeholder:text-base"
                                         />
@@ -424,7 +423,7 @@ export default function ResumePage() {
                                     type="text"
                                     placeholder="Recherche par titre"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => setSearchQuery(sanitize(e.target.value))}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
                                 />
                                 <svg className="absolute left-5 top-4 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -11,4 +11,5 @@ import java.time.LocalDateTime;
 public interface SessionRepository extends JpaRepository<Session, String> {
     void deleteByAccount(Account account);
     void deleteByExpirationDateBefore(LocalDateTime now);
+    Session findByAccount(Account account);
 }

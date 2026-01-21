@@ -13,7 +13,8 @@ export default async function logUser(userName: string, hashPassWord: string) {
         });
 
         if (response.ok) {
-            return { success: true };
+            const data = await response.json();
+            return { success: true, userId: data.id };
         } else {
             const errorText = await response.text();
             return { success: false, message: errorText };

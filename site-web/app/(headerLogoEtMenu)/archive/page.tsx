@@ -6,10 +6,11 @@ import FilArianne from "@/components/FilArianne";
 import { useArchiveLogic } from "@/hooks/useArchiveLogic";
 import {capitalizeWords, MessageResponse} from "@/functions/fil-API";
 import {getPermissions, Permission} from "@/functions/Permissions";
+import {sanitize} from "@/functions/Sanitize";
 
 export default function ArchivePage() {
     const {
-        categories, records, channels, currentUserName, messages,
+        categories, records, channels, currentUserName,currentUserId, messages,
         activeRecordId, setActiveRecordId, selectedCategories, toggleCategory,
         searchQuery, setSearchQuery, isLoading, selectedChannel, setSelectedChannel,
     } = useArchiveLogic();
@@ -28,19 +29,19 @@ export default function ArchivePage() {
     }, [setActiveRecordId]);
 
     useEffect(() => {
-        if (!currentUserName || !activeRecordId) {
+        if (!currentUserId || !activeRecordId) {
             setRecordAccount(null);
             return;
         }
 
-        getPermissions(currentUserName, activeRecordId)
+        getPermissions(currentUserId, activeRecordId)
             .then((permissions: Permission[]) => {
                 setRecordAccount({ permissions });
             })
             .catch(() => {
                 setRecordAccount({ permissions: [] });
             });
-    }, [currentUserName, activeRecordId]);
+    }, [currentUserId, activeRecordId]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const permissions = recordAccount?.permissions ?? [];
@@ -190,7 +191,7 @@ export default function ArchivePage() {
                         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 bg-[#f9fafb]">
                             {sortedMessages.map((msg: MessageResponse, index: number) => {
                                 const isMe = msg.authorUserName === currentUserName;
-                                const isDeleted = msg.content === "Ce message a été supprimé\u200B";
+                                const isDeleted = msg.isDeleted
 
                                 const msgDate = new Date(msg.date);
                                 const prevMsg = index > 0 ? sortedMessages[index - 1] : null;
@@ -283,7 +284,7 @@ export default function ArchivePage() {
                                     type="text"
                                     placeholder="Recherche par titre"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => setSearchQuery(sanitize(e.target.value))}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
                                 />
                                 <svg className="absolute left-5 top-4 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

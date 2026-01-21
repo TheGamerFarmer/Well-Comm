@@ -6,9 +6,9 @@ export interface UserProfile {
     lastName: string;
 }
 
-export async function getUserProfile(userName: string): Promise<UserProfile | null> {
+export async function getUserProfile(userId: number | null): Promise<UserProfile | null> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/infos`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/infos`, {
             credentials: "include",
             cache: "no-store",
         });
@@ -29,13 +29,13 @@ export async function getUserProfile(userName: string): Promise<UserProfile | nu
 }
 
 export async function changePassword(
-    userName: string,
+    userId: number | null,
     currentPassword: string,
     newPassword: string
 ): Promise<boolean> {
     try {
 
-        const url = `${API_BASE_URL}/api/${userName}/changePassword`;
+        const url = `${API_BASE_URL}/api/${userId}/changePassword`;
         console.log("FETCH URL =", url);
         const res = await fetch(url, {
             method: "POST",
@@ -63,10 +63,10 @@ export async function changePassword(
     }
 }
 
-export async function deleteAccount(userName: string): Promise<boolean> {
+export async function deleteAccount(userId: number | null): Promise<boolean> {
     try {
         const res = await fetch(
-            `${API_BASE_URL}/api/${userName}/deleteUser`,
+            `${API_BASE_URL}/api/${userId}/deleteUser`,
             {
                 method: "DELETE",
                 credentials: "include",
@@ -81,13 +81,13 @@ export async function deleteAccount(userName: string): Promise<boolean> {
 }
 
 export async function changeUserInfos(
+    userId: number | null,
     userName: string,
-    newUserName: string,
     firstName: string,
     lastName: string
 ): Promise<boolean> {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/${userName}/changeUserInfos`,
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/changeUserInfos`,
         {
             method: "POST",
             credentials: "include",
@@ -95,7 +95,7 @@ export async function changeUserInfos(
             "Content-Type": "application/json",
         },
             body: JSON.stringify({
-                userName: newUserName,
+                userName,
                 firstName,
                 lastName,
             }),

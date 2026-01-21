@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Client } from "@stomp/stompjs";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {Client} from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import {
-    getCurrentUser,
-    getRecords,
-    fetchAllChannels,
-    createChannel,
-    mapCategoryToEnum,
-    archiveChannel,
-    getChannelContent,
     addMessage,
+    archiveChannel,
+    categories,
+    createChannel,
     deleteMessage,
-    FilResponse,
     DossierResponse,
+    fetchAllChannels,
+    FilResponse,
+    getChannelContent,
+    getCurrentUser,
+    getCurrentUserId,
+    getRecords,
+    mapCategoryToEnum,
     MessageResponse,
-    updateMessage,
-    categories
+    updateMessage
 } from "@/functions/fil-API";
 
 interface SockJSOptions extends SockJS.Options {
@@ -25,6 +26,7 @@ interface SockJSOptions extends SockJS.Options {
 export function useFilLogic() {
     // profil
     const [currentUserName, setCurrentUserName] = useState<string>("");
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     // record & channel
     const [records, setRecords] = useState<DossierResponse[]>([]);
     const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
@@ -59,11 +61,15 @@ export function useFilLogic() {
     useEffect(() => {
         let isMounted = true;
         const init = async () => {
-            const user = await getCurrentUser();
+            const user = await getCurrentUserId();
             if (user && isMounted) {
-                setCurrentUserName(user);
+                setCurrentUserId(user);
                 const userRecords = await getRecords(user);
                 setRecords(userRecords);
+            }
+            const userName = await getCurrentUser();
+            if (userName && isMounted) {
+                setCurrentUserName(userName);
             }
         };
         init().then();
@@ -71,20 +77,20 @@ export function useFilLogic() {
     }, []);
 
     const loadChannels = useCallback(async () => {
-        if (!currentUserName || !activeRecordId) return;
+        if (!currentUserId || !activeRecordId) return;
 
         await Promise.resolve();
         setIsLoading(true);
 
         try {
-            const data = await fetchAllChannels(currentUserName, activeRecordId, selectedCategories, categories);
+            const data = await fetchAllChannels(currentUserId, activeRecordId, selectedCategories, categories);
             setChannels(data);
         } catch (error) {
             console.log("Erreur chargement fils:", error);
         } finally {
             setIsLoading(false);
         }
-    }, [currentUserName, activeRecordId, selectedCategories]);
+    }, [currentUserId, activeRecordId, selectedCategories]);
 
     useEffect(() => {
         loadChannels().then();
@@ -94,23 +100,26 @@ export function useFilLogic() {
         let ignore = false;
         const loadMessages = async () => {
             if (selectedChannel && activeRecordId) {
-                const content = await getChannelContent(currentUserName, activeRecordId, selectedChannel.id);
+                const content = await getChannelContent(currentUserId, activeRecordId, selectedChannel.id);
                 if (!ignore) {
-                    if (content && content.messages) setMessages(content.messages);
-                    else setMessages([]);
+                    if (content && content.messages) {
+                        setMessages(content.messages);
+                    } else {
+                        setMessages([]);
+                    }
                 }
             }
         };
         loadMessages().then();
         return () => { ignore = true; };
-    }, [selectedChannel, activeRecordId, currentUserName]);
+    }, [selectedChannel, activeRecordId, currentUserId]);
 
     useEffect(() => {
         if (!selectedChannel) return;
 
         const options: SockJSOptions = {
             sessionId: 10,
-            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            transports: ['websocket'],
             withCredentials: true
         };
 
@@ -120,20 +129,49 @@ export function useFilLogic() {
         });
 
         client.onConnect = () => {
+
             client.subscribe(`/topic/messages/${selectedChannel.id}`, (payload) => {
                 const data = JSON.parse(payload.body);
 
-                if (data.type === 'UPDATE' || data.type === 'DELETE') {
-                    setMessages((prev) => prev.map(m =>
-                        m.id === data.id || m.id === data.deletedMessageId
-                            ? { ...m, content: data.content || "Ce message a été supprimé"}
-                            : m
-                    ));
+                if (data.type === 'UPDATE') {
+                    setMessages((prev) => {
+                        return prev.map(m =>
+                            m.id === data.id
+                                ? {
+                                    ...m,
+                                    content: data.content,
+                                }
+                                : m
+                        );
+                    });
+                }
+                else if (data.type === 'DELETE') {
+                    setMessages((prev) => {
+                        return prev.map(m =>
+                            m.id === data.id
+                                ? {
+                                    ...m,
+                                    content: data.content,
+                                    isDeleted: true
+                                }
+                                : m
+                        );
+                    });
                 }
                 else if (data.id) {
                     setMessages((prev) => {
-                        if (prev.some(m => m.id === data.id)) return prev;
-                        return [...prev, data];
+                        if (prev.some(m => m.id === data.id)) {
+                            return prev;
+                        }
+                        const newMsg: MessageResponse = {
+                            id: data.id,
+                            content: data.content,
+                            date: data.date,
+                            authorTitle: data.authorTitle,
+                            authorUserName: data.authorUserName,
+                            isDeleted: data.isDeleted || false
+                        };
+                        return [...prev, newMsg];
                     });
                 }
             });
@@ -156,8 +194,8 @@ export function useFilLogic() {
 
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUserName || !activeRecordId) return;
-        const success = await createChannel(currentUserName, activeRecordId, formData.title, formData.category, formData.message);
+        if (!currentUserId || !activeRecordId) return;
+        const success = await createChannel(currentUserId, activeRecordId, formData.title, formData.category, formData.message);
         if (success) {
             setIsOpen(false);
             setFormData({ category: mapCategoryToEnum("Santé"), title: "", message: "" });
@@ -169,7 +207,7 @@ export function useFilLogic() {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChannel || !activeRecordId) return;
 
-        const sentMsg = await addMessage(currentUserName, activeRecordId, selectedChannel.id, newMessage);
+        const sentMsg = await addMessage(currentUserId, activeRecordId, selectedChannel.id, newMessage);
         if (sentMsg) {
             setNewMessage("");
         }
@@ -177,16 +215,12 @@ export function useFilLogic() {
 
     const handleDeleteChatMessage = async (messageId: number | null) => {
         if (!selectedChannel || !activeRecordId || messageId==null) return;
-
-        const success = await deleteMessage(currentUserName, activeRecordId, selectedChannel.id, messageId);
-        if (success) {
-            console.log("Message envoyé pour suppression");
-        }
+        await deleteMessage(currentUserId, activeRecordId, selectedChannel.id, messageId);
     };
 
     const handleSaveEdit = async (id: number) => {
         if (!editingContent.trim() || !selectedChannel || !activeRecordId) return;
-        const success = await updateMessage(currentUserName, activeRecordId, selectedChannel.id, id, editingContent);
+        const success = await updateMessage(currentUserId, activeRecordId, selectedChannel.id, id, editingContent);
         if (success) setEditingMessageId(null);
     };
 
@@ -197,7 +231,7 @@ export function useFilLogic() {
     const confirmArchive = async () => {
         if (!activeRecordId || !channelToArchive) return;
 
-        const success = await archiveChannel(currentUserName, activeRecordId, channelToArchive.id);
+        const success = await archiveChannel(currentUserId, activeRecordId, channelToArchive.id);
         if (success) {
             setChannels(prev => prev.filter(ch => ch.id !== channelToArchive.id));
             setShowArchiveModal(false);
@@ -208,7 +242,7 @@ export function useFilLogic() {
 
     return {
         // profil
-        currentUserName,
+        currentUserName,currentUserId,
         // record & channel
         records, activeRecordId, setActiveRecordId, channels: filteredChannels, categories,
         // messages

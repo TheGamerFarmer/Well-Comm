@@ -2,7 +2,6 @@
 import { useEffect } from "react";
 import {useRouter, usePathname, useParams} from "next/navigation";
 import { Capacitor } from "@capacitor/core";
-import {NextResponse} from "next/dist/server/web/spec-extension/response";
 import {API_BASE_URL} from "@/config";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -20,7 +19,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
                 if (pathname.startsWith(nextJsPagesPrefix)
                     || pathname.startsWith(imagesPrefix))
-                    return NextResponse.next();
+                    return;
 
                 const response = await fetch(`${API_BASE_URL}/api/isLogin`, {
                     method: "GET",

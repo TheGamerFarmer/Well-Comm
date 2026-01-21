@@ -7,13 +7,14 @@ import {
     FilResponse,
     DossierResponse,
     MessageResponse,
-    categories
+    categories, getCurrentUserId
 } from "@/functions/fil-API";
 
 export function useArchiveLogic() {
 
     // profil
     const [currentUserName, setCurrentUserName] = useState<string>("");
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     // record & channel
     const [records, setRecords] = useState<DossierResponse[]>([]);
@@ -32,11 +33,15 @@ export function useArchiveLogic() {
     useEffect(() => {
         let isMounted = true;
         const init = async () => {
-            const user = await getCurrentUser();
+            const user = await getCurrentUserId();
             if (user && isMounted) {
-                setCurrentUserName(user);
+                setCurrentUserId(user);
                 const userRecords = await getRecords(user);
                 setRecords(userRecords);
+            }
+            const userName = await getCurrentUser();
+            if (userName && isMounted) {
+                setCurrentUserName(userName);
             }
         };
         init().then();
@@ -50,14 +55,14 @@ export function useArchiveLogic() {
         setIsLoading(true);
 
         try {
-            const data = await fetchAllCloseChannels(currentUserName, activeRecordId, selectedCategories, categories);
+            const data = await fetchAllCloseChannels(currentUserId, activeRecordId, selectedCategories, categories);
             setChannels(data);
         } catch (error) {
             console.error("Erreur chargement archives:", error);
         } finally {
             setIsLoading(false);
         }
-    }, [currentUserName, activeRecordId, selectedCategories]);
+    }, [currentUserName, activeRecordId, currentUserId, selectedCategories]);
 
     useEffect(() => {
         loadChannels().then();
@@ -67,7 +72,7 @@ export function useArchiveLogic() {
         let ignore = false;
         const loadMessages = async () => {
             if (selectedChannel && activeRecordId) {
-                const content = await getCloseChannelContent(currentUserName, activeRecordId, selectedChannel.id);
+                const content = await getCloseChannelContent(currentUserId, activeRecordId, selectedChannel.id);
                 if (!ignore) {
                     if (content && content.messages) setMessages(content.messages);
                     else setMessages([]);
@@ -76,7 +81,7 @@ export function useArchiveLogic() {
         };
         loadMessages().then();
         return () => { ignore = true; };
-    }, [selectedChannel, activeRecordId, currentUserName]);
+    }, [selectedChannel, activeRecordId, currentUserId]);
 
     const toggleCategory = useCallback((category: string) => {
         setSelectedCategories((prev) =>
@@ -90,7 +95,7 @@ export function useArchiveLogic() {
 
     return {
         // profil
-        currentUserName,
+        currentUserName,currentUserId,
         // record & channel
         records, activeRecordId, setActiveRecordId, channels: filteredChannels, categories,
         // messages

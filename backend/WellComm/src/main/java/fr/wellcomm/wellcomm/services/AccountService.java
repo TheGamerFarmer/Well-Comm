@@ -23,14 +23,19 @@ public class AccountService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCK_TIME_DURATION = 15;
 
-    public Account getUser(String username) {
-        return accountRepository.findById(username)
+    public Account getUser(Long userId) {
+        return accountRepository.findById(userId)
+                .orElse(null);
+    }
+
+    public Account getUserByUserName(String username) {
+        return accountRepository.findByUserName(username)
                 .orElse(null);
     }
 
     public void deleteUser(Account account) {
         sessionRepository.deleteByAccount(account);
-        accountRepository.deleteById(account.getUserName());
+        accountRepository.deleteById(account.getId());
     }
 
     public void saveUser(Account account) {
