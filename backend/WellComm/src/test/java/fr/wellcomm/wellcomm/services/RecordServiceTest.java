@@ -70,7 +70,7 @@ public class RecordServiceTest {
                 .findFirst()
                 .orElse(null);
         assert firstMsg != null;
-        assertEquals("ADMIN", firstMsg.getAuthorTitle());
+        assertEquals("Aidant", firstMsg.getAuthorTitle());
         assertEquals("il a mal au dos", firstMsg.getContent());
     }
 

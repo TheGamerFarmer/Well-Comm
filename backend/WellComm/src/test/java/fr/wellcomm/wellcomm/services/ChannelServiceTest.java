@@ -36,7 +36,7 @@ public class ChannelServiceTest {
         // 1. Test addMessage
         Message newMessage = channelService.addMessage(channel, "probleme regle", user);
         assertNotNull(newMessage);
-        assertEquals("AIDANT", newMessage.getAuthorTitle());
+        assertEquals("Aidant", newMessage.getAuthorTitle());
 
         // 2. Test getLastMessage
         Message last = channel.getLastMessage();
