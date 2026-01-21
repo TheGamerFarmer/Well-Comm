@@ -80,4 +80,37 @@ export async function deleteAccount(userName: string): Promise<boolean> {
     }
 }
 
+export async function changeUserInfos(
+    userName: string,
+    newUserName: string,
+    firstName: string,
+    lastName: string
+): Promise<boolean> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/${userName}/changeUserInfos`,
+        {
+            method: "POST",
+            credentials: "include",
+            headers: {
+            "Content-Type": "application/json",
+        },
+            body: JSON.stringify({
+                userName: newUserName,
+                firstName,
+                lastName,
+            }),
+        }
+    );
 
+        if (res.ok) {
+            return true;
+        } else {
+            const text = await res.text();
+            alert("Erreur: " + text);
+            return false;
+        }
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
+}

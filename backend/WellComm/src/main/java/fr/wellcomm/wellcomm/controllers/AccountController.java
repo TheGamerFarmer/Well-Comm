@@ -7,6 +7,7 @@ import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.SessionService;
+import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
+
+import static fr.wellcomm.wellcomm.domain.Permission.*;
+
 
 @RestController
 @RequestMapping("/api/{userName}")
@@ -59,11 +64,19 @@ public class AccountController {
         private String userName;
     }
 
-        @Getter
-        @Setter
-        public static class ChangePasswordRequest {
-            private String currentPassword;
-            private String newPassword;
+    @Getter
+    @Setter
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+        }
+
+    @Getter
+    @Setter
+    public static class UpdateProfileRequest {
+        private String userName;
+        private String firstName;
+        private String lastName;
         }
 
     @GetMapping("/infos")
@@ -98,6 +111,49 @@ public class AccountController {
     }
 
 
+@PostMapping("/changeUserInfos")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<?> updateProfile(
+            @PathVariable String userName,
+            @RequestBody UpdateProfileRequest request
+    ) {
+
+        System.out.println("\n\n\n\n");
+        System.out.println("PATH userName = " + userName);
+        System.out.println("BODY userName = " + request.getUserName());
+        System.out.println("BODY firstName = " + request.getFirstName());
+        System.out.println("BODY lastName = " + request.getLastName());
+        System.out.println("\n\n\n\n");
+
+        Account account = accountRepository
+                        .findById(userName)
+                        .orElseThrow();
+
+        if (account == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        if (!userName.equals(request.getUserName())) {
+
+            System.out.println("\n\n\n\n");
+            System.out.println("check userName == newUserName");
+            if (accountRepository.existsById(request.getUserName())) {
+                System.out.println("newUserName already exists in DB");
+                return ResponseEntity.status(409).body("Account already exists");
+            }
+            System.out.println("newUserName doesn't exist in DB");
+            account.setUserName(request.getUserName());
+        }
+
+        account.setFirstName(request.getFirstName());
+        account.setLastName(request.getLastName());
+
+        accountService.saveUser(account);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @DeleteMapping("/deleteUser")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> deleteUser(@PathVariable String userName) {
@@ -123,7 +179,15 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle().equals("Aidant")) {
+            newAccess.setTitle(Role.AIDANT);
+        }
+        else if(request.getTitle().equals("Employé")) {
+            newAccess.setTitle(Role.EMPLOYEE);
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -153,7 +217,18 @@ public class AccountController {
 
         RecordAccount newAccess = new RecordAccount();
         newAccess.setRecord(record);
-        newAccess.setTitle(request.getTitle());
+        if(request.getTitle().equals("Aidant") || request.getTitle().equals("AIDANT")) {
+            newAccess.setTitle(Role.AIDANT);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
+        }
+        else if(request.getTitle().equals("Employé") || request.getTitle().equals("EMPLOYEE")) {
+            newAccess.setTitle(Role.EMPLOYEE);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
+        }
+        else{
+            newAccess.setTitle(Role.MEDECIN);
+            newAccess.setPermissions(newAccess.getTitle().getPermission());
+        }
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -210,14 +285,22 @@ public class AccountController {
     }
 
     //modifier le role d'un assistant autre que la personne connecté
-    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{role}")
+    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{title}")
     @PreAuthorize("#userName == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
             @PathVariable String userName,
             @PathVariable String targetUserName,
             @PathVariable Long recordId,
-            @PathVariable String role
+            @PathVariable String title
     ) {
+        Role role;
+        if(title.equals("Aidant")) {
+            role = Role.AIDANT;
+        }
+        else {
+            role = Role.EMPLOYEE;
+        }
+
         Account account = accountService.getUser(userName);
                 if (account == null)
                     return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
