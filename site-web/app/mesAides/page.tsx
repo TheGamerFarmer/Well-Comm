@@ -7,6 +7,9 @@ import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUser} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+
 
 type Dossier = {
     id: number;
@@ -27,6 +30,7 @@ export default function MesAides() {
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
     const [file, setFile] = useState<File | null>(null);
+    const router = useRouter();
 
     /* =======================
        Chargement des dossiers
@@ -143,6 +147,7 @@ export default function MesAides() {
                             key={dossier.id}
                             onClick={() => {
                                 localStorage.setItem('activeRecordId', dossier.id.toString());
+                                localStorage.setItem("activeRecordName", dossier.name);
                             }
                         }
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
