@@ -1,13 +1,14 @@
 "use client";
 import { useEffect } from "react";
 import {useRouter, usePathname, useParams} from "next/navigation";
-import { Capacitor } from "@capacitor/core";
+import {Capacitor, CapacitorHttp} from "@capacitor/core";
 import {API_BASE_URL} from "@/config";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const logPages = ["/login", "/register"];
     const homePage = "/mesAides";
     const nextJsPagesPrefix = "/_next";
@@ -21,19 +22,21 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                     || pathname.startsWith(imagesPrefix))
                     return;
 
-                const response = await fetch(`${API_BASE_URL}/api/isLogin`, {
+                const option = {
+                    url: `${API_BASE_URL}/api/isLogin`,
                     method: "GET",
-                    credentials: 'include',
-                    cache: 'no-store'
-                });
+                    header: { 'Content-Type': 'application/json' },
+                    withCredentials: true,
+                }
 
-                const isLoged = await response.json();
+                const response = await CapacitorHttp.get(option);
+                const isLoged = response.data;
 
-                if (!response.ok || (isLoged && logPages.includes(pathname)))
+                if (!response.status || (isLoged && logPages.includes(pathname)))
                     router.push(homePage);
                 else if (!isLoged
-                            && !logPages.includes(pathname)
-                            && "/" !== pathname) {
+                    && !logPages.includes(pathname)
+                    && "/" !== pathname) {
                     const urlSource = pathname + params;
                     const loginUrl = new URL("/login");
                     loginUrl.searchParams.set("callbackUrl", urlSource);
@@ -43,7 +46,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         };
 
         checkAuth().then();
-    }, [pathname, router]);
+    }, [logPages, params, pathname, router]);
 
     return <>{children}</>;
 }
