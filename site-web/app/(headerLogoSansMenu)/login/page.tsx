@@ -5,6 +5,7 @@ import Link from "next/link";
 import {encryptPassword} from "@/functions/encryptPassword";
 import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
+import {sanitize} from "@/functions/Sanitize";
 
 // 1. Move the logic into a separate component
 function LoginForm() {
@@ -44,7 +45,7 @@ function LoginForm() {
                 Nom d&#39;utilisateur
             </label>
             <input
-                onChange={(e) => setUserName(e.target.value)}
+                onChange={(e) => setUserName(sanitize(e.target.value))}
                 className="h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black"
                 type="text"
             />
@@ -53,7 +54,7 @@ function LoginForm() {
                 Mot de passe
             </label>
             <input
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(sanitize(e.target.value))}
                 className="h-10 rounded-lg border-2 border-[#dfdfdf] border-solid mb-4 mt-1 p-3 text-black"
                 type="password"
             />

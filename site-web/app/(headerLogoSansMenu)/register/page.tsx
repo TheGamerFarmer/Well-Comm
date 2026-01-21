@@ -6,6 +6,7 @@ import {encryptPassword} from "@/functions/encryptPassword";
 import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/config";
+import {sanitize} from "@/functions/Sanitize";
 
 function RegisterForm() {
     const [firstName, setFirstName] = useState("");
@@ -66,23 +67,23 @@ function RegisterForm() {
             <h2 className="font-helvetica-neue text-2xl font-bold text-[#0551ab] mb-6">Créer un compte</h2>
 
             <label className="font-montserrat text-sm font-bold text-[#727272]">Prénom</label>
-            <input type="text" onChange={(e) => setFirstName(e.target.value)}
+            <input type="text" onChange={(e) => setFirstName(sanitize(e.target.value))}
                    className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
 
             <label className="font-montserrat text-sm font-bold text-[#727272]">Nom</label>
-            <input type="text" onChange={(e) => setLastName(e.target.value)}
+            <input type="text" onChange={(e) => setLastName(sanitize(e.target.value))}
                    className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
 
             <label className="font-montserrat text-sm font-bold text-[#727272]">Nom d&#39;utilisateur</label>
-            <input type="text" onChange={(e) => setUserName(e.target.value)}
+            <input type="text" onChange={(e) => setUserName(sanitize(e.target.value))}
                    className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
 
             <label className="font-montserrat text-sm font-bold text-[#727272]">Mot de passe</label>
-            <input type="password" onChange={(e) => setPassword(e.target.value)}
+            <input type="password" onChange={(e) => setPassword(sanitize(e.target.value))}
                    className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
 
             <label className="font-montserrat text-sm font-bold text-[#727272]">Confirmer le mot de passe</label>
-            <input type="password" onChange={(e) => setConfirmPassword(e.target.value)}
+            <input type="password" onChange={(e) => setConfirmPassword(sanitize(e.target.value))}
                    className="w-full h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
 
             {errorMessage && <p className="text-red-600 mb-4 text-sm font-bold">{errorMessage}</p>}
