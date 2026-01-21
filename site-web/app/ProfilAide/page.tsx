@@ -9,7 +9,6 @@ import {useCurrentDossier} from "@/hooks/useCurrentDossier";
 import {getCurrentUserId} from "@/functions/fil-API";
 import {sanitize} from "@/functions/Sanitize";
 import {API_BASE_URL} from "@/config";
-import {fetchWithCert} from "@/functions/fetchWithCert";
 
 export default function ProfilAide() {
     const [recordName, setRecordName] = useState("");
@@ -28,7 +27,7 @@ export default function ProfilAide() {
     }, [recordId, userId]);
 
     const handleSaveRecordName = async () => {
-        const res = await fetchWithCert(`${API_BASE_URL}/api/${userId}/records/${recordId}/${recordName}`,
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/${recordName}`,
             {
                 method: "PUT",
                 credentials: "include",

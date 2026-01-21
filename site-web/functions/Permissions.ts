@@ -1,7 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
 import { API_BASE_URL } from "@/config";
-import {fetchWithCert} from "@/functions/fetchWithCert";
 
 export enum Permission {
     IS_MEDECIN = "IS_MEDECIN",
@@ -21,7 +20,7 @@ export async function getPermissions(userId: number | null, recordId: number): P
     if (!userId || !recordId) return [];
 
     try {
-        const res = await fetchWithCert(
+        const res = await fetch(
             `${API_BASE_URL}/api/${userId}/recordsaccount/${recordId}/permissions`,
             {
                 method: "GET",

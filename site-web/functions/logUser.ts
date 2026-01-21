@@ -1,9 +1,8 @@
 import { API_BASE_URL } from "@/config";
-import { fetchWithCert} from "@/functions/fetchWithCert";
 
 export default async function logUser(userName: string, hashPassWord: string) {
     try {
-        const response = await fetchWithCert(`${API_BASE_URL}/api/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: 'include',

@@ -6,7 +6,6 @@ import { Button } from "@/components/ButtonMain";
 import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
-import { fetchWithCert} from "@/functions/fetchWithCert";
 import Link from "next/link";
 import {sanitize} from "@/functions/Sanitize";
 
@@ -37,7 +36,7 @@ export default function MesAides() {
         if (!userId) return;
 
         const fetchDossiers = async () => {
-            const res = await fetchWithCert(
+            const res = await fetch(
                 `${API_BASE_URL}/api/${userId}/records/`,
                 { credentials: "include" }
             );
@@ -62,7 +61,9 @@ export default function MesAides() {
         e.preventDefault();
         if (!name.trim()) return;
 
-        const res = await fetchWithCert(
+        setName(sanitize(name));
+
+        const res = await fetch(
             `${API_BASE_URL}/api/${userId}/records/create/${encodeURIComponent(
                 name
             )}`,
@@ -100,7 +101,7 @@ export default function MesAides() {
     const handleDelete = async (id: number) => {
         if (!id) return;
 
-        const res = await fetchWithCert(
+        const res = await fetch(
             `${API_BASE_URL}/api/${userId}/records/delete/${id}`,
             {
                 method: "DELETE",

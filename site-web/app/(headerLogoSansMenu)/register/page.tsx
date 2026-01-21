@@ -5,7 +5,6 @@ import { useState, Suspense } from "react";
 import {encryptPassword} from "@/functions/encryptPassword";
 import logUser from "@/functions/logUser";
 import { useSearchParams, useRouter } from "next/navigation";
-import { fetchWithCert} from "@/functions/fetchWithCert";
 import { API_BASE_URL } from "@/config";
 import {sanitize} from "@/functions/Sanitize";
 
@@ -37,7 +36,7 @@ function RegisterForm() {
         const hashedPwd = encryptPassword(password);
 
         try {
-            const response = await fetchWithCert(`${API_BASE_URL}/api/register`, {
+            const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include',
