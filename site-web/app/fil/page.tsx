@@ -8,6 +8,7 @@ import { useFilLogic } from "@/hooks/useFilLogic";
 import {mapCategoryToEnum, capitalizeWords, MessageResponse} from "@/functions/fil-API";
 import Image from "next/image";
 import {getPermissions, Permission} from "@/functions/Permissions";
+import {sanitize} from "@/functions/Sanitize";
 
 export default function FilDeTransmissionPage() {
     const {
@@ -286,7 +287,7 @@ export default function FilDeTransmissionPage() {
                                                         <textarea
                                                             className="w-full p-3 text-black rounded-xl border-2 border-blue-200 focus:border-[#0551ab] outline-none resize-none font-semibold text-sm md:text-base bg-white"
                                                             value={editingContent}
-                                                            onChange={(e) => setEditingContent(e.target.value)}
+                                                            onChange={(e) => setEditingContent(sanitize(e.target.value))}
                                                             autoFocus
                                                             rows={2}
                                                         />
@@ -351,7 +352,7 @@ export default function FilDeTransmissionPage() {
                                         <input
                                             type="text"
                                             value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            onChange={(e) => setNewMessage(sanitize(e.target.value))}
                                             placeholder="Ecrivez votre message ici"
                                             className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-4 focus:border-[#0551ab] transition-all outline-none text-gray-800 font-bold text-sm md:text-base placeholder:text-xs md:placeholder:text-base"
                                         />
@@ -401,7 +402,7 @@ export default function FilDeTransmissionPage() {
                                     type="text"
                                     placeholder="Recherche par titre"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => setSearchQuery(sanitize(e.target.value))}
                                     className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#26b3a9]/10 text-lg shadow-sm"
                                 />
                                 <svg className="absolute left-5 top-4 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,7 +483,7 @@ export default function FilDeTransmissionPage() {
                     <select
                         className="w-full px-4 py-2 mb-4 border rounded-md outline-none focus:ring-2 focus:ring-[#0551ab] text-black border-gray-300"
                         value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        onChange={(e) => setFormData({...formData, category: sanitize(e.target.value)})}
                     >
                         {categories.map(c => <option key={c} value={mapCategoryToEnum(c)}>{c}</option>)}
                     </select>
@@ -491,14 +492,14 @@ export default function FilDeTransmissionPage() {
                         type="text"
                         required
                         value={formData.title}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        onChange={(e) => setFormData({...formData, title: sanitize(e.target.value)})}
                         className="w-full h-11 rounded-lg border-2 mb-4 p-3 outline-none focus:border-[#0551ab] text-black border-gray-300"
                     />
                     <label className="text-sm font-bold text-[#727272] mb-2 block">Message</label>
                     <textarea
                         required
                         value={formData.message}
-                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                        onChange={(e) => setFormData({...formData, message: sanitize(e.target.value)})}
                         className="w-full h-32 rounded-lg border-2 mb-6 p-3 outline-none focus:border-[#0551ab] resize-none text-black border-gray-300"
                     ></textarea>
                     <div className="flex gap-4">
