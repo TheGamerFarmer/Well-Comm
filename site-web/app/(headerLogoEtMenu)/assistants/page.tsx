@@ -5,11 +5,9 @@ import {Button} from "@/components/ButtonMain";
 import FilArianne from "@/components/FilArianne";
 import { useCurrentDossier } from "@/hooks/useCurrentDossier";
 import { API_BASE_URL } from "@/config";
-
-import {
-    getCurrentUserId,
-} from "@/functions/fil-API";
+import { getCurrentUserId } from "@/functions/fil-API";
 import Image from "next/image";
+import {sanitize} from "@/functions/Sanitize";
 import {getPermissions, Permission} from "@/functions/Permissions";
 
 
@@ -74,7 +72,7 @@ export default function AssistantsPage() {
             }
         };
 
-        fetchPermissions();
+        fetchPermissions().then();
     }, [username, currentRecordId, selectedAssistant, currentUserId]);
 
 
@@ -304,7 +302,7 @@ export default function AssistantsPage() {
                                         if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(inv.accountUserName, currentRecordId, e.target.value).then()
+                                        updateRoleAccess(inv.accountUserName, currentRecordId, sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
@@ -346,7 +344,7 @@ export default function AssistantsPage() {
                                         type="text"
                                         placeholder="Nom d'utilisateur de l'assistant"
                                         value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => setUsername(sanitize(e.target.value))}
                                         className="border rounded-lg p-2 text-black"
                                         required
                                     />
@@ -355,7 +353,7 @@ export default function AssistantsPage() {
                                         id="title"
                                         name="title"
                                         value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
+                                        onChange={(e) => setTitle(sanitize(e.target.value))}
                                         className="flex flex-col border rounded-lg px-3 py-2 bg-white text-black">
                                         <option value="AIDANT">Aidant</option>
                                         <option value="EMPLOYEE">Employé</option>

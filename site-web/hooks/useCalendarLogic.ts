@@ -128,7 +128,7 @@ export function useCalendarLogic() {
             ...changeInfo.event.extendedProps
         };
 
-        saveEditsRequest(userId, activeRecordId, false, updatedEvent, calendarRef);
+        saveEditsRequest(userId, activeRecordId, false, updatedEvent, calendarRef).then();
     }
 
     function formatDisplayTime (iso: string){

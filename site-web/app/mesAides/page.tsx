@@ -7,6 +7,7 @@ import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
+import {sanitize} from "@/functions/Sanitize";
 
 type Dossier = {
     id: number;
@@ -59,6 +60,8 @@ export default function MesAides() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
+
+        setName(sanitize(name));
 
         const res = await fetch(
             `${API_BASE_URL}/api/${userId}/records/create/${encodeURIComponent(
