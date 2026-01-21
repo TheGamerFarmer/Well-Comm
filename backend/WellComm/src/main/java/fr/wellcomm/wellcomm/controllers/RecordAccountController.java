@@ -2,7 +2,9 @@ package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.entities.RecordAccount;
+import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
+import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RecordAccountController {
     private final RecordAccountService recordAccountService;
+    private final RecordAccountRepository recordAccountRepository;
 
 @Getter
 @Setter
@@ -30,6 +33,20 @@ public static class RecordAccountResponse {
     private Long recordId;
 }
 
+@Getter
+@Setter
+public static class PermissionsRequest {
+    public String userName;
+}
+
+
+@Getter
+@Setter
+public static class ChangePermissionsRequest {
+    public String userName;
+    public List<Permission> permissions;
+}
+
     @GetMapping("/{recordId}/permissions")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<Permission>> getPermissions(@PathVariable @SuppressWarnings("unused") Long userId,
@@ -39,19 +56,86 @@ public static class RecordAccountResponse {
         return ResponseEntity.ok(ra.getPermissions());
     }
 
-    @GetMapping("/{recordId}")
+    @GetMapping("/{recordId}/autrepermissions/{assistantName}")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<Permission>> getautrePermissions(@PathVariable @SuppressWarnings("unused") String userName,
+                                                           @PathVariable Long recordId,
+                                                                @PathVariable String assistantName
+
+    ) {
+        RecordAccount ra = recordAccountService.getRecordAccount(assistantName, recordId);
+        return ResponseEntity.ok(ra.getPermissions());
+    }
+
+    //liste des record_accounts d'assistants d'un dossier
+    @GetMapping("/{recordId}/assistants")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<RecordAccountResponse>> getAssistantsByRecordId(
+            @PathVariable String userName,
+            @PathVariable Long recordId) {
+
+        List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName) && ((ra.getTitle() == Role.EMPLOYEE) || (ra.getTitle() == Role.AIDANT)))
+                .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(assistants);
+    }
+
+    //liste des record_accounts de médecin d'un dossier
+    @GetMapping("/{recordId}/medecin")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<RecordAccountResponse>> getByRecordId(
         @PathVariable Long userId,
         @PathVariable Long recordId) {
 
             List<RecordAccountResponse> assistants = recordAccountService.getByRecordId(recordId).stream()
-                    .filter(ra -> !ra.getAccount().getId().equals(userId))
-                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle(), d.getAccount().getUserName(), d.getRecord().getId()))
+                    .filter(ra -> !ra.getAccount().getId().equals(userId) && (ra.getTitle() == Role.MEDECIN))
+                    .map(d -> new RecordAccountResponse(d.getId(), d.getCreatedAt(), d.getTitle().getTitre(), d.getAccount().getUserName(), d.getRecord().getId()))
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(assistants);
+        return ResponseEntity.ok(assistants);
+    }
+
+    @PutMapping("/{recordId}/changepermissions")
+    @PreAuthorize("#userName == authentication.name and @securityService.hasRecordAccountPermission(T(fr.wellcomm.wellcomm.domain.Permission).ASSIGN_PERMISSIONS)")
+    public ResponseEntity<?> changePermissions(@PathVariable @SuppressWarnings("unused") String userName,
+                                                           @PathVariable Long recordId,
+                                                            @RequestBody ChangePermissionsRequest request
+    ) {
+        RecordAccount recordAccount = recordAccountService.getRecordAccount(request.userName, recordId);
+        for (Permission p : request.getPermissions()) {
+            if (!recordAccount.getPermissions().contains(p)) {
+                recordAccount.getPermissions().add(p);
+            }
         }
-
-
+        recordAccount.getPermissions().removeIf(permsrecordAccount -> !request.getPermissions().contains(permsrecordAccount));
+        recordAccountRepository.save(recordAccount);
+        return ResponseEntity.ok(recordAccount.getPermissions());
 }
+
+    //liste des medecins
+    @GetMapping("/{recordId}/medecins")
+    @PreAuthorize("#userName == authentication.name")
+    public ResponseEntity<List<RecordAccountResponse>> getMedecinsByRecordId(
+            @PathVariable String userName,
+            @PathVariable Long recordId) {
+
+        List<RecordAccountResponse> medecins = recordAccountService.getByRecordId(recordId).stream()
+                .filter(ra -> !ra.getAccount().getUserName().equals(userName))
+                .filter(ra -> ra.getTitle() == Role.MEDECIN)
+
+                .map(d -> new RecordAccountResponse(
+                        d.getId(),
+                        d.getCreatedAt(),
+                        d.getTitle().getTitre(),
+                        d.getAccount().getUserName(),
+                        d.getRecord().getId()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(medecins);
+    }
+
+
+    }

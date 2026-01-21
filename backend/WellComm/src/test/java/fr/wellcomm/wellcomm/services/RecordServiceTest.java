@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,7 @@ public class RecordServiceTest {
         // 3. Création de l'accès avec USER + RECORD + TITRE
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        RecordAccount access = new RecordAccount(testUser, testRecord, "ADMIN",permissionList);
+        RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT,permissionList);
 
         // 4. On l'ajoute à l'utilisateur
         accountService.addRecordAccount(testUser, access);

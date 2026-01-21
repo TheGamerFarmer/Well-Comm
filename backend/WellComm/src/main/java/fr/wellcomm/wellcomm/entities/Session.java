@@ -23,6 +23,4 @@ public class Session {
     @JoinColumn(name = "user_name", nullable = false)
     private Account account;
     private LocalDateTime expirationDate;
-    @Column(name = "current_record_id")
-    private Long currentRecordId;
 }

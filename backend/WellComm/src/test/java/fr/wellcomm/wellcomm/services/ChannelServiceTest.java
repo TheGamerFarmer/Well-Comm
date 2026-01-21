@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.domain.Permission;
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class ChannelServiceTest {
         Record record = recordService.createRecord("Dossier", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "AIDANT",permissionList));
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));
         OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
         // 1. Test addMessage
@@ -52,7 +53,7 @@ public class ChannelServiceTest {
         Record record = recordService.createRecord("Dossier Ordre", user.getId());
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, "ADMIN",permissionList));
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));
 
         // Le premier message est créé ici (Message Index 0)
         OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", user);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {Montserrat} from "next/font/google";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
 
 const montserrat = Montserrat({
     subsets: ["latin"],
@@ -16,14 +17,14 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
-                                       children,}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="fr" className={montserrat.className}>
         <body>
-        {children}
+        {/* On enveloppe les enfants (tes pages) avec la sécurité */}
+        <AuthProvider>
+            {children}
+        </AuthProvider>
         </body>
         </html>
     );

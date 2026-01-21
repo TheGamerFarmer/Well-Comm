@@ -114,7 +114,7 @@ export default function MesAides() {
         // Mise à jour de la liste côté front
         setDossiers(dossiers.filter(d => d.id !== id));
 
-        console.log("Dossier supprimé ✅");
+        console.log("Dossier supprimé ");
     }
 
     return (

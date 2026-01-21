@@ -6,6 +6,7 @@ import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import fr.wellcomm.wellcomm.repositories.CloseChannelRepository;
+import fr.wellcomm.wellcomm.domain.Role;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +35,19 @@ public class ChannelService {
         if (channel.getId() == 0) {
             channel = channelRepository.save(channel);
         }
-
-        String userTitle = recordAccountRepository
+        /*
+        Role userTitle = recordAccountRepository
                 .findByAccountUserNameAndRecordId(account.getUserName(), channel.getRecord().getId())
                 .map(RecordAccount::getTitle)
+                .orElse("Membre");
+        */
+
+        String userTitle = recordAccountRepository
+                .findByAccountUserNameAndRecordId(
+                        account.getUserName(),
+                        channel.getRecord().getId()
+                )
+                .map(ra -> ra.getTitle().getTitre())
                 .orElse("Membre");
 
         Message message = new Message(content,

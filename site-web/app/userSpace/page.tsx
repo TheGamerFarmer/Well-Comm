@@ -4,7 +4,9 @@ import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import { getUserProfile, UserProfile, changePassword, deleteAccount } from "@/functions/user-api";
+import { useRouter } from "next/navigation";
+import { getUserProfile, UserProfile, changePassword, deleteAccount, changeUserInfos } from "@/functions/user-api";
+import { API_BASE_URL } from "@/config";
 import {encryptPassword} from "@/functions/encryptPassword";
 import {getCurrentUserId} from "@/functions/fil-API";
 
@@ -16,6 +18,11 @@ export default function UserSpace() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [userId, setUserId] = useState<number | null>(null);
+    const [userName, setUserName] = useState<string>("");
+    const [newUserName, setNewUserName] = useState<string>("");
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
+    const router = useRouter();
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -32,6 +39,9 @@ export default function UserSpace() {
                     firstName: profile.firstName,
                     lastName: profile.lastName,
                 });
+                setFirstName(profile.firstName);
+                setLastName(profile.lastName);
+                setNewUserName(profile.userName);
             }
         };
 
@@ -46,7 +56,7 @@ export default function UserSpace() {
         const ok = await changePassword(userId, encryptPassword(currentPassword), encryptPassword(newPassword));
 
         if (ok) {
-            alert("Mot de passe modifié avec succès !");
+            alert("Mot de passe modifié avec succès!");
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
@@ -64,7 +74,21 @@ export default function UserSpace() {
         }
     };
 
+    const handleSaveProfile = async () => {
+        const ok = await changeUserInfos(
+            userName,
+            newUserName,
+            firstName,
+            lastName
+        );
 
+        if (ok) {
+            alert("Profil mis à jour avec succès!");
+            if (newUserName !== userName) {
+                window.location.reload();
+            }
+        }
+    };
 
 
 
@@ -102,18 +126,18 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Prénom</label>
                             <input
                                 type="text"
-                                value={profile?.firstName || ""}
-                                readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-center md:justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom</label>
                             <input
                                 type="text"
-                                value={profile?.lastName || ""}
-                                readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
@@ -130,16 +154,16 @@ export default function UserSpace() {
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
                                 type="text"
-                                value={profile?.userName || ""}
-                                readOnly
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
+                                value={newUserName}
+                                onChange={(e) => setNewUserName(e.target.value)}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"
                             />
                         </div>
                     </div>
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
-                        <Button variant="cancel" link={""}>Annuler</Button>
-                        <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
+                        <Button variant="cancel" link={""} onClickAction={handleSaveProfile}>Annuler</Button>
+                        <Button type="button" link={""} variant={"primary"} onClickAction={handleSaveProfile}>Enregistrer</Button>
                     </div>
 
                     <div className="mt-8">
