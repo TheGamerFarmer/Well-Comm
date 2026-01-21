@@ -1,51 +1,53 @@
-
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import {API_BASE_URL} from "@/config";
 import {getRecordName} from "@/functions/record-api";
-import {Record} from "@/functions/record-api";
-
+import {useCurrentDossier} from "@/hooks/useCurrentDossier";
+import {getCurrentUserId} from "@/functions/fil-API";
+import {sanitize} from "@/functions/Sanitize";
+import {API_BASE_URL} from "@/config";
 
 export default function ProfilAide() {
-
-    const [record, setRecord] = useState<Record | null>(null);
-    const [recordName, setRecordName] = useState<string>("");
+    const [recordName, setRecordName] = useState("");
+    const [recordId, setRecordId] = useState<number | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
-        const loadRecord = async () => {
-            const meRes = await fetch(`${API_BASE_URL}/api/me`, {
-                credentials: "include",
-                cache: "no-store",
-            });
-
-            const me = await meRes.json();
-            setRecordName(me.recordId);
-
-            const record = await getRecordName(me.userName, me.recordId);
-            if (record) {
-                setRecord({
-                    recordName: me.recordName,
-                });
-                // setNewUserName(me.userName);
-            }
-        };
-        loadRecord();
+        getCurrentUserId().then(setUserId);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useCurrentDossier().then(setRecordId);
     }, []);
 
+    useEffect(() => {
+        getRecordName(userId, recordId).then(setRecordName);
+    }, [recordId, userId]);
 
+    const handleSaveRecordName = async () => {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/${recordName}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+
+        if (!res.ok) {
+            setErrorMessage("Le changement de nom a échoué");
+        }
+    };
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="py-4 ">
-                <p className="font-bold text-[#0551ab] text-2xl">L'aidé</p>
+                <p className="font-bold text-[#0551ab] text-2xl">L&#39;aidé</p>
                 <FilArianne/>
             </div>
-            <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-[100%] rounded-xl border-20 border-[#f4f4f4] md:border-white ">
-                <div className="w-full h-[66px] mb-[22px] pt-4 pb-4 pl-[23px] rounded-xl bg-gradient-to-r from-[#45bbb1] to-[#215a9e]">
-                    <p className="w-[229px] h-[34px] font-montserrat text-xl font-bold leading-[1.7px] text-left text-[#fff]">
+            <div  className="flex justify-center items-center flex-col bg-[#f4f4f4] w-full rounded-xl border-20 border-[#f4f4f4] md:border-white ">
+                <div className="w-full h-[66px] mb-[22px] pt-4 pb-4 pl-[23px] rounded-xl bg-linear-to-r from-[#45bbb1] to-[#215a9e]">
+                    <p className="w-[229px] h-[34px] font-montserrat text-xl font-bold leading-[1.7px] text-left text-white">
                         DOSSIER PATIENT
                     </p>
                 </div>
@@ -77,14 +79,17 @@ export default function ProfilAide() {
                             <input
                                 type="text"
                                 value={recordName}
-                                onChange={(e) => setRecordName(e.target.value)}
-                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
+                                onChange={(e) => setRecordName(sanitize(e.target.value))}
+                                className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-3.5 ph-4 rounded-lg border #dfdfdf border-solid bg-[#fff]h-10 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"/>
                         </div>
                     </div>
 
+                    {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
+
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
                         <Button variant="cancel" link={""}>Annuler</Button>
-                        <Button type="submit" link={""} variant={"primary"}>Enregistrer</Button>
+                        <Button type="button" link={""} variant={"primary"}
+                                onClickAction={handleSaveRecordName} >Enregistrer</Button>
                     </div>
                 </form>
 

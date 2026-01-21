@@ -1,14 +1,8 @@
 import { API_BASE_URL } from "@/config";
 
-
-export interface Record {
-    recordName: string;
-    userName: string;
-}
-
-export async function getRecordName(userName: string, recordId: string): Promise<Record | null> {
+export async function getRecordName(userId: number | null, recordId: number | null): Promise<string> {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/${userName}/records/${recordId}/name`, {
+        const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/name`, {
             credentials: "include",
             cache: "no-store",
         });
@@ -25,6 +19,6 @@ export async function getRecordName(userName: string, recordId: string): Promise
     } catch (err) {
         console.error("Erreur getRecordName:", err);
     }
-    return null;
+    return "null";
 }
 
