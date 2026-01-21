@@ -2,6 +2,7 @@ package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Session;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.EventRepository;
 import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
@@ -17,14 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SessionServiceTest {
     @Autowired private SessionService sessionService;
     @Autowired private SessionRepository sessionRepository;
+    @Autowired private AccountRepository accountRepository;
 
     @Test
     void testSession() {
         Account user = new Account();
         user.setUserName("testUser");
+        user = accountRepository.save(user);
 
         Session session = new Session();
         session.setAccount(user);
+        sessionRepository.save(session);
         assertNotNull(session);
 
         sessionService.logout(user);

@@ -3,6 +3,8 @@ package fr.wellcomm.wellcomm.services;
 import fr.wellcomm.wellcomm.domain.Category;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
+import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +17,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MessageServiceTest {
     @Autowired private MessageService messageService;
     @Autowired private RecordService recordService;
+    @Autowired private AccountRepository accountRepository;
     private Message testMessage;
     private OpenChannel testChannel;
+    @Autowired
+    private MessageRepository messageRepository;
 
     @BeforeEach
     void setUp() {
         Account testUser = new Account();
         testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
         // 1. Créer un Record pour l'arborescence
         Record record = recordService.createRecord("Dossier de Test", testUser.getId());
 
@@ -50,6 +56,7 @@ public class MessageServiceTest {
     @Test
     void testDeleteMessage() {
         messageService.deleteMessage(testMessage); //
-        assertNull(messageService.getMessage(testMessage.getId())); //
+        Message deleted = messageRepository.findById(testMessage.getId()).orElse(null);
+        assertNull(messageService.getMessage(deleted.getId())); //
     }
 }

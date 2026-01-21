@@ -6,7 +6,6 @@ import fr.wellcomm.wellcomm.repositories.MessageRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.ChannelRepository;
 import fr.wellcomm.wellcomm.repositories.CloseChannelRepository;
-import fr.wellcomm.wellcomm.domain.Role;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +46,7 @@ public class ChannelService {
                         account.getUserName(),
                         channel.getRecord().getId()
                 )
-                .map(ra -> ra.getTitle().getTitre())
+                .map(ra -> ra.getTitle())
                 .orElse("Membre");
 
         Message message = new Message(content,

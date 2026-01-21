@@ -28,9 +28,7 @@ public class ChannelServiceTest {
         user.setUserName("testUser");
         accountService.saveUser(user);
         Record record = recordService.createRecord("Dossier", user.getId());
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
         OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
         // 1. Test addMessage
@@ -51,9 +49,7 @@ public class ChannelServiceTest {
         accountService.saveUser(user);
 
         Record record = recordService.createRecord("Dossier Ordre", user.getId());
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.ASSIGN_PERMISSIONS);
-        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT,permissionList));
+        accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
 
         // Le premier message est créé ici (Message Index 0)
         OpenChannel channel = recordService.createChannel(record, "Discussion", Category.Sante, "Premier !", user);

@@ -154,17 +154,7 @@ public class AccountController {
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
 
-        RecordAccount newAccess = new RecordAccount();
-        newAccess.setRecord(record);
-        if(request.getTitle().equals("Aidant")) {
-            newAccess.setTitle(Role.AIDANT);
-        }
-        else if(request.getTitle().equals("Employé")) {
-            newAccess.setTitle(Role.EMPLOYEE);
-        }
-        else{
-            newAccess.setTitle(Role.MEDECIN);
-        }
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle()));
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -191,20 +181,7 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");
         }
 
-        RecordAccount newAccess = new RecordAccount();
-        newAccess.setRecord(record);
-        if(request.getTitle().equals("Aidant") || request.getTitle().equals("AIDANT")) {
-            newAccess.setTitle(Role.AIDANT);
-            newAccess.setPermissions(newAccess.getTitle().getPermission());
-        }
-        else if(request.getTitle().equals("Employé") || request.getTitle().equals("EMPLOYEE")) {
-            newAccess.setTitle(Role.EMPLOYEE);
-            newAccess.setPermissions(newAccess.getTitle().getPermission());
-        }
-        else{
-            newAccess.setTitle(Role.MEDECIN);
-            newAccess.setPermissions(newAccess.getTitle().getPermission());
-        }
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle()));
 
         accountService.addRecordAccount(account, newAccess);
 

@@ -69,36 +69,32 @@ public class ChannelControllerTest {
     void testRealPermissionSuccess() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
-        userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Médical", "userTest");
+        Record record = new Record("Dossier Médical", userTest.getId());
         record = recordRepository.save(record);
 
-        // Ajout de la permission SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT , permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
 
         // 2. Mock du comportement métier uniquement
         OpenChannel mockChan = new OpenChannel();
         mockChan.setRecord(record);
-        mockChan.setId(1L);
 
         Message mockMsg = new Message("Hello",
                 new Date(),
                 new Account(),
                 "ADMIN",
-                mockChan);
+                mockChan, false);
 
         // 2. Configuration du Mock pour retourner ce message
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
         when(channelService.addMessage(any(), any(), any())).thenReturn(mockMsg);
 
         // 3. Exécution
-        mockMvc.perform(post("/api/userTest/records/" + record.getId() + "/channels/1/messages")
+        mockMvc.perform(post("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId() + "/messages")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("Hello"))
+                        .content(mockMsg.getContent()))
                 .andExpect(status().isOk());
     }
 
@@ -110,12 +106,10 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", 0L);
         record = recordRepository.save(record);
 
-        // On donne une autre permission, mais pas SEND_MESSAGE
-        List<Permission> permissions = List.of(Permission.IS_MEDECIN);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN, permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
         recordAccountRepository.save(ra);
 
         OpenChannel mockChan = new OpenChannel();
@@ -123,7 +117,7 @@ public class ChannelControllerTest {
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
 
         // 2. Exécution : Doit être bloqué (403 Forbidden)
-        mockMvc.perform(post("/api/userTest/records/" + record.getId() + "/channels/1/messages")
+        mockMvc.perform(post("/api/0/records/" + record.getId() + "/channels/1/messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("Tentative"))
                 .andExpect(status().isForbidden());
@@ -135,14 +129,12 @@ public class ChannelControllerTest {
     void testgetChannelContent() throws Exception {
         // 1. Création des données
         Account userTest = new Account();
-        userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", userTest.getId());
         record = recordRepository.save(record);
 
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN, permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
         recordAccountRepository.save(ra);
 
         OpenChannel mockChan = new OpenChannel();
@@ -151,7 +143,7 @@ public class ChannelControllerTest {
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(get("/api/userTest/records/" + record.getId() + "/channels/1/")
+        MvcResult result = mockMvc.perform(get("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();
 
@@ -175,11 +167,10 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", 0L);
         record = recordRepository.save(record);
 
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN, permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
         recordAccountRepository.save(ra);
 
         CloseChannel mockChan = new CloseChannel();
@@ -188,7 +179,7 @@ public class ChannelControllerTest {
         when(channelService.getCloseChannel(anyLong())).thenReturn(mockChan);
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(get("/api/userTest/records/" + record.getId() + "/closechannels/1/")
+        MvcResult result = mockMvc.perform(get("/api/0/records/" + record.getId() + "/closechannels/1/")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();
 
@@ -208,35 +199,32 @@ public class ChannelControllerTest {
     void testaddMessage() throws Exception {
         // 1. Création des données
         Account userTest = new Account();
-        userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", "userTest");
+        Record record = new Record("Dossier Secret", userTest.getId());
         record = recordRepository.save(record);
         System.out.println(record.getId());
 
-        List<Permission> permissions = List.of(Permission.SEND_MESSAGE);
-        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT , permissions);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
 
         // 2. Mock du comportement métier uniquement
         OpenChannel mockChan = new OpenChannel();
         mockChan.setRecord(record);
-        mockChan.setId(1L);
 
         Message mockMsg = new Message("Hello",
                 new Date(),
                 new Account(),
                 "ADMIN",
-                mockChan);
+                mockChan, false);
 
         // 3. Configuration du Mock pour retourner ce message
         when(channelService.getChannel(anyLong())).thenReturn(mockChan);
         when(channelService.addMessage(any(), any(), any())).thenReturn(mockMsg);
         // 4. Exécution
-        MvcResult result = mockMvc.perform(post("/api/userTest/records/" + record.getId() + "/channels/1/messages")
+        MvcResult result = mockMvc.perform(post("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId() + "/messages")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("Tentative"))
+                        .content(mockMsg.getContent()))
                 .andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
