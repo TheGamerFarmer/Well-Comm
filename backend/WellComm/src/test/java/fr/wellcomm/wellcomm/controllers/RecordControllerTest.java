@@ -136,7 +136,7 @@ public class RecordControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Record r = recordRepository.findById(record.getId()).get();
+        Record r = recordRepository.findById(record.getId()).orElse(null);
 
         assertEquals("dossier secret", r.getName());
     }

@@ -189,7 +189,7 @@ public class CalendarControllerTest {
 
 
 
-        Event events = eventRepository.findById(event.getId()).get();
+        Event events = eventRepository.findById(event.getId()).orElse(null);
         assertEquals("test", events.getTitle());
     }
 

@@ -182,7 +182,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElse(null);
         assertEquals("testUser", ra.getAccount().getUserName());
     }
 
@@ -300,7 +300,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElse(null);
         assertEquals(Role.EMPLOYEE.getTitre(), ra2.getTitle());
     }
 }
