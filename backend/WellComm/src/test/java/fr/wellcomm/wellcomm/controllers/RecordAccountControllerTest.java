@@ -121,7 +121,6 @@ public class RecordAccountControllerTest {
         Account assistant = new Account();
         assistant.setUserName("assistant");
         assistant = accountRepository.save(assistant);
-        String assistantName = "assistant";
         RecordAccount ra = new RecordAccount();
         ra.setAccount(assistant);
         ra.setRecord(record);
@@ -134,7 +133,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/autrepermissions/" + assistantName)
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/permissions/" + assistant.getId())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -174,7 +173,6 @@ public class RecordAccountControllerTest {
         Account assistant = new Account();
         assistant.setUserName("assistant");
         assistant = accountRepository.save(assistant);
-        String assistantName = "assistant";
         RecordAccount ra = new RecordAccount();
         ra.setAccount(assistant);
         ra.setRecord(record);
@@ -227,7 +225,6 @@ public class RecordAccountControllerTest {
         Account assistant = new Account();
         assistant.setUserName("assistant");
         assistant = accountRepository.save(assistant);
-        String assistantName = "assistant";
         RecordAccount ra = new RecordAccount();
         ra.setAccount(assistant);
         ra.setRecord(record);
@@ -280,7 +277,6 @@ public class RecordAccountControllerTest {
         Account assistant = new Account();
         assistant.setUserName("assistant");
         assistant = accountRepository.save(assistant);
-        String assistantName = "assistant";
         RecordAccount ra = new RecordAccount();
         ra.setAccount(assistant);
         ra.setRecord(record);
@@ -333,7 +329,6 @@ public class RecordAccountControllerTest {
         Account assistant = new Account();
         assistant.setUserName("assistant");
         assistant = accountRepository.save(assistant);
-        String assistantName = "assistant";
         RecordAccount ra = new RecordAccount();
         ra.setAccount(assistant);
         ra.setRecord(record);

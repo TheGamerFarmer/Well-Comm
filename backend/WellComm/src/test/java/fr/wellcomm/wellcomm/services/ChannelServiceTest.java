@@ -1,7 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;

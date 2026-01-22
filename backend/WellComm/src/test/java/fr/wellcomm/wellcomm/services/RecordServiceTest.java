@@ -65,7 +65,7 @@ public class RecordServiceTest {
         testUser.setUserName("testuserTest");
         testUser = accountRepository.save(testUser);
         RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT);
-        access = recordAccountRepository.save(access);
+        recordAccountRepository.save(access);
         // Teste la création d'un channel et vérifie si le rôle "Aidant" est bien récupéré
         OpenChannel channel = recordService.createChannel(
                 testRecord,
@@ -143,7 +143,6 @@ public class RecordServiceTest {
         testUser = accountRepository.save(testUser);
         OpenChannel dos = recordService.createChannel(testRecord, "Mal de dos", Category.Sante, "Hi", testUser);
         OpenChannel salon = recordService.createChannel(testRecord, "salon", Category.Menage, "Vite", testUser);
-        OpenChannel cuisine = recordService.createChannel(testRecord, "cuisine", Category.Menage, "Vite", testUser);
         long dosId = dos.getId();
         long salonId = salon.getId();
 
@@ -175,6 +174,13 @@ public class RecordServiceTest {
                         .toInstant()
         );
         cuisine.getLastMessage().setDate(oneWeekAgo);
+        Date oneDayago = Date.from(
+                LocalDateTime.now()
+                        .minusDays(1)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        salon.getLastMessage().setDate(oneDayago);
 
 
         // On teste le filtre par catégorie

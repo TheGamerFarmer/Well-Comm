@@ -2,9 +2,6 @@ package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
-import fr.wellcomm.wellcomm.repositories.CalendarRepository;
-import fr.wellcomm.wellcomm.repositories.EventRepository;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,11 +57,7 @@ public class RegistrationControllerTest {
     void testregister() throws Exception {
         // Création des données
         RegistrationController.RegisterRequest request =
-                new RegistrationController.RegisterRequest();
-        request.setUserName("user");
-        request.setFirstName("first");
-        request.setLastName("last");
-        request.setPassword("password");
+                new RegistrationController.RegisterRequest("user", "password", "first", "last");
 
         // Exécution
         MvcResult result = mockMvc.perform(

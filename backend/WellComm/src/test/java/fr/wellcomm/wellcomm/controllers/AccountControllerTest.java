@@ -308,7 +308,7 @@ public class AccountControllerTest {
 
         // 2. Exécution
         mockMvc.perform(
-                        put("/api/" + userTest.getId() + "/updateRoleAccess/current_record/" + testUser.getUserName() + "/" + record.getId() + "/" + Role.EMPLOYEE.getTitre())
+                        put("/api/" + userTest.getId() + "/updateRoleAccess/current_record/" + testUser.getId() + "/" + record.getId() + "/" + Role.EMPLOYEE.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )

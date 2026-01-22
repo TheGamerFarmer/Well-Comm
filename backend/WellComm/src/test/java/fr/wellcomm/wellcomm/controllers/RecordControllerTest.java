@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -212,9 +211,7 @@ public class RecordControllerTest {
 
         Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
-        List<Message> messages = new ArrayList<>();
 
-        Date date = new Date();
         ClosedChannel closedChannel = new ClosedChannel();
         closedChannel.setTitle("test1");
         closedChannel.setCategory(Category.Menage);
