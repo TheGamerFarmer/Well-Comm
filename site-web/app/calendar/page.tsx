@@ -2,6 +2,7 @@
 
 import Agenda from "@/components/Agenda";
 import React, {useState} from "react";
+import FilArianne from "@/components/FilArianne";
 
 export default function Calendar() {
     const [activeCategory] = useState("Calendrier");
@@ -12,7 +13,7 @@ export default function Calendar() {
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold text-[#0551ab]">Calendrier</h1>
                     <nav className="text-sm text-gray-500 mt-1">
-                        Home / <span className="text-[#26b3a9] font-medium">{activeCategory}</span>
+                        <FilArianne />
                     </nav>
                 </div>
             </div>

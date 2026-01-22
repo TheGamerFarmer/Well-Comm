@@ -6,10 +6,14 @@ import { usePathname } from "next/navigation";
 const breadcrumbNames: Record<string, string> = {
     home: "Accueil",
     mesAides: "Mes aidés",
-    calendrier: "Calendrier",
+    calendar: "Calendrier",
     userSpace: "Mon profil",
     ProfilAide: "L'Aidé",
     fil: "Fil de Transmission",
+    assistants: "Assistants",
+    archive: "Archives",
+    medecin: "Médecins",
+    resume: "Résumé",
 };
 
 export default function Breadcrumb() {
