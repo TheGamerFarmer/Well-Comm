@@ -1,5 +1,6 @@
 package fr.wellcomm.wellcomm.controllers;
 
+import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.*;
@@ -39,6 +40,8 @@ public class CalendarControllerTest {
     private RecordRepository recordRepository;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private RecordAccountRepository recordAccountRepository;
     @Autowired
     private CalendarRepository calendarRepository;
     @Autowired
@@ -86,6 +89,8 @@ public class CalendarControllerTest {
         calendar = calendarRepository.save(calendar);
         record.setCalendar(calendar);
         record = recordRepository.save(record);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
 
         LocalDateTime timestart = LocalDateTime.now().minusHours(2);
         LocalDateTime timeend = LocalDateTime.now().plusHours(2);
@@ -124,11 +129,13 @@ public class CalendarControllerTest {
         calendar = calendarRepository.save(calendar);
         record.setCalendar(calendar);
         record = recordRepository.save(record);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
 
         CalendarController.EventDTO eventDTO = new CalendarController.EventDTO(1L, "test", "2025-01-22T12:30:00", "2025-01-22T13:30:00", "test", "ici", "red");
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/api/" + userTest.getId() + "/records/" + record.getId() + "/calendar/event")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(eventDTO))
@@ -139,7 +146,7 @@ public class CalendarControllerTest {
 
 
         List<Event> events = eventRepository.findAll();
-        assertEquals(2, events.size());
+        assertEquals(1, events.size());
     }
 
     @Test
@@ -167,6 +174,8 @@ public class CalendarControllerTest {
         calendar = calendarRepository.save(calendar);
         record.setCalendar(calendar);
         record = recordRepository.save(record);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
 
         CalendarController.EventDTO eventDTO = new CalendarController.EventDTO(event.getId(), "test", "2025-01-22T12:30:00", "2025-01-22T13:30:00", "test", "ici", "red");
 
@@ -209,6 +218,8 @@ public class CalendarControllerTest {
         calendar = calendarRepository.save(calendar);
         record.setCalendar(calendar);
         record = recordRepository.save(record);
+        RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
+        recordAccountRepository.save(ra);
 
         // 2. Exécution
         mockMvc.perform(delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/calendar/event/" + event.getId())

@@ -3,6 +3,7 @@ package fr.wellcomm.wellcomm.services;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Event;
 import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,14 @@ public class CalendarServiceTest {
     private RecordService recordService;
     @Autowired
     private EventRepository eventRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Test
     void testCalendar() {
         Account user = new Account();
         user.setUserName("testUser");
+        user = accountRepository.save(user);
         Record testRecord = recordService.createRecord("Dossier Global", user);
 
         LocalDateTime now = LocalDateTime.now();

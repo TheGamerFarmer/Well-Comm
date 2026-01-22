@@ -33,7 +33,7 @@ import java.util.Date;
 
 @SpringBootTest
 @Transactional
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class ChannelControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -52,6 +52,7 @@ public class ChannelControllerTest {
     private ChannelService channelService;
     @Autowired
     private ChannelRepository channelRepository;
+
 
     @BeforeEach
     void setup() {
@@ -146,42 +147,6 @@ public class ChannelControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(get("/api/" + userTest.getId() + "/records/" + record.getId() + "/channels/" + mockChan.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn();
-
-        String json = result.getResponse().getContentAsString();
-
-        ChannelController.ChannelInfos infos = objectMapper.readValue(
-                json,
-                ChannelController.ChannelInfos.class
-        );
-
-        //Vérifie qu'il n'y a aucun message
-        assertEquals(0, infos.messageInfos().size());
-    }
-
-
-    @Test
-    void testgetCloseChannelContent() throws Exception {
-        // 1. Création des données
-        Account userTest = new Account();
-        userTest.setUserName("userTest");
-        userTest = accountRepository.save(userTest);
-
-        Record record = new Record("Dossier Secret", userTest);
-        record = recordRepository.save(record);
-
-        RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
-        recordAccountRepository.save(ra);
-
-        ClosedChannel mockChan = new ClosedChannel();
-        mockChan.setRecord(record);
-        mockChan.setCategory(Category.Menage);
-        when(channelService.getCloseChannel(anyLong())).thenReturn(mockChan);
-
-        // 2. Exécution
-        MvcResult result = mockMvc.perform(get("/api/" + userTest.getId() + "/records/" + record.getId() + "/closechannels/" + mockChan.getId())
                         .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();

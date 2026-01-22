@@ -15,7 +15,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -64,12 +63,10 @@ public class LoginControllerTest {
         testuser.setPassword(passwordEncoder.encode("password"));
         testuser = accountRepository.save(testuser);
 
-        LoginController.LoginRequest request = new LoginController.LoginRequest();
-        request.setUserName(testuser.getUserName());
-        request.setPassword("password");
+        LoginController.LoginRequest request = new LoginController.LoginRequest(testuser.getUserName(), "password");
 
         // Exécution
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/api/login")
                                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
