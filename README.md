@@ -38,9 +38,7 @@ Créez ensuite l'utilisateur et la base de données :
 
 ```sql
 CREATE USER {user de votre choix} WITH PASSWORD '{mot de passe de votre choix}';
-CREATE DATABASE wellcomm;
-\c wellcomm
-GRANT ALL ON SCHEMA public TO {user créé plus tôt};
+CREATE DATABASE {nom de votre choix} OWNER {user de votre choix};
 ```
 
 Tapez `\q` pour quitter psql.
@@ -63,6 +61,7 @@ nano backend/WellComm/src/main/resources/application.properties
 Modifiez les variables suivantes avec les identifiants de votre base de données :
 
 ```properties
+spring.datasource.url=jdbc:postgresql:{url de la bdd}?ssl=true&sslmode=require
 spring.datasource.username={user de la bdd}
 spring.datasource.password={mot de passe de la bdd}
 ```
