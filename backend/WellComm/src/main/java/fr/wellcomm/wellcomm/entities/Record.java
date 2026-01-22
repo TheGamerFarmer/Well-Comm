@@ -28,8 +28,7 @@ public class Record {
     @OneToMany(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "id")
     private Map<Long, RecordAccount> recordAccounts = new HashMap<>();
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JoinColumn(name = "calendar_id")
+    @OneToOne(mappedBy = "record", cascade = CascadeType.ALL, orphanRemoval = true)
     private Calendar calendar;
 
     public Record(String name, Account admin) {

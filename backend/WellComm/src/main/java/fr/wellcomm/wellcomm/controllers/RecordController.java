@@ -139,7 +139,6 @@ public class RecordController {
     public ResponseEntity<?> createChannel(@PathVariable long userId,
                                            @PathVariable long recordId,
                                            @RequestBody CreateFilRequest request) {
-        System.out.println("========================");
         Account account = accountService.getUser(userId);
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");

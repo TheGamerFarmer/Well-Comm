@@ -34,7 +34,7 @@ public class AccountService {
 
     public void deleteUser(Account account) {
         sessionRepository.deleteByAccount(account);
-        accountRepository.deleteById(account.getId());
+        accountRepository.delete(account);
     }
 
     public void saveUser(Account account) {

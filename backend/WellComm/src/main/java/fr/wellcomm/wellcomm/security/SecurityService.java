@@ -51,11 +51,24 @@ public class SecurityService {
         OpenChannel channel = channelService.getChannel(Long.parseLong(params.get("channelId")));
         if (channel == null)
             return false;
-
         Record record = channel.getRecord();
         if (record.getId() != Long.parseLong(params.get("recordId")))
             return false;
+        return hasPermission(account, record, permission);
+    }
 
+    public boolean hasCloseChannelPermission(Permission permission) {
+        Map<String, String> params = getPathVars();
+        Account account = accountService.getUser(Long.valueOf(params.get("userId")));
+        if (account == null)
+            return false;
+
+        ClosedChannel channel = channelService.getCloseChannel(Long.parseLong(params.get("channelId")));
+        if (channel == null)
+            return false;
+        Record record = channel.getRecord();
+        if (record.getId() != Long.parseLong(params.get("recordId")))
+            return false;
         return hasPermission(account, record, permission);
     }
 

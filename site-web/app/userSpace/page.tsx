@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import { Button } from "@/components/ButtonMain";
 import Image from "next/image";
 import FilArianne from "@/components/FilArianne";
-import { getUserProfile, UserProfile, changePassword, deleteAccount, changeUserInfos } from "@/functions/user-api";
+import { getUserProfile, changePassword, deleteAccount, changeUserInfos } from "@/functions/user-api";
 import {encryptPassword} from "@/functions/encryptPassword";
 import {getCurrentUserId} from "@/functions/fil-API";
 
@@ -34,7 +34,7 @@ export default function UserSpace() {
                 setUserName(profile.userName);
                 localStorage.setItem('firstName', profile.firstName);
                 localStorage.setItem('lastName', profile.lastName);
-                localStorage.setItem('userName', profile.userName);
+                localStorage.setItem('username', profile.userName);
             }
         };
 
@@ -78,11 +78,14 @@ export default function UserSpace() {
 
         if (ok) {
             alert("Profil mis à jour avec succès!");
+            localStorage.setItem('username', userName);
+            localStorage.setItem('firstName', firstName);
+            localStorage.setItem('lastName', lastName);
         }
     };
 
     const handleDefault = async () => {
-        const userName = localStorage.getItem('userName');
+        const userName = localStorage.getItem('username');
         const firstName = localStorage.getItem('firstName');
         const lastName = localStorage.getItem('lastName');
         if (userName && lastName && firstName) {
