@@ -16,7 +16,8 @@ const breadcrumbHrefMap: Record<string, string> = {
     calendrier: "/calendrier",
     fil: "/fil",
     medecin: "/medecin",
-    userSpace: "/userSpace"
+    userSpace: "/userSpace",
+    ProfilAide: "/ProfilAide",
 };
 
 const breadcrumbTree: Record<string, BreadcrumbNode> = {
@@ -42,7 +43,11 @@ const breadcrumbTree: Record<string, BreadcrumbNode> = {
             },
             userSpace: {
                 label: "Mon profil"
+            },
+            ProfilAide: {
+                label: "L'aidé"
             }
+
         }
     }
 };
@@ -86,7 +91,7 @@ export default function Breadcrumb() {
     };
 
     return (
-        <nav aria-label="Breadcrumb" className="text-sm text-gray-500 my-4">
+        <nav aria-label="Breadcrumb" className="font-semibold text-gray-800 text-sm  my-4">
             <ol className="flex items-center flex-wrap">
                 {breadcrumbPath?.map((item, index) => {
                     const isLast = index === (breadcrumbPath?.length ?? 0) - 1;

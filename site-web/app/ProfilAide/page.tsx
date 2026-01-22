@@ -45,6 +45,13 @@ const localRecordId = localStorage.getItem('activeRecordId');
                 }
     };
 
+    const handleDefault = async () => {
+        const name = localStorage.getItem('recordName')
+        if (name) {
+            setRecordName(name);
+        }
+    };
+
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="py-4 ">
@@ -91,7 +98,7 @@ const localRecordId = localStorage.getItem('activeRecordId');
                     </div>
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
-                        <Button variant="cancel" link={""}>Annuler</Button>
+                        <Button variant="cancel" link={""} onClickAction={handleDefault} >Annuler</Button>
                         <Button type="button" link={""} variant={"primary"} onClickAction={handleSave} >Enregistrer</Button>
                     </div>
                 </form>
