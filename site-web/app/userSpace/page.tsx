@@ -84,7 +84,6 @@ export default function UserSpace() {
 
         if (ok) {
             alert("Profil mis à jour avec succès!");
-            localStorage.setItem('userName', userName);
         }
     };
 
