@@ -14,7 +14,6 @@ export default function UserSpace() {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [profile, setProfile] = useState<UserProfile | null>(null);
     const [userId, setUserId] = useState<number | null>(null);
     const [userName, setUserName] = useState<string>("");
     const [firstName, setFirstName] = useState<string>("");
@@ -30,11 +29,6 @@ export default function UserSpace() {
             setUserId(id);
             const profile = await getUserProfile(id);
             if (profile) {
-                setProfile({
-                    userName: profile.userName,
-                    firstName: profile.firstName,
-                    lastName: profile.lastName,
-                });
                 setFirstName(profile.firstName);
                 setLastName(profile.lastName);
                 setUserName(profile.userName);
