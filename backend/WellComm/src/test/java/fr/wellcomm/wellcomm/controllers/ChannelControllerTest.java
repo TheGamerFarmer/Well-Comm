@@ -159,7 +159,7 @@ public class ChannelControllerTest {
         );
 
         //Vérifie qu'il n'y a aucun message
-        assertEquals(0, infos.messageInfos().size());
+        assertEquals(0, infos.messages().size());
     }
 
     @Test
