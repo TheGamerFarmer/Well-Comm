@@ -135,20 +135,9 @@ export default function MedecinPage() {
             return;
         }
 
-        const res = await fetch(
-            `${API_BASE_URL}/api/${userId}/addAccess/current_record/${encodeURIComponent(
-                username
-            )}`,
-            {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    recordId: activeRecordId,
-                    title: title,
-                }),
             }
         );
 
@@ -172,7 +161,7 @@ export default function MedecinPage() {
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userId}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -195,7 +184,7 @@ export default function MedecinPage() {
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${userId}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}/title/${title}`,{
             method: "PUT",
             credentials: "include",
         });

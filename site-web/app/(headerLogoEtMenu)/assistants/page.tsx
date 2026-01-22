@@ -126,20 +126,9 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/addAccess/current_record/${encodeURIComponent(
-                username
-            )}`,
-            {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${encodeURIComponent(currentUserId)}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    recordId: currentRecordId,
-                    title: title,
-                }),
             }
         );
 
@@ -163,7 +152,7 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -186,7 +175,7 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/updateRoleAccess/current_record/${userId}/${recordId}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}/title/${title}`,{
             method: "PUT",
             credentials: "include",
         });
