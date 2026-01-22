@@ -14,7 +14,7 @@ L'application permet de centraliser la gestion des soins en offrant des outils a
 - **Résumés hebdomadaires** : Consulter l'historique des 7 derniers jours
 - **Gestion des assistants** : Ajouter des professionnels avec permissions personnalisées
 - **Espace médecins** : Accès limité aux informations de santé
-- **Application responsive** : Accessible sur ordinateur et mobile (Android)
+- **Application responsive** : Accessible sur ordinateur et mobile
 
 ## Prérequis
 
