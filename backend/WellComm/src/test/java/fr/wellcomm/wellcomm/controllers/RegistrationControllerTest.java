@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +72,11 @@ public class RegistrationControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        Map<String, Object> infos = objectMapper.readValue(json, Map.class);
+        Map<String, Object> infos =
+                objectMapper.readValue(
+                        json,
+                        new TypeReference<>() {}
+                );
         assertTrue(infos.containsKey("id"));
         assertEquals("user", infos.get("userName"));
 

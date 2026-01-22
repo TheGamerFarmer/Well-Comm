@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,9 +92,10 @@ public class RecordAccountControllerTest {
         String json = result.getResponse().getContentAsString();
 
         List<Permission> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
+                        json,
+                        new TypeReference<>() {}
+                );
+
 
         assertEquals(1, infos.size());
     }
@@ -143,9 +145,10 @@ public class RecordAccountControllerTest {
         String json = result.getResponse().getContentAsString();
 
         List<Permission> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
+                        json,
+                        new TypeReference<>() {}
+                );
+
 
         assertEquals(1, infos.size());
     }
@@ -196,7 +199,7 @@ public class RecordAccountControllerTest {
 
         List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
                 json,
-                List.class
+                new TypeReference<>() {}
         );
 
         assertEquals(1, infos.size());
@@ -248,8 +251,10 @@ public class RecordAccountControllerTest {
 
         List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
                 json,
-                List.class
+                new TypeReference<>() {}
         );
+
+
 
         assertEquals(1, infos.size());
     }
@@ -300,7 +305,7 @@ public class RecordAccountControllerTest {
 
         List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
                 json,
-                List.class
+                new TypeReference<>() {}
         );
 
         assertEquals(1, infos.size());
@@ -355,7 +360,7 @@ public class RecordAccountControllerTest {
 
         List<Permission> infos = objectMapper.readValue(
                 json,
-                List.class
+                new TypeReference<>() {}
         );
 
         assertEquals(2, infos.size());

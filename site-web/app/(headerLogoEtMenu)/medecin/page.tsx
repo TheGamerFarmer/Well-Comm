@@ -23,7 +23,7 @@ export default function MedecinPage() {
     const [isOpenPerms,setIsOpenPerms] = useState(false);
     const [invitationToDelete, setInvitationToDelete] = useState<Invitation | null>(null);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [title, setTitle] = useState<Invitation["title"]>("Medecin");
+    const [title] = useState<Invitation["title"]>("Medecin");
     const [username, setUsername] = useState("");
     const [userId, setUserId] = useState<number | null>(null);
     const [error, setError] = useState("");
@@ -135,20 +135,9 @@ export default function MedecinPage() {
             return;
         }
 
-        const res = await fetch(
-            `${API_BASE_URL}/api/${userId}/addAccess/current_record/${encodeURIComponent(
-                username
-            )}`,
-            {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    recordId: activeRecordId,
-                    title: title,
-                }),
             }
         );
 
@@ -166,13 +155,13 @@ export default function MedecinPage() {
     }
 
 //supprimer un médecin
-    const removeAccess = async (name: string, id: number ) => {
+    const removeAccess = async () => {
         if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userId}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -189,26 +178,6 @@ export default function MedecinPage() {
 
 
     //mettre a jour le role d'un médecin
-    const updateRoleAccess = async (name: string, id: number, title: string) => {
-        if (!userId || !activeRecordId) {
-            console.log("Aucun dossier sélectionné");
-            return;
-        }
-
-        const res = await fetch (`${API_BASE_URL}/api/${userId}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
-            method: "PUT",
-            credentials: "include",
-        });
-
-        if (!res.ok) {
-            const errorMessage = await res.text();
-            console.log(errorMessage);
-            return;
-        }
-        await fetchMedecins();
-        console.log("recordAccount modifié ")
-    }
-
     const openPermissionsModal = (medecin: Invitation) => {
         setSelectedMedecin(medecin);
         setIsOpenPerms(true);
@@ -379,7 +348,7 @@ export default function MedecinPage() {
                                     if (!invitationToDelete?.accountUserName || !activeRecordId)
                                         return;
 
-                                    removeAccess(invitationToDelete.accountUserName, activeRecordId).then();
+                                    removeAccess().then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui

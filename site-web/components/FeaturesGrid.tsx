@@ -1,4 +1,3 @@
-// mon-site-web/components/FeaturesGrid.tsx
 import { Calendar, MessageSquare, LayoutDashboard } from 'lucide-react';
 
 const features = [

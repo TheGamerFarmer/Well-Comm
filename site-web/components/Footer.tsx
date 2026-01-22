@@ -1,4 +1,3 @@
-// mon-site-web/components/Footer.tsx
 import Link from 'next/link';
 import {Button} from "@/components/ButtonMain";
 import Image from "next/image";

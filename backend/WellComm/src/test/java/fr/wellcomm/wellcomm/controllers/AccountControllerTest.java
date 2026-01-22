@@ -27,6 +27,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,7 +115,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Account infos = accountRepository.findByUserName(request.userName()).orElse(null);
+        Account infos = accountRepository.findByUserName(request.userName()).orElseThrow();
         assertEquals("newUser", infos.getUserName());
         assertEquals("newFirstName", infos.getFirstName());
         assertEquals("newLastName", infos.getLastName());
@@ -135,6 +136,8 @@ public class AccountControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andReturn();
+
+        assertNull(accountRepository.findByUserName(userTest.getUserName()).orElse(null));
     }
 
     @Test
@@ -147,18 +150,15 @@ public class AccountControllerTest {
         Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
-        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
-
         // 2. Exécution
         mockMvc.perform(
-                        post("/api/" + userTest.getId() + "/addAccess")
+                        post("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/title/" + Role.AIDANT.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElse(null);
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElseThrow();
         assertEquals("userTest", ra.getAccount().getUserName());
 
     }
@@ -177,18 +177,15 @@ public class AccountControllerTest {
         testUser.setUserName("testUser");
         testUser = accountRepository.save(testUser);
 
-        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
-
         // 2. Exécution
         mockMvc.perform(
-                        post("/api/" + userTest.getId() + "/addAccess/current_record/" + testUser.getUserName())
+                        post("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/targetUser/" + testUser.getId() + "/title/" + Role.AIDANT.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElseThrow();
         assertEquals("testUser", ra.getAccount().getUserName());
     }
 
@@ -212,13 +209,10 @@ public class AccountControllerTest {
         userTest.getRecordAccounts().put(record.getId(), recordAccount);
         accountRepository.save(userTest);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
-
         // 2. Exécution
         mockMvc.perform(
-                        delete("/api/" + userTest.getId() + "/deleteAccess/")
+                        delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/access")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -258,13 +252,10 @@ public class AccountControllerTest {
         testUser.getRecordAccounts().put(record.getId(), ra);
         accountRepository.save(testUser);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
-
         // 2. Exécution
         mockMvc.perform(
-                        delete("/api/" + userTest.getId() + "/deleteAccess/current_record/" + testUser.getUserName() + "/" + record.getId())
+                        delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/targetUser/" + testUser.getId())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -304,18 +295,15 @@ public class AccountControllerTest {
         testUser.getRecordAccounts().put(record.getId(), ra);
         accountRepository.save(testUser);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
-
         // 2. Exécution
         mockMvc.perform(
-                        put("/api/" + userTest.getId() + "/updateRoleAccess/current_record/" + testUser.getId() + "/" + record.getId() + "/" + Role.EMPLOYEE.getTitre())
+                        put("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/targetUser/" + testUser.getId() + "/title/" + Role.EMPLOYEE.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElseThrow();
         assertEquals(Role.EMPLOYEE.getTitre(), ra2.getTitle());
     }
 }

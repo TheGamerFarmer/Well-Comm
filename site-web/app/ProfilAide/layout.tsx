@@ -2,7 +2,6 @@ import HeaderLoged from "@/components/HeaderLoged";
 
 export default function ProfilAideLayout({ children }: { children: React.ReactNode }) {
     return (
-
         <div className="flex flex-col min-h-screen ">
             <header className="bg-white shadow-md relative z-10">
 

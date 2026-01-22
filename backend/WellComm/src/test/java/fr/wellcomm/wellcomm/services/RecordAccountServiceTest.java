@@ -17,13 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RecordAccountServiceTest {
     @Autowired private RecordService recordService;
     @Autowired private RecordAccountService recordAccountService;
-    private Record testRecord;
 
     @Test
     void testRecordAccountService() {
         Account testUser = new Account();
         testUser.setUserName("userTest");
-        testRecord = recordService.createRecord("Dossier Global", testUser);
+        Record testRecord = recordService.createRecord("Dossier Global", testUser);
 
         //1. test createRecordAccount
         RecordAccount recordAccount = recordAccountService.createReccordAccount(testUser, testRecord, Role.AIDANT);

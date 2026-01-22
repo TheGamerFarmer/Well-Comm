@@ -4,8 +4,6 @@ import Agenda from "@/components/Agenda";
 import FilArianne from "@/components/FilArianne";
 
 export default function Calendar() {
-
-
     return (
         <div className="w-full p-6 md:p-10 font-montserrat min-h-screen bg-[#f1f2f2]">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6 w-full pt-12 md:pt-8">

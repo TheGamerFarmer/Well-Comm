@@ -22,11 +22,15 @@ Avant de commencer, assurez-vous d'avoir installé :
 - PostgreSQL
 - Git
 - Java (pour le backend Spring Boot)
-- Node.js et npm (pour le frontend React)
+- Node.js et npm (pour le frontend)
 
 ## Installation
 
-### 1. Configuration de la base de données
+### 1. Installer l'application
+
+Installez le fichier wellcomm.tar.gz et l'extraire.
+
+### 2. Configuration de la base de données
 
 Connectez-vous à PostgreSQL en tant qu'utilisateur postgres :
 
@@ -43,19 +47,13 @@ CREATE DATABASE {nom de votre choix} OWNER {user de votre choix};
 
 Tapez `\q` pour quitter psql.
 
-### 2. Clonage du projet
-
-```bash
-git clone https://github.com/TheGamerFarmer/Well-Comm.git
-cd Well-Comm/
-```
 
 ### 3. Configuration du backend
 
-À la racine du projet, modifiez le fichier de configuration :
+À la racine de l'application, modifiez le fichier de configuration :
 
 ```bash
-nano backend/WellComm/src/main/resources/application.properties
+nano application.properties
 ```
 
 Modifiez les variables suivantes avec les identifiants de votre base de données :
@@ -63,14 +61,14 @@ Modifiez les variables suivantes avec les identifiants de votre base de données
 ```properties
 spring.datasource.url=jdbc:postgresql:{url de la bdd}?ssl=true&sslmode=require
 spring.datasource.username={user de la bdd}
-spring.datasource.password={mot de passe de la bdd}
+spring.datasource.password={mot de passe de l user de la bdd}
 ```
 
 Enregistrez et fermez le fichier (Ctrl+X, puis Y, puis Entrée).
 
 ## Lancement de l'application
 
-À la racine du projet, exécutez les commandes suivantes :
+À la racine de l'application, exécutez les commandes suivantes :
 
 ```bash
 chmod +x lancement.sh

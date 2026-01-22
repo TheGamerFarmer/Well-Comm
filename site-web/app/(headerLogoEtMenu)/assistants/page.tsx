@@ -126,20 +126,9 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/addAccess/current_record/${encodeURIComponent(
-                username
-            )}`,
-            {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${encodeURIComponent(currentUserId)}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    recordId: currentRecordId,
-                    title: title,
-                }),
             }
         );
 
@@ -157,13 +146,13 @@ export default function AssistantsPage() {
     }
 
 //supprimer un assistant
-    const removeAccess = async (name: string, id: number ) => {
+    const removeAccess = async () => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/deleteAccess/current_record/${name}/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -180,13 +169,13 @@ export default function AssistantsPage() {
 
 
     //mettre a jour le role d'un assistant
-    const updateRoleAccess = async (userId: number, recordId: number, title: string) => {
+    const updateRoleAccess = async (title: string) => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/updateRoleAccess/current_record/${userId}/${recordId}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}/title/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -294,7 +283,7 @@ export default function AssistantsPage() {
                                         if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(inv.accountUserId, currentRecordId, sanitize(e.target.value)).then()
+                                        updateRoleAccess(sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
@@ -397,7 +386,7 @@ export default function AssistantsPage() {
                                     if (!invitationToDelete?.accountUserName || !currentRecordId)
                                         return;
                                     
-                                    removeAccess(invitationToDelete.accountUserName, currentRecordId).then();
+                                    removeAccess().then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui
