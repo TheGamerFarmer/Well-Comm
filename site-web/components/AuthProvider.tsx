@@ -16,12 +16,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
     useEffect(() => {
         const checkAuth = async () => {
+            if (pathname.startsWith(nextJsPagesPrefix)
+                || pathname.startsWith(imagesPrefix))
+                return;
+
             if (Capacitor.isNativePlatform()) {
-
-                if (pathname.startsWith(nextJsPagesPrefix)
-                    || pathname.startsWith(imagesPrefix))
-                    return;
-
                 const option = {
                     url: `${API_BASE_URL}/api/isLogin`,
                     method: "GET",
@@ -32,17 +31,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
                 const response = await CapacitorHttp.get(option);
                 const isLoged = response.data;
 
-                if (!response.status || (isLoged && logPages.includes(pathname)))
+                if (!response.status || (isLoged && logPages.includes(pathname)) || pathname === "/")
                     router.push(homePage);
                 else if (!isLoged
-                    && !logPages.includes(pathname)
-                    && "/" !== pathname) {
+                    && !logPages.includes(pathname)) {
                     const urlSource = pathname + params;
                     const loginUrl = new URL("/login");
                     loginUrl.searchParams.set("callbackUrl", urlSource);
                     router.push(loginUrl.search);
                 }
             }
+
+            if (localStorage.getItem('activeRecordId') == null && !logPages.includes(pathname) && pathname !== "/" && pathname !== homePage)
+                router.push(homePage);
         };
 
         checkAuth().then();

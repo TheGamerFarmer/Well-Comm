@@ -8,7 +8,6 @@ import {getRecordName, changeRecordName} from "@/functions/record-api";
 import {getCurrentUserId} from "@/functions/fil-API";
 
 export default function ProfilAide() {
-
     const [recordName, setRecordName] = useState<string>("");
 
     useEffect(() => {

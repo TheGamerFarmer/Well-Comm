@@ -146,7 +146,7 @@ export default function AssistantsPage() {
     }
 
 //supprimer un assistant
-    const removeAccess = async (name: string, id: number ) => {
+    const removeAccess = async () => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
@@ -169,7 +169,7 @@ export default function AssistantsPage() {
 
 
     //mettre a jour le role d'un assistant
-    const updateRoleAccess = async (userId: number, recordId: number, title: string) => {
+    const updateRoleAccess = async (title: string) => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
@@ -283,7 +283,7 @@ export default function AssistantsPage() {
                                         if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(inv.accountUserId, currentRecordId, sanitize(e.target.value)).then()
+                                        updateRoleAccess(sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
@@ -386,7 +386,7 @@ export default function AssistantsPage() {
                                     if (!invitationToDelete?.accountUserName || !currentRecordId)
                                         return;
                                     
-                                    removeAccess(invitationToDelete.accountUserName, currentRecordId).then();
+                                    removeAccess().then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui

@@ -17,7 +17,6 @@ const BurgerScreen = () => {
     const currentPath = usePathname();
 
     const menuItems = [
-        { text: "Mon Profil", iconWhite: "/images/icons/white/solar-user-outline(1).svg", iconBlue: "/images/icons/blue/solar-user-outline.svg", href: "/userSpace" },
         { text: "L’aidé", iconWhite: "/images/icons/white/icons-patient.svg", iconBlue: "/images/icons/blue/icons-patient.svg", href: "/ProfilAide" },
         { text: "Calendrier", iconWhite: "/images/icons/white/solar-calendar-outline.svg", iconBlue: "/images/icons/blue/solar-calendar-outline(1).svg", href: "/calendar" },
         { text: "Résumé", iconWhite: "/images/icons/white/icons-bell.svg", iconBlue: "/images/icons/blue/icons-bell(1).svg", href: "/resume" },

@@ -4,10 +4,11 @@ import Image from "next/image";
 import {useEffect, useState} from "react";
 import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
+import {Capacitor} from "@capacitor/core";
+import Link from "next/link";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
-
     const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -41,6 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {/* 1. Logo/Titre (Image dans la maquette) */}
 
                         {/* 🚨 NOUVEAU CODE POUR L'IMAGE */}
+                    <Link href={Capacitor.isNativePlatform() ? "" : "/"} className="flex items-center space-x-2">
                         <Image
                             src="/images/logo.svg" // 🚨 Assurez-vous que ce nom de fichier est exact
                             alt="Logo WellComm"
@@ -48,7 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             height={60} // Hauteur du logo (à ajuster)
                             priority // Pour charger l'image rapidement
                         />
-                        {/* --------------------------- */}
+                    </Link>
 
                 </div>
 

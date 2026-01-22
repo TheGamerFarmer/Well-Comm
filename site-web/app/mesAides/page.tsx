@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import FilArianne from "@/components/FilArianne";
 import { Button } from "@/components/ButtonMain";
-import ImagePreview from "@/components/ImagePreview";
 import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Link from "next/link";
@@ -17,7 +16,6 @@ type Dossier = {
 };
 
 export default function MesAides() {
-
     const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
@@ -28,12 +26,10 @@ export default function MesAides() {
     const [isOpen, setIsOpen] = useState(false);
     const [dossierToDelete, setDossierToDelete] = useState<Dossier | null>(null);
     const [name, setName] = useState("");
-    const [file, setFile] = useState<File | null>(null);
-    const router = useRouter();
-
+    useRouter();
     /* =======================
-       Chargement des dossiers
-       ======================= */
+           Chargement des dossiers
+           ======================= */
     useEffect(() => {
         if (!userId) return;
 
@@ -88,7 +84,6 @@ export default function MesAides() {
         ]);
 
         setName("");
-        setFile(null);
         setIsOpen(false);
     };
 

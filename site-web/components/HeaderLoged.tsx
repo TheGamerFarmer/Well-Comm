@@ -6,6 +6,7 @@ import BurgerScreen from "@/components/BurgerScreen";
 import {useEffect, useState} from "react";
 import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
+import {Capacitor} from "@capacitor/core";
 
 export default function HeaderLoged() {
     const [isOpen, setIsOpen] = useState(false);
@@ -32,13 +33,12 @@ export default function HeaderLoged() {
     }
 
     return (
-
         <header className="bg-white shadow-md">
             <BurgerScreen/>
 
             <div className=" ml-20 px-4 py-3 flex justify-between items-center">
 
-                <Link href="/mesAides" className="flex items-center space-x-2">
+                <Link href={Capacitor.isNativePlatform() ? "" : "/"} className="flex items-center space-x-2">
                     <Image
                         src="/images/logo.svg"
                         alt="Logo WellComm"
@@ -71,8 +71,16 @@ export default function HeaderLoged() {
                             onClick={() => {
                                 setIsOpen(false);
                             }}>
-                        Profil
+                        Mon profil
                     </button>
+                    </Link>
+                    <Link href="/mesAides">
+                        <button className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-md"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                }}>
+                            Mes aidés
+                        </button>
                     </Link>
                     <button
                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-md"
