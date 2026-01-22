@@ -14,7 +14,7 @@ type Invitation = {
     title: string;
     accountUserId: number;
     accountUserName: string;
-    dateCreation: string;
+    creationDate: string;
     recordId: number;
 };
 
@@ -129,13 +129,13 @@ export default function MedecinPage() {
     }, [userId, activeRecordId, fetchMedecins]);
 
 //ajouter un assitant au dossier
-    const addAccessToCurrentRecord = async (title: string) => {
+    const addAccessToCurrentRecord = async (username : string,title: string) => {
         if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}/title/${title}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${encodeURIComponent(username)}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
             }
@@ -155,13 +155,13 @@ export default function MedecinPage() {
     }
 
 //supprimer un médecin
-    const removeAccess = async () => {
+    const removeAccess = async (targetId : number) => {
         if (!userId || !activeRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${userId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${userId}/records/${activeRecordId}/access/targetUser/${targetId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -251,7 +251,7 @@ export default function MedecinPage() {
                                         <span className="font-bold text-black ">{inv.accountUserName}</span>
                                     </li>
                                     <li>
-                                        <span className="text-gray-500 ">ajouté le : {new Date(inv.dateCreation).toLocaleDateString()} </span>
+                                        <span className="text-gray-500 ">ajouté le : {new Date(inv.creationDate).toLocaleDateString()} </span>
                                     </li>
                                 </ul>
                             </div>
@@ -289,7 +289,7 @@ export default function MedecinPage() {
                                 onSubmit={(e) => {
                                     e.preventDefault();
                                     if (!username.trim()) return;
-                                    addAccessToCurrentRecord(title).then();
+                                    addAccessToCurrentRecord(username,title).then();
                                 }}
                                 className="flex flex-col gap-4"
                             >
@@ -348,7 +348,7 @@ export default function MedecinPage() {
                                     if (!invitationToDelete?.accountUserName || !activeRecordId)
                                         return;
 
-                                    removeAccess().then();
+                                    removeAccess(invitationToDelete.accountUserId).then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui
