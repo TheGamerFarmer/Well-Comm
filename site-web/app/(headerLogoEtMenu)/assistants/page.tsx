@@ -10,7 +10,6 @@ import Image from "next/image";
 import {sanitize} from "@/functions/Sanitize";
 import {getPermissions, Permission} from "@/functions/Permissions";
 
-
 //"Aidant" | "Infirmier(e)" | "Aide soignant(e)" | "Aide à domicile"
 type Invitation = {
     id: number;

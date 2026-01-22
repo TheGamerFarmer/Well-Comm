@@ -125,6 +125,7 @@ export function useCalendarLogic() {
             title: changeInfo.event.title,
             start: changeInfo.event.startStr.split('+')[0].split('Z')[0],
             end: changeInfo.event.endStr.split('+')[0].split('Z')[0],
+            color: changeInfo.event.backgroundColor || "#0551ab",
             ...changeInfo.event.extendedProps
         };
 
