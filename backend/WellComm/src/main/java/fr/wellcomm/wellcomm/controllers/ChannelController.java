@@ -33,7 +33,7 @@ public class ChannelController {
         boolean isDeleted
     ) {}
 
-    public record ChannelInfos (long id, String title, String category, List<MessageInfos> messageInfos) {}
+    public record ChannelInfos (long id, String title, String category, List<MessageInfos> messages) {}
 
     @GetMapping("/channels/{channelId}")
     @PreAuthorize("#userId.toString() == authentication.name and" +
@@ -87,10 +87,9 @@ public class ChannelController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/closechannels/{channelId}")
     @PreAuthorize("#userId.toString() == authentication.name and" +
-            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_MESSAGE)")
+            "@securityService.hasCloseChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_MESSAGE)")
     public ResponseEntity<ChannelInfos> getCloseChannelContent(
             @PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable @SuppressWarnings("unused") long recordId,
