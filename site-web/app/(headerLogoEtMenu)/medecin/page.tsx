@@ -14,7 +14,7 @@ type Invitation = {
     title: string;
     accountUserId: number;
     accountUserName: string;
-    dateCreation: string;
+    creationDate: string;
     recordId: number;
 };
 
@@ -251,7 +251,7 @@ export default function MedecinPage() {
                                         <span className="font-bold text-black ">{inv.accountUserName}</span>
                                     </li>
                                     <li>
-                                        <span className="text-gray-500 ">ajouté le : {new Date(inv.dateCreation).toLocaleDateString()} </span>
+                                        <span className="text-gray-500 ">ajouté le : {new Date(inv.creationDate).toLocaleDateString()} </span>
                                     </li>
                                 </ul>
                             </div>
