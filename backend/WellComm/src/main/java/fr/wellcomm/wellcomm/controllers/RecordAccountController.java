@@ -153,13 +153,13 @@ public class RecordAccountController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/access/targetUser/{targetId}/title/{title}")
+    @PostMapping("/access/targetUser/{targetUserName}/title/{title}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> addRecordAccountCurrentRecord(@PathVariable @SuppressWarnings("unused") Long userId,
-                                                           @PathVariable long targetId,
+                                                           @PathVariable String targetUserName,
                                                            @PathVariable long recordId,
                                                            @PathVariable String title) {
-        Account account = accountService.getUser(targetId);
+        Account account = accountService.getUserByUserName(targetUserName);
         if (account == null)
             return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
@@ -168,7 +168,7 @@ public class RecordAccountController {
             return ResponseEntity.badRequest().body("Dossier inexistant");
 
         Optional<RecordAccount> existing = recordAccountService.getByRecordId(recordId).stream()
-                .filter(ra -> ra.getAccount().getId().equals(targetId))
+                .filter(ra -> ra.getAccount().getUserName().equals(targetUserName))
                 .findFirst();
         if (existing.isPresent()) {
             return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");

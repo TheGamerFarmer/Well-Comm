@@ -126,7 +126,7 @@ export default function AssistantsPage() {
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${encodeURIComponent(currentUserId)}/title/${title}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${encodeURIComponent(username)}/title/${title}`, {
                 method: "POST",
                 credentials: "include",
             }
@@ -146,13 +146,13 @@ export default function AssistantsPage() {
     }
 
 //supprimer un assistant
-    const removeAccess = async () => {
+    const removeAccess = async (userId : number) => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${userId}`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -169,13 +169,13 @@ export default function AssistantsPage() {
 
 
     //mettre a jour le role d'un assistant
-    const updateRoleAccess = async (title: string) => {
+    const updateRoleAccess = async (userId : number, title: string) => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${currentUserId}/title/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/access/targetUser/${userId}/title/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -283,7 +283,7 @@ export default function AssistantsPage() {
                                         if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(sanitize(e.target.value)).then()
+                                        updateRoleAccess(inv.accountUserId,sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>
@@ -386,7 +386,7 @@ export default function AssistantsPage() {
                                     if (!invitationToDelete?.accountUserName || !currentRecordId)
                                         return;
                                     
-                                    removeAccess().then();
+                                    removeAccess(invitationToDelete.accountUserId).then();
                                     setInvitationToDelete(null);}}
                                 link={""}>
                                 Oui
