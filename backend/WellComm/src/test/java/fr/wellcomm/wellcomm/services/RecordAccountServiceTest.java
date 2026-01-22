@@ -28,7 +28,7 @@ public class RecordAccountServiceTest {
         //1. test createRecordAccount
         RecordAccount recordAccount = recordAccountService.createReccordAccount(testUser, testRecord, Role.AIDANT);
         assertEquals(testRecord.getId(), recordAccount.getRecord().getId());
-        assertEquals(Role.AIDANT, recordAccount.getTitle());
+        assertEquals(Role.AIDANT.getTitre(), recordAccount.getTitle());
 
         //2. test getByRecordId
         List<RecordAccount> recordsaccount = recordAccountService.getByRecordId(testRecord.getId());
@@ -40,7 +40,7 @@ public class RecordAccountServiceTest {
 
         //4. test updateRoleRecordAccount
         recordAccountService.updateRoleRecordAccount(testUser.getUserName(), testRecord.getId(), Role.EMPLOYEE);
-        assertEquals(Role.EMPLOYEE, recordAccount.getTitle());
+        assertEquals(Role.EMPLOYEE.getTitre(), recordAccount.getTitle());
     }
 
 }

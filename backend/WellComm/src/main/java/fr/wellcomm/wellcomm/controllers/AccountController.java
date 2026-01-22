@@ -154,7 +154,7 @@ public class AccountController {
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
 
-        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle()));
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle().toUpperCase()));
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -181,7 +181,8 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");
         }
 
-        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle()));
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle().toUpperCase()));
+
 
         accountService.addRecordAccount(account, newAccess);
 

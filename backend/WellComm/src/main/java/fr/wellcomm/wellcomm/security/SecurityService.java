@@ -64,18 +64,19 @@ public class SecurityService {
         Account account = accountService.getUser(Long.valueOf(params.get("userId")));
         if (account == null)
             return false;
-        Message message = messageService.getMessage(Long.parseLong(params.get("channelId")));
+
+        Message message = messageService.getMessage(Long.parseLong(params.get("messageId")));
         if (message == null)
             return false;
-        System.out.println(message.getId());
-        System.out.println(message.getChannel().getId());
-        System.out.println(Long.parseLong(params.get("channelId")));
+
         Channel channel = message.getChannel();
         if (channel.getId() != Long.parseLong(params.get("channelId")))
             return false;
+
         Record record = channel.getRecord();
         if (record.getId() != Long.parseLong(params.get("recordId")))
             return false;
+
         return hasPermission(account, record, permission);
     }
 

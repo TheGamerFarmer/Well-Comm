@@ -99,7 +99,7 @@ public class RecordController {
         return ResponseEntity.ok(newRecord);
     }
 
-    @GetMapping("/{recordId}/channels/{category}")
+    @GetMapping("/{recordId}/channels/categorys/{category}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable Long recordId,
@@ -118,7 +118,7 @@ public class RecordController {
         return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{recordId}/closechannels/{category}")
+    @GetMapping("/{recordId}/closechannels/categorys/{category}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
                                                                  @PathVariable Long recordId,
@@ -137,7 +137,7 @@ public class RecordController {
         return response.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{recordId}/channels/{category}/week")
+    @GetMapping("/{recordId}/channels/categorys/{category}/week")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
                                                                  @PathVariable Long recordId,

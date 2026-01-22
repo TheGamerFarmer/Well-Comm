@@ -49,7 +49,7 @@ public class RecordAccountService {
 
         // Mise à jour du rôle
         recordAccount.setTitle(role.getTitre());
-        recordAccount.setPermissions(recordAccount.getPermissions());
+        recordAccount.setPermissions(role.getPermission());
 
         // Sauvegarde
         recordAccountRepository.save(recordAccount);

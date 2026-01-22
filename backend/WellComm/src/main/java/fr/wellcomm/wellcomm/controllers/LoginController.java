@@ -40,7 +40,6 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        System.out.println(request.getQueryString());
         String userName = loginRequest.getUserName();
         String password = loginRequest.getPassword();
 

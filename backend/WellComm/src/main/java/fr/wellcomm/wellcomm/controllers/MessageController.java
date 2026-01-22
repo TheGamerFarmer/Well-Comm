@@ -18,7 +18,7 @@ public class MessageController {
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @PutMapping("/update")
+    @PutMapping("")
     @PreAuthorize("#userId.toString() == authentication.name and " +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or " +
             "@securityService.ownMessage())")
@@ -46,7 +46,7 @@ public class MessageController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("")
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
                     "@securityService.ownMessage())")
