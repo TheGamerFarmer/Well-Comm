@@ -41,7 +41,6 @@ const localRecordId = localStorage.getItem('activeRecordId');
 
                     if (res) {
                         alert("Profil mis à jour avec succès!");
-                        localStorage.setItem('activeRecordId', recordName);
                     }
                 }
     };
