@@ -92,13 +92,6 @@ export default function MesAides() {
         setIsOpen(false);
     };
 
-    /* =======================
-       Upload image
-       ======================= */
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        setFile(files && files.length > 0 ? files[0] : null);
-    };
 //supprimer un dossier
     const handleDelete = async (id: number) => {
         if (!id) return;
@@ -153,8 +146,6 @@ export default function MesAides() {
                         }
                             className="w-full h-[83px] rounded-lg bg-[#f6f6f6] flex items-center px-5 gap-4 font-bold cursor-pointer hover:bg-gray-200"
                             >
-                            {/* image plus tard depuis backend */}
-                            <div className="w-12 h-12 bg-gray-300 rounded-md" />
 
                             {dossier.name}
 
@@ -184,20 +175,6 @@ export default function MesAides() {
                         </h2>
 
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                            <label
-                                htmlFor="file-upload"
-                                className="cursor-pointer flex justify-center"
-                            >
-                                <ImagePreview file={file} />
-                            </label>
-
-                            <input
-                                id="file-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleFileChange}
-                            />
 
                             <input
                                 type="text"
