@@ -1,22 +1,48 @@
 #!/bin/bash
 
-# Récupérer le chemin du dossier où se trouve le script
-ROOT_DIR=$(pwd)
+# Créer le dossier logs s'il n'existe pas
+mkdir -p logs
 
-# 1. Lancer le Backend
-echo "[1/2] Démarrage du Backend (Sortie vers backend.log)..."
-cd "$ROOT_DIR/backend/WellComm/" || exit
-nohup ./mvnw spring-boot:run > "$ROOT_DIR/backend.log" 2>&1 &
+# Fonction pour arrêter les processus
+cleanup() {
+    echo ""
+    echo "Arrêt de l'application..."
+    kill $BACKEND_PID 2>/dev/null
+    kill $FRONTEND_PID 2>/dev/null
+    exit 0
+}
 
-# 2. Lancer le Frontend
-echo "[2/2] Installation et démarrage du Frontend (Sortie vers frontend.log)..."
-cd "$ROOT_DIR/site-web/" || exit
-# On lance l'install en clair pour voir si elle réussit, puis le run en arrière-plan
-npm install
-nohup npm run dev > "$ROOT_DIR/frontend.log" 2>&1 &
+echo "Démarrage de WellComm..."
 
-echo "-------------------------------------------------------"
-echo "Les serveurs sont lancés !"
-echo "- Backend : tail -f backend.log"
-echo "- Frontend : tail -f frontend.log"
-echo "-------------------------------------------------------"
+
+echo "Lancement du backend..."
+java -jar deploy/wellcomm-backend.jar --spring.config.location=file:./application.properties > logs/backend.log 2>&1 &
+BACKEND_PID=$!
+echo "Backend démarré (PID: $BACKEND_PID) - Logs: logs/backend.log"
+
+
+echo "Attente du démarrage du backend..."
+sleep 5
+
+
+echo "Lancement du frontend..."
+npx serve -s deploy/frontend -l 3000 > logs/frontend.log 2>&1 &
+FRONTEND_PID=$!
+echo "Frontend démarré (PID: $FRONTEND_PID) - Logs: logs/frontend.log"
+
+echo ""
+echo "=========================================="
+echo "Application démarrée !"
+echo "=========================================="
+echo "Backend : http://localhost:8080"
+echo "Frontend : http://localhost:3000"
+echo ""
+echo "Logs disponibles dans :"
+echo "  - logs/backend.log"
+echo "  - logs/frontend.log"
+echo ""
+echo "Pour arrêter l'application, appuyez sur Ctrl+C"
+
+trap cleanup SIGINT SIGTERM
+
+wait
