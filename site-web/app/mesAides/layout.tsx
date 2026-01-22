@@ -72,6 +72,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </header>
             {isOpen && (
                 <div className="absolute right-0 mt-18 w-44 rounded-md bg-white shadow-lg border border-black z-100 mr-2">
+                    <Link href="/userSpace">
+                        <button className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-md"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                }}>
+                            Mon profil
+                        </button>
+                    </Link>
                     <button
                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-md"
                         onClick={async () => {
