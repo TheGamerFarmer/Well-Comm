@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/config";
 
-export async function getRecordName(userId: number | null, recordId: number | null): Promise<string> {
+
+export async function getRecordName(userId: number, recordId: string): Promise<string | null> {
     try {
         const response = await fetch(`${API_BASE_URL}/api/${userId}/records/${recordId}/name`, {
             credentials: "include",
@@ -10,7 +11,7 @@ export async function getRecordName(userId: number | null, recordId: number | nu
         console.log("Response status:", response.status);
 
         if (response.ok) {
-            const data = await response.json();
+            const data = await response.text();
             console.log("Data:", data);
             return data;
         } else {
@@ -19,6 +20,26 @@ export async function getRecordName(userId: number | null, recordId: number | nu
     } catch (err) {
         console.error("Erreur getRecordName:", err);
     }
-    return "null";
+    return null;
 }
 
+
+export async function changeRecordName(
+    userId: number | null,
+    recordId: string | null,
+    newName: string
+): Promise<boolean> {
+    try {
+        const res = await fetch(
+            `${API_BASE_URL}/api/${userId}/records/${recordId}/${encodeURIComponent(newName)}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
+        return res.ok;
+    } catch (err) {
+        console.error("Erreur changeRecordName:", err);
+        return false;
+    }
+}
