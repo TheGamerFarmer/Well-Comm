@@ -9,8 +9,6 @@ import fr.wellcomm.wellcomm.services.RecordAccountService;
 import fr.wellcomm.wellcomm.services.SessionService;
 import fr.wellcomm.wellcomm.domain.Role;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,44 +30,10 @@ public class AccountController {
     private final AccountRepository accountRepository;
     private final RecordAccountService recordAccountService;
     private final SessionService sessionService;
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class UserInfos {
-        private String userName;
-        private String firstName;
-        private String lastName;
-    }
-
-    @Getter
-    @Setter
-    public static class addRecordAccountRequest {
-        private long recordId;
-        private String title;
-    }
-
-    @Getter
-    @Setter
-    public static class deleteRecordAccountRequest {
-        private long recordId;
-    }
-
-
-    @Getter
-    @Setter
-    public static class ChangePasswordRequest {
-        private String currentPassword;
-        private String newPassword;
-        }
-
-    @Getter
-    @Setter
-    public static class UpdateProfileRequest {
-        private String userName;
-        private String firstName;
-        private String lastName;
-        }
+    public record UserInfos(String userName, String firstName, String lastName) {}
+    public record addRecordAccountRequest(long recordId, String title) {}
+    public record deleteRecordAccountRequest(long recordId) {}
+    public record ChangePasswordRequest(String currentPassword, String newPassword) {}
 
     @GetMapping("/infos")
     @PreAuthorize("#userId.toString() == authentication.name")
@@ -93,11 +57,11 @@ public class AccountController {
             return ResponseEntity.badRequest().body("User not found");
         }
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword, account.getPassword())) {
             return ResponseEntity.status(403).body("Mot de passe actuel incorrect");
         }
 
-        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        account.setPassword(passwordEncoder.encode(request.newPassword));
         accountRepository.save(account);
 
         return ResponseEntity.ok().build();
@@ -108,28 +72,27 @@ public class AccountController {
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateProfile(
             @PathVariable Long userId,
-            @RequestBody UpdateProfileRequest request
+            @RequestBody UserInfos request
     ) {
         Account account = accountRepository
                         .findById(userId)
                         .orElseThrow();
 
-        if (!account.getUserName().equals(request.getUserName())) {
+        if (!account.getUserName().equals(request.userName)) {
 
             if (accountRepository.existsByUserName(request.userName)) {
                 return ResponseEntity.status(409).body("Account already exists");
             }
-            account.setUserName(request.getUserName());
+            account.setUserName(request.userName);
         }
 
-        account.setFirstName(request.getFirstName());
-        account.setLastName(request.getLastName());
+        account.setFirstName(request.firstName);
+        account.setLastName(request.lastName);
 
         accountService.saveUser(account);
 
         return ResponseEntity.ok().build();
     }
-
 
     @DeleteMapping("/deleteUser")
     @PreAuthorize("#userId.toString() == authentication.name")
@@ -150,11 +113,11 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        Record record = recordService.getRecord(request.getRecordId());
+        Record record = recordService.getRecord(request.recordId);
         if (record == null)
             return ResponseEntity.badRequest().body("Record not found");
 
-        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle()));
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.title.toUpperCase()));
 
         accountService.addRecordAccount(account, newAccess);
 
@@ -170,18 +133,18 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
 
-        Record record = recordService.getRecord(request.getRecordId());
+        Record record = recordService.getRecord(request.recordId);
         if (record == null)
             return ResponseEntity.badRequest().body("Dossier inexistant");
 
-        Optional<RecordAccount> existing = recordAccountService.getByRecordId(request.getRecordId()).stream()
+        Optional<RecordAccount> existing = recordAccountService.getByRecordId(request.recordId).stream()
                 .filter(ra -> ra.getAccount().getUserName().equals(name))
                 .findFirst();
         if (existing.isPresent()) {
             return ResponseEntity.badRequest().body("Cette personne à déjà été ajoutée");
         }
 
-        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.getTitle().toUpperCase()));
+        RecordAccount newAccess = new RecordAccount(account, record, Role.valueOf(request.title.toUpperCase()));
 
 
         accountService.addRecordAccount(account, newAccess);
@@ -196,7 +159,7 @@ public class AccountController {
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
 
-        RecordAccount recordAccount = account.getRecordAccounts().get(request.getRecordId());
+        RecordAccount recordAccount = account.getRecordAccounts().get(request.recordId);
         if (recordAccount == null)
             return ResponseEntity.badRequest().body("Access not found");
 
@@ -237,33 +200,32 @@ public class AccountController {
     }
 
 
-    @PutMapping("/updateRoleAccess/current_record/{targetUserName}/{recordId}/{title}")
+    @PutMapping("/updateRoleAccess/current_record/{targetUserId}/{recordId}/{title}")
     @PreAuthorize("#userId.toString() == authentication.name")
     public ResponseEntity<?> updateRoleRecordAccount(
             @PathVariable @SuppressWarnings("unused") Long userId,
-            @PathVariable String targetUserName,
-            @PathVariable Long recordId,
+            @PathVariable long targetUserId,
+            @PathVariable long recordId,
             @PathVariable String title
     ) {
-        Account account = accountService.getUserByUserName(targetUserName);
+        Account account = accountService.getUser(targetUserId);
         if (account == null)
             return ResponseEntity.badRequest().body("Nom d'utilisateur inexistant");
-        Role role;
-        if(title.equals("Aidant")) {
-            role = Role.AIDANT;
-        }
-        else {
-            role = Role.EMPLOYEE;
-        }
 
-        recordAccountService.updateRoleRecordAccount(targetUserName, recordId, role);
+        Role role;
+        if (title.equals("Aidant"))
+            role = Role.AIDANT;
+        else
+            role = Role.EMPLOYEE;
+
+        recordAccountService.updateRoleRecordAccount(targetUserId, recordService.getRecord(recordId), role);
 
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<?> logout(@PathVariable Long userId) {
+    public ResponseEntity<?> logout(@PathVariable long userId) {
         Account account = accountRepository.findById(userId).orElse(null);
         if (account == null)
             return ResponseEntity.badRequest().body("Account not found");

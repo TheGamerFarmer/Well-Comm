@@ -3,15 +3,12 @@ package fr.wellcomm.wellcomm.controllers;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.Map;
 
 @RestController
@@ -20,27 +17,19 @@ import java.util.Map;
 public class RegistrationController {
     private final AccountRepository accountRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    @Getter
-    @Setter
-    public static class RegisterRequest {
-        private String userName;
-        private String password;
-        private String firstName;
-        private String lastName;
-    }
+    public record RegisterRequest(String userName, String password, String firstName, String lastName) {}
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (accountRepository.existsByUserName(request.getUserName())) {
+        if (accountRepository.existsByUserName(request.userName)) {
             return ResponseEntity.status(409).body("Account already exists");
         }
 
         Account savedAccount = accountRepository.save(new Account(
-                request.getUserName(),
-                request.getFirstName(),
-                request.getLastName(),
-                passwordEncoder.encode(request.getPassword())
+                request.userName,
+                request.firstName,
+                request.lastName,
+                passwordEncoder.encode(request.password)
         ));
 
         Map<String, Object> responseBody = Map.of(

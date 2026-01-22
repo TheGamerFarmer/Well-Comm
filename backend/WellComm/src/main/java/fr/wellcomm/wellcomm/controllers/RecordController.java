@@ -10,9 +10,6 @@ import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.RecordAccountService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import fr.wellcomm.wellcomm.services.RecordService;
-
 
 @RestController
 @RequestMapping("/api/{userId}/records")
@@ -32,42 +28,22 @@ public class RecordController {
     private final RecordAccountService recordAccountService;
     private final RecordRepository recordRepository;
     private final CalendarRepository calendarRepository;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class CreateFilRequest {
-        private String title;
-        private Category category;
-        private String firstMessage;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class DossierResponse {
-        private Long id;
-        private String name;
-        private Long admin;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class FilResponse {
-        private Long id;
-        private String title;
-        private Category category;
-        private Date creationDate;
-        private String lastMessage;
-        private String lastMessageAuthor;
-    }
+    public record CreateFilRequest(String title, Category category, String firstMessage) {}
+    public record DossierResponse(long id, String name, long adminId) {}
+    public record FilResponse(
+        Long id,
+        String title,
+        Category category,
+        Date creationDate,
+        String lastMessage,
+        String lastMessageAuthor
+    ) {}
 
     @GetMapping("/")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable Long userId) {
+    public ResponseEntity<List<DossierResponse>> getRecords(@PathVariable long userId) {
         List<DossierResponse> dossiers = recordService.getRecords(userId).stream()
-                .map(d -> new DossierResponse(d.getId(), d.getName(), d.getAdmin()))
+                .map(d -> new DossierResponse(d.getId(), d.getName(), d.getAdmin().getId()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dossiers);
@@ -75,14 +51,17 @@ public class RecordController {
 
     @GetMapping("/{recordId}/name")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<String> getNameRecord(@PathVariable @SuppressWarnings("unused") Long userId, @PathVariable long recordId) {
+    public ResponseEntity<String> getNameRecord(@PathVariable @SuppressWarnings("unused") long userId,
+                                                @PathVariable long recordId) {
         Record record = recordService.getRecord(recordId);
         return ResponseEntity.ok(record.getName());
     }
 
     @PutMapping("/{recordId}/{newname}")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") Long userId, @PathVariable long recordId, @PathVariable String newname) {
+    public ResponseEntity<Void> changeNameRecord(@PathVariable @SuppressWarnings("unused") long userId,
+                                                 @PathVariable long recordId,
+                                                 @PathVariable String newname) {
         Record record = recordService.getRecord(recordId);
         record.setName(newname);
         recordRepository.save(record);
@@ -91,20 +70,19 @@ public class RecordController {
 
     @PostMapping("/create/{name}")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<Record> createRecord(@PathVariable Long userId,
+    public ResponseEntity<Record> createRecord(@PathVariable long userId,
                                                @PathVariable String name) {
-
-        Record newRecord = recordService.createRecord(name, userId);
-        recordAccountService.createReccordAccount(accountService.getUser(userId), newRecord, Role.AIDANT);
+        Account account = accountService.getUser(userId);
+        Record newRecord = recordService.createRecord(name, account);
+        recordAccountService.createReccordAccount(account, newRecord, Role.AIDANT);
         return ResponseEntity.ok(newRecord);
     }
 
     @GetMapping("/{recordId}/channels/categorys/{category}")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
-            @PathVariable Long recordId,
-            @PathVariable Category category) {
-
+    public ResponseEntity<List<FilResponse>> getChannelsFiltered(@PathVariable @SuppressWarnings("unused") long userId,
+                                                                 @PathVariable long recordId,
+                                                                 @PathVariable Category category) {
         List<FilResponse> response = recordService.getChannelsOfCategory(recordId, category).stream()
                 .map(f -> {
                     Message lastMsg = f.getLastMessage();
@@ -120,10 +98,9 @@ public class RecordController {
 
     @GetMapping("/{recordId}/closechannels/categorys/{category}")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
-                                                                 @PathVariable Long recordId,
-                                                                 @PathVariable Category category) {
-
+    public ResponseEntity<List<FilResponse>> getCloseChannelsFiltered(@PathVariable @SuppressWarnings("unused") long userId,
+                                                                      @PathVariable long recordId,
+                                                                      @PathVariable Category category) {
         List<FilResponse> response = recordService.getChannelsOfCategoryClose(recordId, category).stream()
                 .map(f -> {
                     Message lastMsg = f.getLastMessage();
@@ -139,9 +116,9 @@ public class RecordController {
 
     @GetMapping("/{recordId}/channels/categorys/{category}/week")
     @PreAuthorize("#userId.toString() == authentication.name")
-    public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") Long userId,
-                                                                 @PathVariable Long recordId,
-                                                                 @PathVariable Category category) {
+    public ResponseEntity<List<FilResponse>> getLastWeekChannelsFiltered(@PathVariable @SuppressWarnings("unused") long userId,
+                                                                         @PathVariable long recordId,
+                                                                         @PathVariable Category category) {
 
         List<FilResponse> response = recordService.getLastWeekChannelsOfCategory(recordId, category).stream()
                 .map(f -> {
@@ -159,10 +136,9 @@ public class RecordController {
     @PostMapping("/{recordId}/channels/new")
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).OPEN_CHANNEL)")
-    public ResponseEntity<?> createChannel(@PathVariable Long userId,
+    public ResponseEntity<?> createChannel(@PathVariable long userId,
                                            @PathVariable long recordId,
                                            @RequestBody CreateFilRequest request) {
-        System.out.println("========================");
         Account account = accountService.getUser(userId);
         if (account == null)
             return ResponseEntity.badRequest().body("User not found");
@@ -181,9 +157,9 @@ public class RecordController {
 
         OpenChannel newChannel = recordService.createChannel(
                 record,
-                request.getTitle(),
-                request.getCategory(),
-                request.getFirstMessage(),
+                request.title,
+                request.category,
+                request.firstMessage,
                 account
         );
 
@@ -202,9 +178,9 @@ public class RecordController {
     @PostMapping("/{recordId}/channels/{channelId}/archive")
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).CLOSE_CHANNEL)")
-    public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") Long userId,
-            @PathVariable long recordId,
-            @PathVariable long channelId) {
+    public ResponseEntity<?> archiveChannel(@PathVariable @SuppressWarnings("unused") long userId,
+                                            @PathVariable long recordId,
+                                            @PathVariable long channelId) {
         Record record = recordService.getRecord(recordId);
         if (record == null) {
             return ResponseEntity.badRequest().body("Record not found");
@@ -218,14 +194,14 @@ public class RecordController {
     @Transactional
     @DeleteMapping("/delete/{recordId}")
     @PreAuthorize("#userId.toString() == authentication.name and @securityService.deleteRecord()")
-    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") Long userId,
-                                              @PathVariable Long recordId) {
+    public ResponseEntity<Void> deleteDossier(@PathVariable @SuppressWarnings("unused") long userId,
+                                              @PathVariable long recordId) {
         calendarRepository.deleteById(recordId);
         boolean deleted = recordService.deleteRecord(recordId);
         if (deleted) {
-            return ResponseEntity.noContent().build(); // 204
+            return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.notFound().build(); // 404
+            return ResponseEntity.notFound().build();
         }
     }
 }

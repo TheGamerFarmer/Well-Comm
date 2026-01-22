@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     async function logout() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/${userId}/logout`, {
-                method: "DELETE",
+                method: "POST",
                 credentials: "include",
             });
             if (!response.ok) {

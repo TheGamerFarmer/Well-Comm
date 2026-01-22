@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 
 @Service
@@ -35,7 +34,7 @@ public class AccountService {
 
     public void deleteUser(Account account) {
         sessionRepository.deleteByAccount(account);
-        accountRepository.deleteById(account.getId());
+        accountRepository.delete(account);
     }
 
     public void saveUser(Account account) {
@@ -54,7 +53,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public void registerFailedAttempt(Account account) {
+    public void registerFailedAttempt(@NotNull Account account) {
         int newAttempts = account.getFailedAttempts() + 1;
         account.setFailedAttempts(newAttempts);
 
@@ -65,7 +64,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public boolean isAccountLocked(Account account) {
+    public boolean isAccountLocked(@NotNull Account account) {
         if (!account.isLocked()) return false;
 
         if (account.getLockTime().plusMinutes(LOCK_TIME_DURATION).isBefore(LocalDateTime.now())) {
@@ -78,7 +77,7 @@ public class AccountService {
         return true;
     }
 
-    public void resetFailedAttempts(Account account) {
+    public void resetFailedAttempts(@NotNull Account account) {
         if (account.getFailedAttempts() > 0) {
             account.setFailedAttempts(0);
             account.setLockTime(null);

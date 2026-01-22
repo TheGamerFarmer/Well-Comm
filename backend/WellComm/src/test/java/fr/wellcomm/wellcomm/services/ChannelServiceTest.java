@@ -1,7 +1,6 @@
 package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +25,7 @@ public class ChannelServiceTest {
         Account user = new Account();
         user.setUserName("testUser");
         accountService.saveUser(user);
-        Record record = recordService.createRecord("Dossier", user.getId());
+        Record record = recordService.createRecord("Dossier", user);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
         OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
@@ -48,7 +46,7 @@ public class ChannelServiceTest {
         user.setUserName("testOrder");
         accountService.saveUser(user);
 
-        Record record = recordService.createRecord("Dossier Ordre", user.getId());
+        Record record = recordService.createRecord("Dossier Ordre", user);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
 
         // Le premier message est créé ici (Message Index 0)

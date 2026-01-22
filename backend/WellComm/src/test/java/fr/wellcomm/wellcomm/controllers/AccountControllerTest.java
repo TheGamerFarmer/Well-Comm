@@ -2,9 +2,11 @@ package fr.wellcomm.wellcomm.controllers;
 
 import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
-import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.entities.*;
-import fr.wellcomm.wellcomm.repositories.*;
+import fr.wellcomm.wellcomm.entities.Record;
+import fr.wellcomm.wellcomm.repositories.AccountRepository;
+import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
+import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +23,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-public class RecordAccountControllerTest {
+public class AccountControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -60,28 +64,17 @@ public class RecordAccountControllerTest {
     }
 
     @Test
-    void testgetPermissions() throws Exception {
+    void testgetInfos() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
         userTest.setUserName("userTest");
+        userTest.setFirstName("firstName");
+        userTest.setLastName("lastName");
         userTest = accountRepository.save(userTest);
-
-        Record record = new Record("Dossier Secret", userTest);
-        record = recordRepository.save(record);
-
-        RecordAccount recordAccount = new RecordAccount();
-        recordAccount.setAccount(userTest);
-        recordAccount.setRecord(record);
-        recordAccount.setTitle(Role.AIDANT.getTitre());
-        recordAccount.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(recordAccount);
-
-        userTest.getRecordAccounts().put(record.getId(), recordAccount);
-        accountRepository.save(userTest);
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/permissions")
+                        get("/api/" + userTest.getId() + "/infos")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -90,16 +83,62 @@ public class RecordAccountControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        List<Permission> infos = objectMapper.readValue(
+        AccountController.UserInfos infos = objectMapper.readValue(
                 json,
-                List.class
+                AccountController.UserInfos.class
         );
 
-        assertEquals(1, infos.size());
+        assertEquals("userTest", infos.userName());
+        assertEquals("firstName", infos.firstName());
+        assertEquals("lastName", infos.lastName());
     }
 
     @Test
-    void testgetAutrePermissions() throws Exception {
+    void testupdateProfil() throws Exception {
+        // 1. Création des données réelles en base
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest.setFirstName("firstName");
+        userTest.setLastName("lastName");
+        userTest.setPassword("password");
+        userTest = accountRepository.save(userTest);
+
+        AccountController.UserInfos request = new AccountController.UserInfos("newUser", "newFirstName", "newLastName");
+
+        // 2. Exécution
+        mockMvc.perform(
+                        post("/api/" + userTest.getId() + "/changeUserInfos")
+                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
+                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Account infos = accountRepository.findByUserName(request.userName()).orElse(null);
+        assertEquals("newUser", infos.getUserName());
+        assertEquals("newFirstName", infos.getFirstName());
+        assertEquals("newLastName", infos.getLastName());
+    }
+
+    @Test
+    void testudeleteUser() throws Exception {
+        // 1. Création des données réelles en base
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest = accountRepository.save(userTest);
+
+        // 2. Exécution
+        mockMvc.perform(
+                        delete("/api/" + userTest.getId() + "/deleteUser")
+                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    void testaddRecordAccount() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
         userTest.setUserName("userTest");
@@ -108,50 +147,24 @@ public class RecordAccountControllerTest {
         Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
-        RecordAccount recordAccount = new RecordAccount();
-        recordAccount.setAccount(userTest);
-        recordAccount.setRecord(record);
-        recordAccount.setTitle(Role.AIDANT.getTitre());
-        recordAccount.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(recordAccount);
-
-        userTest.getRecordAccounts().put(record.getId(), recordAccount);
-        accountRepository.save(userTest);
-
-        Account assistant = new Account();
-        assistant.setUserName("assistant");
-        assistant = accountRepository.save(assistant);
-        RecordAccount ra = new RecordAccount();
-        ra.setAccount(assistant);
-        ra.setRecord(record);
-        ra.setTitle(Role.EMPLOYEE.getTitre());
-        ra.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(ra);
-
-        assistant.getRecordAccounts().put(record.getId(), ra);
-        accountRepository.save(assistant);
+        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/permissions/" + assistant.getId())
+        mockMvc.perform(
+                        post("/api/" + userTest.getId() + "/addAccess")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String json = result.getResponse().getContentAsString();
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElse(null);
+        assertEquals("userTest", ra.getAccount().getUserName());
 
-        List<Permission> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
-
-        assertEquals(1, infos.size());
     }
 
     @Test
-    void testgetAssistantsByrecordId() throws Exception {
+    void testaddRecordAccountCurrentRecord() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
         userTest.setUserName("userTest");
@@ -160,154 +173,27 @@ public class RecordAccountControllerTest {
         Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
-        RecordAccount recordAccount = new RecordAccount();
-        recordAccount.setAccount(userTest);
-        recordAccount.setRecord(record);
-        recordAccount.setTitle(Role.AIDANT.getTitre());
-        recordAccount.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(recordAccount);
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
 
-        userTest.getRecordAccounts().put(record.getId(), recordAccount);
-        accountRepository.save(userTest);
-
-        Account assistant = new Account();
-        assistant.setUserName("assistant");
-        assistant = accountRepository.save(assistant);
-        RecordAccount ra = new RecordAccount();
-        ra.setAccount(assistant);
-        ra.setRecord(record);
-        ra.setTitle(Role.EMPLOYEE.getTitre());
-        ra.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(ra);
-
-        assistant.getRecordAccounts().put(record.getId(), ra);
-        accountRepository.save(assistant);
+        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/assistants")
+        mockMvc.perform(
+                        post("/api/" + userTest.getId() + "/addAccess/current_record/" + testUser.getUserName())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String json = result.getResponse().getContentAsString();
-
-        List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
-
-        assertEquals(1, infos.size());
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        assertEquals("testUser", ra.getAccount().getUserName());
     }
 
     @Test
-    void testgetByrecordId() throws Exception {
-        // 1. Création des données réelles en base
-        Account userTest = new Account();
-        userTest.setUserName("userTest");
-        userTest = accountRepository.save(userTest);
-
-        Record record = new Record("Dossier Secret", userTest);
-        record = recordRepository.save(record);
-
-        RecordAccount recordAccount = new RecordAccount();
-        recordAccount.setAccount(userTest);
-        recordAccount.setRecord(record);
-        recordAccount.setTitle(Role.AIDANT.getTitre());
-        recordAccount.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(recordAccount);
-
-        userTest.getRecordAccounts().put(record.getId(), recordAccount);
-        accountRepository.save(userTest);
-
-        Account assistant = new Account();
-        assistant.setUserName("assistant");
-        assistant = accountRepository.save(assistant);
-        RecordAccount ra = new RecordAccount();
-        ra.setAccount(assistant);
-        ra.setRecord(record);
-        ra.setTitle(Role.MEDECIN.getTitre());
-        ra.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(ra);
-
-        assistant.getRecordAccounts().put(record.getId(), ra);
-        accountRepository.save(assistant);
-
-        // 2. Exécution
-        MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/medecin")
-                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = result.getResponse().getContentAsString();
-
-        List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
-
-        assertEquals(1, infos.size());
-    }
-
-    @Test
-    void testgetMedecinsByrecordId() throws Exception {
-        // 1. Création des données réelles en base
-        Account userTest = new Account();
-        userTest.setUserName("userTest");
-        userTest = accountRepository.save(userTest);
-
-        Record record = new Record("Dossier Secret", userTest);
-        record = recordRepository.save(record);
-
-        RecordAccount recordAccount = new RecordAccount();
-        recordAccount.setAccount(userTest);
-        recordAccount.setRecord(record);
-        recordAccount.setTitle(Role.AIDANT.getTitre());
-        recordAccount.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(recordAccount);
-
-        userTest.getRecordAccounts().put(record.getId(), recordAccount);
-        accountRepository.save(userTest);
-
-        Account assistant = new Account();
-        assistant.setUserName("assistant");
-        assistant = accountRepository.save(assistant);
-        RecordAccount ra = new RecordAccount();
-        ra.setAccount(assistant);
-        ra.setRecord(record);
-        ra.setTitle(Role.MEDECIN.getTitre());
-        ra.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(ra);
-
-        assistant.getRecordAccounts().put(record.getId(), ra);
-        accountRepository.save(assistant);
-
-        // 2. Exécution
-        MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/medecins")
-                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = result.getResponse().getContentAsString();
-
-        List<RecordAccountController.RecordAccountResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
-
-        assertEquals(1, infos.size());
-    }
-
-    @Test
-    void testchangePermissions() throws Exception {
+    void testdeleteRecordAccount() throws Exception {
         // 1. Création des données réelles en base
         Account userTest = new Account();
         userTest.setUserName("userTest");
@@ -326,38 +212,110 @@ public class RecordAccountControllerTest {
         userTest.getRecordAccounts().put(record.getId(), recordAccount);
         accountRepository.save(userTest);
 
-        Account assistant = new Account();
-        assistant.setUserName("assistant");
-        assistant = accountRepository.save(assistant);
-        RecordAccount ra = new RecordAccount();
-        ra.setAccount(assistant);
-        ra.setRecord(record);
-        ra.setTitle(Role.EMPLOYEE.getTitre());
-        ra.setPermissions(List.of(Permission.CLOSE_CHANNEL));
-        recordAccountRepository.save(ra);
-
-        assistant.getRecordAccounts().put(record.getId(), ra);
-        accountRepository.save(assistant);
-
-        RecordAccountController.ChangePermissionsRequest request = new RecordAccountController.ChangePermissionsRequest("assistant",
-                List.of(Permission.CLOSE_CHANNEL, Permission.OPEN_CHANNEL));
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
 
         // 2. Exécution
-        MvcResult result = mockMvc.perform(
-                        put("/api/" + userTest.getId() + "/records/" + record.getId() + "/changepermissions")
+        mockMvc.perform(
+                        delete("/api/" + userTest.getId() + "/deleteAccess/")
+                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
+                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    void testdeleteRecordAccount2() throws Exception {
+        // 1. Création des données réelles en base
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", userTest);
+        record = recordRepository.save(record);
+
+        RecordAccount recordAccount = new RecordAccount();
+        recordAccount.setAccount(userTest);
+        recordAccount.setRecord(record);
+        recordAccount.setTitle(Role.AIDANT.getTitre());
+        recordAccount.setPermissions(List.of(Permission.ASSIGN_PERMISSIONS));
+        recordAccountRepository.save(recordAccount);
+
+        userTest.getRecordAccounts().put(record.getId(), recordAccount);
+        accountRepository.save(userTest);
+
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
+
+        RecordAccount ra = new RecordAccount();
+        ra.setAccount(testUser);
+        ra.setRecord(record);
+        ra.setTitle(Role.EMPLOYEE.getTitre());
+        ra.setPermissions(List.of(Permission.OPEN_CHANNEL));
+        recordAccountRepository.save(ra);
+
+        testUser.getRecordAccounts().put(record.getId(), ra);
+        accountRepository.save(testUser);
+
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
+
+        // 2. Exécution
+        mockMvc.perform(
+                        delete("/api/" + userTest.getId() + "/deleteAccess/current_record/" + testUser.getUserName() + "/" + record.getId())
+                                .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
+                                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    void testupdateRecordAccount() throws Exception {
+        // 1. Création des données réelles en base
+        Account userTest = new Account();
+        userTest.setUserName("userTest");
+        userTest = accountRepository.save(userTest);
+
+        Record record = new Record("Dossier Secret", userTest);
+        record = recordRepository.save(record);
+
+        RecordAccount recordAccount = new RecordAccount();
+        recordAccount.setAccount(userTest);
+        recordAccount.setRecord(record);
+        recordAccount.setTitle(Role.AIDANT.getTitre());
+        recordAccount.setPermissions(List.of(Permission.ASSIGN_PERMISSIONS));
+        recordAccountRepository.save(recordAccount);
+
+        userTest.getRecordAccounts().put(record.getId(), recordAccount);
+        accountRepository.save(userTest);
+
+        Account testUser = new Account();
+        testUser.setUserName("testUser");
+        testUser = accountRepository.save(testUser);
+
+        RecordAccount ra = new RecordAccount();
+        ra.setAccount(testUser);
+        ra.setRecord(record);
+        ra.setTitle(Role.AIDANT.getTitre());
+        ra.setPermissions(List.of(Permission.OPEN_CHANNEL));
+        recordAccountRepository.save(ra);
+
+        testUser.getRecordAccounts().put(record.getId(), ra);
+        accountRepository.save(testUser);
+
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
+
+        // 2. Exécution
+        mockMvc.perform(
+                        put("/api/" + userTest.getId() + "/updateRoleAccess/current_record/" + testUser.getId() + "/" + record.getId() + "/" + Role.EMPLOYEE.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String json = result.getResponse().getContentAsString();
-
-        List<Permission> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
-
-        assertEquals(2, infos.size());
+        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
+        assertEquals(Role.EMPLOYEE.getTitre(), ra2.getTitle());
     }
 }

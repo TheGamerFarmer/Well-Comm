@@ -1,19 +1,16 @@
 package fr.wellcomm.wellcomm.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Entity
-@Table(name = "account")
-@Getter
-@Setter
+@Table(name = "accounts")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {
@@ -27,6 +24,8 @@ public class Account {
     private String password;
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<Long, RecordAccount> recordAccounts = new HashMap<>();
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Record> ownedRecords = new ArrayList<>();
     private int failedAttempts;
     private LocalDateTime lockTime;
     private boolean isLocked;

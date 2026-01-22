@@ -29,7 +29,7 @@ public class MessageServiceTest {
         testUser.setUserName("testUser");
         testUser = accountRepository.save(testUser);
         // 1. Créer un Record pour l'arborescence
-        Record record = recordService.createRecord("Dossier de Test", testUser.getId());
+        Record record = recordService.createRecord("Dossier de Test", testUser);
 
         // 2. Créer un Channel
         testChannel = recordService.createChannel(record, "Canal Test", Category.Sante, "Premier message", testUser);

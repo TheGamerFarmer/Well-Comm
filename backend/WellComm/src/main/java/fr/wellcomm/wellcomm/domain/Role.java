@@ -1,7 +1,6 @@
 package fr.wellcomm.wellcomm.domain;
 
 import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +14,7 @@ public enum Role {
             Permission.INVITE,
             Permission.OPEN_CHANNEL,
             Permission.CLOSE_CHANNEL,
+            Permission.SEE_MESSAGE,
             Permission.SEND_MESSAGE,
             Permission.MODIFY_MESSAGE,
             Permission.DELETE_MESSAGE,
@@ -23,6 +23,7 @@ public enum Role {
             Permission.SEE_CALENDAR,
             Permission.OPEN_CHANNEL,
             Permission.CLOSE_CHANNEL,
+            Permission.SEE_MESSAGE,
             Permission.SEND_MESSAGE,
             Permission.MODIFY_MESSAGE,
             Permission.DELETE_MESSAGE),
@@ -30,6 +31,7 @@ public enum Role {
             Permission.IS_MEDECIN,
             Permission.OPEN_CHANNEL,
             Permission.CLOSE_CHANNEL,
+            Permission.SEE_MESSAGE,
             Permission.SEND_MESSAGE,
             Permission.MODIFY_MESSAGE,
             Permission.DELETE_MESSAGE);

@@ -22,7 +22,7 @@ public class MessageService {
         messageRepository.save(message);
     }
 
-    public void deleteMessage(Message message) {
+    public void deleteMessage(@NotNull Message message) {
         message.setDeleted(true);
         message.setContent("Ce message a été supprimé\u200B");
         messageRepository.save(message);

@@ -1,54 +1,122 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
-const breadcrumbNames: Record<string, string> = {
-    home: "Accueil",
-    mesAides: "Mes aidés",
-    calendar: "Calendrier",
-    userSpace: "Mon profil",
-    ProfilAide: "L'Aidé",
-    fil: "Fil de Transmission",
-    assistants: "Assistants",
-    archive: "Archives",
-    medecin: "Médecins",
-    resume: "Résumé",
+type BreadcrumbNode = {
+    label: string;
+    children?: Record<string, BreadcrumbNode>;
 };
+const breadcrumbHrefMap: Record<string, string> = {
+    home: "/",
+    mesAides: "/mesAides",
+    dossier: "", // pas cliquable
+    assistants: "/assistants",
+    calendrier: "/calendrier",
+    fil: "/fil",
+    medecin: "/medecin",
+    userSpace: "/userSpace",
+    ProfilAide: "/ProfilAide",
+};
+
+const breadcrumbTree: Record<string, BreadcrumbNode> = {
+    home: {
+        label: "Accueil",
+        children: {
+            mesAides: {
+                label: "Mes aidés",
+                children: {
+                    dossier: {
+                        label: "Dossier",
+                        children: {
+                            assistants: { label: "Assistants" },
+                            calendrier: { label: "Calendrier" },
+                            fil: { label: "Fil de transmission" },
+                            resume: { label: "Résumé" },
+                            archive: { label: "Archives" },
+                            calendar: { label: "Calendrier" },
+                            medecin: { label: "Médecins" }
+                        }
+                    }
+                }
+            },
+            userSpace: {
+                label: "Mon profil"
+            },
+            ProfilAide: {
+                label: "L'aidé"
+            }
+
+        }
+    }
+};
+
+function findBreadcrumbPath(
+    tree: Record<string, BreadcrumbNode>,
+    target: string,
+    path: { key: string; label: string }[] = []
+): { key: string; label: string }[] | null {
+    for (const key in tree) {
+        const node = tree[key];
+        const newPath = [...path, { key, label: node.label }];
+        if (key === target) return newPath;
+        if (node.children) {
+            const result = findBreadcrumbPath(node.children, target, newPath);
+            if (result) return result;
+        }
+    }
+    return null;
+}
 
 export default function Breadcrumb() {
     const pathname = usePathname();
+    const [activeRecordName, setActiveRecordName] = useState<string | null>(null);
 
-    // Découpe l'URL : "/calendar/settings" → ["calendar", "settings"]
-    const segments = pathname.split("/").filter(Boolean);
+    useEffect(() => {
+        const name = localStorage.getItem("activeRecordName");
+        if (name) setActiveRecordName(name);
+    }, []);
+
+    const currentPage = pathname.split("/").filter(Boolean).pop();
+    const breadcrumbPath = currentPage
+        ? findBreadcrumbPath(breadcrumbTree, currentPage)
+        : null;
+
+    // Construit l'URL pour chaque étape
+    const getBreadcrumbHref = (index: number) =>
+    {
+        const item = breadcrumbPath![index];
+        return breadcrumbHrefMap[item.key] || "#";
+    };
 
     return (
-        <nav aria-label="Breadcrumb" className="text-sm text-[#6b7280]">
-            <ol className="flex items-center space-x-2 my-4">
-                <li>
-                    <Link href="/" className="text-[#223f81] hover:underline font-medium">
-                        Accueil
-                    </Link>
-                </li>
+        <nav aria-label="Breadcrumb" className="font-semibold text-gray-800 text-sm  my-4">
+            <ol className="flex items-center flex-wrap">
+                {breadcrumbPath?.map((item, index) => {
+                    const isLast = index === (breadcrumbPath?.length ?? 0) - 1;
+                    const displayLabel =
+                        item.key === "dossier" && activeRecordName
+                            ? activeRecordName
+                            : item.label;
 
-                {segments.map((segment, index) => {
-                    const href = "/" + segments.slice(0, index + 1).join("/");
-                    const isLast = index === segments.length - 1;
-                    const name = breadcrumbNames[segment] || decodeURIComponent(segment);
+                    const isClickable = !isLast && item.key !== "dossier";
 
                     return (
-                        <li key={href} className="flex items-center space-x-2">
-                            <span>/</span>
+                        <li key={item.key} className="flex items-center">
+                            {index > 0 && <span className="mx-2">/</span>}
 
-                            {isLast ? (
-                                <span className="font-medium text-gray">{name}</span>
-                            ) : (
+                            {isClickable ? (
                                 <Link
-                                    href={href}
-                                    className="text-[#223f81] hover:underline"
+                                    href={getBreadcrumbHref(index)}
+                                    className="text-[#223f81] font-bold hover:underline"
                                 >
-                                    {name}
+                                    {displayLabel}
                                 </Link>
+                            ) : (
+                                <span className={isLast ? "font-semibold text-gray-800" : ""}>
+                                    {displayLabel}
+                                </span>
                             )}
                         </li>
                     );

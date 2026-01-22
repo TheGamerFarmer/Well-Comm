@@ -15,6 +15,7 @@ type Invitation = {
     id: number;
     title: string;
     accountUserName: string;
+    accountUserId: number;
     dateCreation: string;
     recordId: number;
 };
@@ -42,17 +43,17 @@ export default function AssistantsPage() {
     }, []);
 
     useEffect(() => {
-        let assistantName: string | null = null; // ou "" si tu préfères
+        let assistantId: number | null = null;
 
         if (selectedAssistant) {
-            assistantName = selectedAssistant.accountUserName;
+            assistantId = selectedAssistant.accountUserId;
         }
-        if (!assistantName || !currentRecordId || ! currentUserId) return;
+        if (!assistantId || !currentRecordId || ! currentUserId) return;
 
         const fetchPermissions = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/autrepermissions/${assistantName}`,
+                    `${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/permissions/${assistantId}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -98,7 +99,7 @@ export default function AssistantsPage() {
         if (!currentUserId || !currentRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/assistants`,
+            `${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/assistants`,
             {credentials: "include"}
         );
 
@@ -179,13 +180,13 @@ export default function AssistantsPage() {
 
 
     //mettre a jour le role d'un assistant
-    const updateRoleAccess = async (name: string, id: number, title: string) => {
+    const updateRoleAccess = async (userId: number, recordId: number, title: string) => {
         if (!currentUserId || !currentRecordId) {
             console.log("Aucun dossier sélectionné");
             return;
         }
 
-        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/updateRoleAccess/current_record/${name}/${id}/${title}`,{
+        const res = await fetch (`${API_BASE_URL}/api/${currentUserId}/updateRoleAccess/current_record/${userId}/${recordId}/${title}`,{
             method: "PUT",
             credentials: "include",
         });
@@ -221,7 +222,7 @@ export default function AssistantsPage() {
         if (!selectedAssistant || !currentRecordId) return;
 
         await fetch(
-            `${API_BASE_URL}/api/${currentUserId}/recordsaccount/${currentRecordId}/changepermissions`,
+            `${API_BASE_URL}/api/${currentUserId}/records/${currentRecordId}/changepermissions`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -293,7 +294,7 @@ export default function AssistantsPage() {
                                         if ( !currentRecordId)
                                             return;
 
-                                        updateRoleAccess(inv.accountUserName, currentRecordId, sanitize(e.target.value)).then()
+                                        updateRoleAccess(inv.accountUserId, currentRecordId, sanitize(e.target.value)).then()
                                     }}
                                     className="flex flex-col cursor-pointer border rounded-lg px-3 py-2 bg-white text-[#20baa7] font-bold">
                                     <option value="Aidant">Aidant</option>

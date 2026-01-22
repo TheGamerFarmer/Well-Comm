@@ -1,19 +1,12 @@
 package fr.wellcomm.wellcomm.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
-import jakarta.persistence.Column;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "sessions")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Session {

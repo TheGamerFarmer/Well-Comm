@@ -21,7 +21,7 @@ export async function getPermissions(userId: number | null, recordId: number): P
 
     try {
         const res = await fetch(
-            `${API_BASE_URL}/api/${userId}/recordsaccount/${recordId}/permissions`,
+            `${API_BASE_URL}/api/${userId}/records/${recordId}/permissions`,
             {
                 method: "GET",
                 credentials: "include",

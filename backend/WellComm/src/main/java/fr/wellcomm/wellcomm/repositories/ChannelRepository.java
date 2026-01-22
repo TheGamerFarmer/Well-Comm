@@ -1,7 +1,7 @@
 package fr.wellcomm.wellcomm.repositories;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.entities.CloseChannel;
+import fr.wellcomm.wellcomm.entities.ClosedChannel;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,5 +24,5 @@ public interface ChannelRepository extends JpaRepository<OpenChannel, Long> {
     List<OpenChannel> findByDossierIdAndCategorie(@Param("recordId") Long recordId, @Param("category") Category category);
 
     @Query("SELECT channels FROM Record record JOIN record.closeChannels channels WHERE record.id = :recordId AND channels.category = :category")
-    List<CloseChannel> findByDossierIdAndCategorieClose(@Param("recordId") Long recordId, @Param("category") Category category);
+    List<ClosedChannel> findByDossierIdAndCategorieClose(@Param("recordId") Long recordId, @Param("category") Category category);
 }

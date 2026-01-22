@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import java.util.Date;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -34,19 +33,13 @@ public class ChannelService {
         if (channel.getId() == 0) {
             channel = channelRepository.save(channel);
         }
-        /*
-        Role userTitle = recordAccountRepository
-                .findByAccountUserNameAndRecordId(account.getUserName(), channel.getRecord().getId())
-                .map(RecordAccount::getTitle)
-                .orElse("Membre");
-        */
 
         String userTitle = recordAccountRepository
-                .findByAccountUserNameAndRecordId(
-                        account.getUserName(),
+                .findByAccountIdAndRecordId(
+                        account.getId(),
                         channel.getRecord().getId()
                 )
-                .map(ra -> ra.getTitle())
+                .map(RecordAccount::getTitle)
                 .orElse("Membre");
 
         Message message = new Message(content,
@@ -64,18 +57,7 @@ public class ChannelService {
         return message;
     }
 
-    public Date lastMessage(@NotNull OpenChannel channel) {
-        Map<Long, Message> messages = channel.getMessages();
-        Date lastMessage = null;
-        for (Message message : messages.values()) {
-            if(lastMessage == null || lastMessage.getTime() < message.getDate().getTime()) {
-                lastMessage = message.getDate();
-            }
-        }
-        return lastMessage;
-    }
-
-    public CloseChannel getCloseChannel(long id) {
+    public ClosedChannel getCloseChannel(long id) {
         return closeChannelRepository.findById(id).orElse(null);
     }
 }
