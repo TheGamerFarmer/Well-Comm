@@ -23,6 +23,7 @@ export default function ProfilAide() {
 
                     if (name) {
                         setRecordName(name);
+                        localStorage.setItem('recordName', name);
                     }}
         };
         loadRecord().then();
