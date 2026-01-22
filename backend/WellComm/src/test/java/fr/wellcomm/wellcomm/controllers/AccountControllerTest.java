@@ -27,6 +27,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,7 +115,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Account infos = accountRepository.findByUserName(request.userName()).orElse(null);
+        Account infos = accountRepository.findByUserName(request.userName()).orElseThrow();
         assertEquals("newUser", infos.getUserName());
         assertEquals("newFirstName", infos.getFirstName());
         assertEquals("newLastName", infos.getLastName());
@@ -135,6 +136,8 @@ public class AccountControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andReturn();
+
+        assertNull(accountRepository.findByUserName(userTest.getUserName()).orElse(null));
     }
 
     @Test
@@ -155,7 +158,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElse(null);
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElseThrow();
         assertEquals("userTest", ra.getAccount().getUserName());
 
     }
@@ -182,7 +185,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElse(null);
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElseThrow();
         assertEquals("testUser", ra.getAccount().getUserName());
     }
 
@@ -300,7 +303,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElse(null);
+        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).orElseThrow();
         assertEquals(Role.EMPLOYEE.getTitre(), ra2.getTitle());
     }
 }

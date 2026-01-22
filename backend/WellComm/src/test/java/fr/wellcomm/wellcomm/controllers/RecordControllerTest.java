@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-import tools.jackson.databind.JsonNode;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import java.util.Date;
 import java.util.List;
@@ -84,10 +84,11 @@ public class RecordControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        List<RecordController.DossierResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
+        List<RecordController.DossierResponse> infos =
+                objectMapper.readValue(
+                        json,
+                        new TypeReference<>() {}
+                );
 
         assertEquals(0, infos.size());
     }
@@ -136,7 +137,7 @@ public class RecordControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Record r = recordRepository.findById(record.getId()).orElse(null);
+        Record r = recordRepository.findById(record.getId()).orElseThrow();
 
         assertEquals("dossier secret", r.getName());
     }
@@ -161,10 +162,7 @@ public class RecordControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        JsonNode root = objectMapper.readTree(json);
-        String recordName = root.get("name").asText();
-
-        assertEquals("dossier secret", recordName);
+        assertTrue(json.contains("\"name\":\"dossier secret\""));
     }
 
     @Test
@@ -194,10 +192,12 @@ public class RecordControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        List<RecordController.FilResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
+        List<RecordController.FilResponse> infos =
+                objectMapper.readValue(
+                        json,
+                        new TypeReference<>() {}
+                );
+
 
         assertEquals(1, infos.size());
     }
@@ -234,10 +234,12 @@ public class RecordControllerTest {
 
         String json = result.getResponse().getContentAsString();
 
-        List<RecordController.FilResponse> infos = objectMapper.readValue(
-                json,
-                List.class
-        );
+        List<RecordController.FilResponse> infos =
+                objectMapper.readValue(
+                        json,
+                        new TypeReference<>() {}
+                );
+
 
         assertEquals(1, infos.size());
     }
@@ -344,6 +346,6 @@ public class RecordControllerTest {
                 .andExpect(status().isNoContent())
                 .andReturn();
 
-        assertNotEquals(record.getId(), recordRepository.findById(record.getId()));
+        assertNull(recordRepository.findById(record.getId()).orElse(null));
     }
 }

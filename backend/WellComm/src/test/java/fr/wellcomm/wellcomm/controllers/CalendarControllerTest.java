@@ -19,12 +19,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,8 +112,9 @@ public class CalendarControllerTest {
 
         List<CalendarController.EventDTO> infos = objectMapper.readValue(
                 json,
-                List.class
+                new TypeReference<>() {}
         );
+
 
         assertEquals(1, infos.size());
     }
@@ -189,7 +192,7 @@ public class CalendarControllerTest {
 
 
 
-        Event events = eventRepository.findById(event.getId()).orElse(null);
+        Event events = eventRepository.findById(event.getId()).orElseThrow();
         assertEquals("test", events.getTitle());
     }
 
@@ -228,5 +231,7 @@ public class CalendarControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andReturn();
+
+        assertNull(eventRepository.findById(event.getId()).orElse(null));
     }
 }
