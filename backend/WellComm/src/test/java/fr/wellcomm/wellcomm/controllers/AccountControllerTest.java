@@ -179,7 +179,7 @@ public class AccountControllerTest {
 
         // 2. Exécution
         mockMvc.perform(
-                        post("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/targetUser/" + testUser.getId() + "/title/" + Role.AIDANT.getTitre())
+                        post("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/targetUser/" + testUser.getUserName() + "/title/" + Role.AIDANT.getTitre())
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                 )
                 .andExpect(status().isOk())
