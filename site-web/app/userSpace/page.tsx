@@ -38,6 +38,9 @@ export default function UserSpace() {
                 setFirstName(profile.firstName);
                 setLastName(profile.lastName);
                 setUserName(profile.userName);
+                localStorage.setItem('firstName', profile.firstName);
+                localStorage.setItem('lastName', profile.lastName);
+                localStorage.setItem('userName', profile.userName);
             }
         };
 
@@ -81,11 +84,20 @@ export default function UserSpace() {
 
         if (ok) {
             alert("Profil mis à jour avec succès!");
-            localStorage.setItem('username', userName);
+            localStorage.setItem('userName', userName);
         }
     };
 
-
+    const handleDefault = async () => {
+        const userName = localStorage.getItem('userName');
+        const firstName = localStorage.getItem('firstName');
+        const lastName = localStorage.getItem('lastName');
+        if (userName && lastName && firstName) {
+            setFirstName(firstName);
+            setLastName(lastName);
+            setUserName(userName);
+        }
+    };
 
     return (
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
@@ -138,13 +150,6 @@ export default function UserSpace() {
                     </div>
 
                     <div className="flex flex-col md:flex-row md:gap-4">
-                        {/*<div className="self-center">*/}
-                        {/*    <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Date de naissance</label>*/}
-                        {/*    <input*/}
-                        {/*        type="date"*/}
-                        {/*        className="w-[280px] md:w-[300px] h-[50px] bg-white self-stretch flex flex-row justify-between items-start py-[14px] ph-4 border-solid bg-[#fff]h-10 rounded-lg border-2 border-[#dfdfdf] mb-4 mt-1 p-3 text-black"*/}
-                        {/*    />*/}
-                        {/*</div>*/}
                         <div className="self-center">
                             <label className="flex font-montserrat text-sm font-bold text-left text-[#727272]">Nom utilisateur</label>
                             <input
@@ -157,7 +162,7 @@ export default function UserSpace() {
                     </div>
 
                     <div className="flex gap-4 justify-end mt-4 mb-4 lg:mt-16 lg:mb-16 self-center">
-                        <Button variant="cancel" link={""} onClickAction={handleSaveProfile}>Annuler</Button>
+                        <Button variant="cancel" link={""} onClickAction={handleDefault}>Annuler</Button>
                         <Button type="button" link={""} variant={"primary"} onClickAction={handleSaveProfile}>Enregistrer</Button>
                     </div>
 
