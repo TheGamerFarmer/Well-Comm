@@ -1,11 +1,11 @@
 package fr.wellcomm.wellcomm.services;
 
 import fr.wellcomm.wellcomm.domain.Category;
-import fr.wellcomm.wellcomm.domain.Permission;
 import fr.wellcomm.wellcomm.domain.Role;
 import fr.wellcomm.wellcomm.entities.*;
 import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
+import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +26,7 @@ public class RecordServiceTest {
     private Record testRecord;
     private long userId;
     @Autowired private AccountRepository accountRepository;
+    @Autowired private RecordAccountRepository recordAccountRepository;
 
     @BeforeEach
     void setUp() {
@@ -61,16 +61,18 @@ public class RecordServiceTest {
 
     @Test
     void testCreateChannel() {
-        Account user = new Account();
-        user.setUserName("userTest");
-        user = accountRepository.save(user);
+        Account testUser = new Account();
+        testUser.setUserName("testuserTest");
+        testUser = accountRepository.save(testUser);
+        RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT);
+        access = recordAccountRepository.save(access);
         // Teste la création d'un channel et vérifie si le rôle "Aidant" est bien récupéré
         OpenChannel channel = recordService.createChannel(
                 testRecord,
                 "Mal de dos",
                 Category.Menage,
                 "il a mal au dos",
-                user
+                testUser
         );
 
         assertNotNull(channel);

@@ -3,8 +3,6 @@ package fr.wellcomm.wellcomm.services;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Session;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
-import fr.wellcomm.wellcomm.repositories.EventRepository;
-import fr.wellcomm.wellcomm.repositories.RecordRepository;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +26,7 @@ public class SessionServiceTest {
 
         Session session = new Session();
         session.setAccount(user);
+        session.setToken("token");
         sessionRepository.save(session);
         assertNotNull(session);
 

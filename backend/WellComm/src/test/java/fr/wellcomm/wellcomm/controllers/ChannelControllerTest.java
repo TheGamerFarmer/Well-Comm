@@ -206,7 +206,7 @@ public class ChannelControllerTest {
 
         Record record = new Record("Dossier Secret", userTest.getId());
         record = recordRepository.save(record);
-        System.out.println(record.getId());
+
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
         recordAccountRepository.save(ra);
