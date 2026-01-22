@@ -208,7 +208,7 @@ public class AccountControllerTest {
 
         // 2. Exécution
         mockMvc.perform(
-                        delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/access/")
+                        delete("/api/" + userTest.getId() + "/records/" + record.getId() + "/access")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                 )
                 .andExpect(status().isOk())
