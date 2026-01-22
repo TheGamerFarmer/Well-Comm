@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.entities.Message;
 import fr.wellcomm.wellcomm.entities.OpenChannel;
-import fr.wellcomm.wellcomm.entities.CloseChannel;
+import fr.wellcomm.wellcomm.entities.ClosedChannel;
 import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,33 +23,21 @@ public class ChannelController {
     private final ChannelService channelService;
     private final AccountService accountService;
     private final SimpMessagingTemplate messagingTemplate;
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class MessageInfos {
-        private Long id;
-        private String content;
-        private Date date;
-        private String authorUserName;
-        private String authorTitle;
+    public record MessageInfos (
+        long id,
+        String content,
+        Date date,
+        String authorUserName,
+        String authorTitle,
         @JsonProperty("isDeleted")
-        private boolean isDeleted;
-    }
+        boolean isDeleted
+    ) {}
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class ChannelInfos {
-        private Long id;
-        private String title;
-        private String category;
-        private List<MessageInfos> messages;
-    }
+    public record ChannelInfos (long id, String title, String category, List<MessageInfos> messageInfos) {}
 
     @GetMapping("/channels/{channelId}")
     @PreAuthorize("#userId.toString() == authentication.name and" +
-            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEND_MESSAGE)")
+            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_MESSAGE)")
     public ResponseEntity<ChannelInfos> getChannelContent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                           @PathVariable @SuppressWarnings("unused") long recordId,
                                                           @PathVariable Long channelId) {
@@ -103,13 +89,14 @@ public class ChannelController {
 
 
     @GetMapping("/closechannels/{channelId}")
-    @PreAuthorize("#userId.toString() == authentication.name")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
+            "@securityService.hasChannelPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_MESSAGE)")
     public ResponseEntity<ChannelInfos> getCloseChannelContent(
             @PathVariable @SuppressWarnings("unused") Long userId,
             @PathVariable @SuppressWarnings("unused") long recordId,
             @PathVariable Long channelId) {
 
-        CloseChannel channel = channelService.getCloseChannel(channelId);
+        ClosedChannel channel = channelService.getCloseChannel(channelId);
         if (channel == null) {
             return ResponseEntity.notFound().build();
         }

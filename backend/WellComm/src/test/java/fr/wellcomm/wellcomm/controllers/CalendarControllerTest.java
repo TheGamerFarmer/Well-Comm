@@ -72,7 +72,7 @@ public class CalendarControllerTest {
         LocalDateTime timestart1 = LocalDateTime.now().minusHours(1);
         LocalDateTime timeend1 = LocalDateTime.now().plusHours(1);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         Calendar calendar = new Calendar();
         calendar.setRecord(record);
 
@@ -118,7 +118,7 @@ public class CalendarControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         Calendar calendar = new Calendar();
         calendar.setRecord(record);
         calendar = calendarRepository.save(calendar);
@@ -152,7 +152,7 @@ public class CalendarControllerTest {
         LocalDateTime timestart1 = LocalDateTime.now().minusHours(1);
         LocalDateTime timeend1 = LocalDateTime.now().plusHours(1);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         Calendar calendar = new Calendar();
         calendar.setRecord(record);
 
@@ -194,7 +194,7 @@ public class CalendarControllerTest {
         LocalDateTime timestart1 = LocalDateTime.now().minusHours(1);
         LocalDateTime timeend1 = LocalDateTime.now().plusHours(1);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         Calendar calendar = new Calendar();
         calendar.setRecord(record);
 

@@ -7,7 +7,6 @@ import fr.wellcomm.wellcomm.entities.Record;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordAccountRepository;
 import fr.wellcomm.wellcomm.repositories.RecordRepository;
-import fr.wellcomm.wellcomm.services.AccountService;
 import fr.wellcomm.wellcomm.services.ChannelService;
 import fr.wellcomm.wellcomm.services.RecordService;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,9 +88,9 @@ public class AccountControllerTest {
                 AccountController.UserInfos.class
         );
 
-        assertEquals("userTest", infos.getUserName());
-        assertEquals("firstName", infos.getFirstName());
-        assertEquals("lastName", infos.getLastName());
+        assertEquals("userTest", infos.userName());
+        assertEquals("firstName", infos.firstName());
+        assertEquals("lastName", infos.lastName());
     }
 
     @Test
@@ -104,10 +103,7 @@ public class AccountControllerTest {
         userTest.setPassword("password");
         userTest = accountRepository.save(userTest);
 
-        AccountController.UpdateProfileRequest request = new AccountController.UpdateProfileRequest();
-        request.setUserName("newUser");
-        request.setFirstName("newFirstName");
-        request.setLastName("newLastName");
+        AccountController.UserInfos request = new AccountController.UserInfos("newUser", "newFirstName", "newLastName");
 
         // 2. Exécution
         mockMvc.perform(
@@ -118,7 +114,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Account infos = accountRepository.findByUserName(request.getUserName()).get();
+        Account infos = accountRepository.findByUserName(request.userName()).orElse(null);
         assertEquals("newUser", infos.getUserName());
         assertEquals("newFirstName", infos.getFirstName());
         assertEquals("newLastName", infos.getLastName());
@@ -148,12 +144,10 @@ public class AccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
-        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest();
-        request.setRecordId(record.getId());
-        request.setTitle(Role.AIDANT.getTitre());
+        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
 
         // 2. Exécution
         mockMvc.perform(
@@ -164,7 +158,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountUserNameAndRecordId("userTest", record.getId()).get();
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(userTest.getId(), record.getId()).orElse(null);
         assertEquals("userTest", ra.getAccount().getUserName());
 
     }
@@ -176,16 +170,14 @@ public class AccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         Account testUser = new Account();
         testUser.setUserName("testUser");
         testUser = accountRepository.save(testUser);
 
-        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest();
-        request.setRecordId(record.getId());
-        request.setTitle(Role.AIDANT.getTitre());
+        AccountController.addRecordAccountRequest request = new AccountController.addRecordAccountRequest(record.getId(), Role.AIDANT.getTitre());
 
         // 2. Exécution
         mockMvc.perform(
@@ -196,7 +188,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra = recordAccountRepository.findByAccountUserNameAndRecordId("testUser", record.getId()).get();
+        RecordAccount ra = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
         assertEquals("testUser", ra.getAccount().getUserName());
     }
 
@@ -207,7 +199,7 @@ public class AccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -220,8 +212,7 @@ public class AccountControllerTest {
         userTest.getRecordAccounts().put(record.getId(), recordAccount);
         accountRepository.save(userTest);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest();
-        request.setRecordId(record.getId());
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
 
         // 2. Exécution
         mockMvc.perform(
@@ -240,7 +231,7 @@ public class AccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -267,8 +258,7 @@ public class AccountControllerTest {
         testUser.getRecordAccounts().put(record.getId(), ra);
         accountRepository.save(testUser);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest();
-        request.setRecordId(record.getId());
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
 
         // 2. Exécution
         mockMvc.perform(
@@ -287,7 +277,7 @@ public class AccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -314,8 +304,7 @@ public class AccountControllerTest {
         testUser.getRecordAccounts().put(record.getId(), ra);
         accountRepository.save(testUser);
 
-        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest();
-        request.setRecordId(record.getId());
+        AccountController.deleteRecordAccountRequest request = new AccountController.deleteRecordAccountRequest(record.getId());
 
         // 2. Exécution
         mockMvc.perform(
@@ -326,7 +315,7 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        RecordAccount ra2 = recordAccountRepository.findByAccountUserNameAndRecordId("testUser", record.getId()).get();
+        RecordAccount ra2 = recordAccountRepository.findByAccountIdAndRecordId(testUser.getId(), record.getId()).get();
         assertEquals(Role.EMPLOYEE.getTitre(), ra2.getTitle());
     }
 }

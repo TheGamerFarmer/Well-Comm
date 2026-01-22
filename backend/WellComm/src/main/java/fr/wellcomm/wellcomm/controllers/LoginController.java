@@ -5,10 +5,7 @@ import fr.wellcomm.wellcomm.entities.Account;
 import fr.wellcomm.wellcomm.repositories.SessionRepository;
 import fr.wellcomm.wellcomm.repositories.AccountRepository;
 import fr.wellcomm.wellcomm.services.AccountService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -30,18 +26,12 @@ public class LoginController {
     private final SessionRepository sessionRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AccountService accountService;
-
-    @Getter
-    @Setter
-    public static class LoginRequest {
-        private String userName;
-        private String password;
-    }
+    public record LoginRequest(String userName, String password) {}
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        String userName = loginRequest.getUserName();
-        String password = loginRequest.getPassword();
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        String userName = loginRequest.userName;
+        String password = loginRequest.password;
 
         Account account = accountRepository.findByUserName(userName).orElse(null);
 

@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,10 +21,10 @@ public class MessageController {
     @PreAuthorize("#userId.toString() == authentication.name and " +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_MESSAGE) or " +
             "@securityService.ownMessage())")
-    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") Long userId,
+    public ResponseEntity<?> modifyContent(@PathVariable @SuppressWarnings("unused") long userId,
                                            @PathVariable @SuppressWarnings("unused") long recordId,
                                            @PathVariable long channelId,
-                                           @PathVariable Long messageId,
+                                           @PathVariable long messageId,
                                            @RequestBody String newContent) {
 
         Message message = messageService.getMessage(messageId);
@@ -50,10 +49,10 @@ public class MessageController {
     @PreAuthorize("#userId.toString() == authentication.name and" +
             "(@securityService.hasMessagePermission(T(fr.wellcomm.wellcomm.domain.Permission).DELETE_MESSAGE) or" +
                     "@securityService.ownMessage())")
-    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") Long userId,
+    public ResponseEntity<?> deleteMessage(@PathVariable @SuppressWarnings("unused") long userId,
                                            @PathVariable @SuppressWarnings("unused") long recordId,
                                            @PathVariable long channelId,
-                                           @PathVariable Long messageId) {
+                                           @PathVariable long messageId) {
 
         Message message = messageService.getMessage(messageId);
         if (message == null) {

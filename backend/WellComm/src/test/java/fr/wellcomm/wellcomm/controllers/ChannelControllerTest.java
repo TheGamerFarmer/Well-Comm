@@ -69,7 +69,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Médical", userTest.getId());
+        Record record = new Record("Dossier Médical", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
@@ -105,7 +105,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", 0L);
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
@@ -131,7 +131,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
@@ -158,7 +158,7 @@ public class ChannelControllerTest {
         );
 
         //Vérifie qu'il n'y a aucun message
-        assertEquals(0, infos.getMessages().size());
+        assertEquals(0, infos.messageInfos().size());
     }
 
 
@@ -169,13 +169,13 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.MEDECIN);
         recordAccountRepository.save(ra);
 
-        CloseChannel mockChan = new CloseChannel();
+        ClosedChannel mockChan = new ClosedChannel();
         mockChan.setRecord(record);
         mockChan.setCategory(Category.Menage);
         when(channelService.getCloseChannel(anyLong())).thenReturn(mockChan);
@@ -194,7 +194,7 @@ public class ChannelControllerTest {
         );
 
         //Vérifie qu'il n'y a aucun message
-        assertEquals(0, infos.getMessages().size());
+        assertEquals(0, infos.messageInfos().size());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class ChannelControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
 
@@ -238,6 +238,6 @@ public class ChannelControllerTest {
                 ChannelController.MessageInfos.class
         );
 
-        assertEquals("Hello", infos.getContent());
+        assertEquals("Hello", infos.content());
     }
 }

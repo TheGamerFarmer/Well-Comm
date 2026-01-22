@@ -27,7 +27,7 @@ public class ChannelServiceTest {
         Account user = new Account();
         user.setUserName("testUser");
         accountService.saveUser(user);
-        Record record = recordService.createRecord("Dossier", user.getId());
+        Record record = recordService.createRecord("Dossier", user);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
         OpenChannel channel = recordService.createChannel(record, "Mal de dos", Category.Sante, "il a mal au dos", user);
 
@@ -48,7 +48,7 @@ public class ChannelServiceTest {
         user.setUserName("testOrder");
         accountService.saveUser(user);
 
-        Record record = recordService.createRecord("Dossier Ordre", user.getId());
+        Record record = recordService.createRecord("Dossier Ordre", user);
         accountService.addRecordAccount(user, new RecordAccount(user, record, Role.AIDANT));
 
         // Le premier message est créé ici (Message Index 0)

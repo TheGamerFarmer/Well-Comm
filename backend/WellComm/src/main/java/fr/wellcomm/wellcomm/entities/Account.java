@@ -1,19 +1,14 @@
 package fr.wellcomm.wellcomm.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "account")
-@Getter
-@Setter
+@Table(name = "accounts")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {

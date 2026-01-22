@@ -7,10 +7,12 @@ import {getCurrentUserId} from "@/functions/fil-API";
 import { API_BASE_URL } from "@/config";
 import Image from "next/image";
 import {getPermissions, Permission} from "@/functions/Permissions";
+import {sanitize} from "@/functions/Sanitize";
 
 type Invitation = {
     id: number;
     title: string;
+    accountUserId: number;
     accountUserName: string;
     dateCreation: string;
     recordId: number;
@@ -49,17 +51,17 @@ export default function MedecinPage() {
     }, [setActiveRecordId])
 
     useEffect(() => {
-        let medecinName: string | null = null; // ou "" si tu préfères
+        let medecinId: number | null = null; // ou "" si tu préfères
 
         if (selectedMedecin) {
-            medecinName = selectedMedecin.accountUserName;
+            medecinId = selectedMedecin.accountUserId;
         }
-        if (!medecinName || !activeRecordId || ! userId) return;
+        if (!medecinId || !activeRecordId || ! userId) return;
 
         const fetchPermissions = async () => {
             try {
                 const res = await fetch(
-                    `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/autrepermissions/${medecinName}`,
+                    `${API_BASE_URL}/api/${userId}/records/${activeRecordId}/permissions/${medecinId}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -106,7 +108,7 @@ export default function MedecinPage() {
         if (!userId || !activeRecordId) return;
 
         const res = await fetch(
-            `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/medecin`,
+            `${API_BASE_URL}/api/${userId}/records/${activeRecordId}/medecins`,
             {credentials: "include"}
         );
 
@@ -229,7 +231,7 @@ export default function MedecinPage() {
         if (!selectedMedecin || !activeRecordId) return;
 
         await fetch(
-            `${API_BASE_URL}/api/${userId}/recordsaccount/${activeRecordId}/changepermissions`,
+            `${API_BASE_URL}/api/${userId}/records/${activeRecordId}/changepermissions`,
             {
                 method: "PUT",
                 credentials: "include",
@@ -326,7 +328,7 @@ export default function MedecinPage() {
                                     type="text"
                                     placeholder="Nom d'utilisateur du médecin"
                                     value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    onChange={(e) => setUsername(sanitize(e.target.value))}
                                     className="border rounded-lg p-2 text-black"
                                     required
                                 />

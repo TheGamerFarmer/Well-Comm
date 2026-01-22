@@ -5,6 +5,7 @@ public enum Permission {
     EDIT_CALENDAR,
     ASSIGN_PERMISSIONS,
     INVITE,
+    SEE_MESSAGE,
     SEND_MESSAGE,
     MODIFY_MESSAGE,
     DELETE_MESSAGE,

@@ -37,7 +37,7 @@ public class RecordServiceTest {
         userId = testUser.getId();
 
         // 2. Création du Record
-        testRecord = recordService.createRecord("Dossier Global", userId);
+        testRecord = recordService.createRecord("Dossier Global", testUser);
 
         // 3. Création de l'accès avec USER + RECORD + TITRE
         RecordAccount access = new RecordAccount(testUser, testRecord, Role.AIDANT);
@@ -120,7 +120,7 @@ public class RecordServiceTest {
         assertFalse(testRecord.getOpenChannels().containsKey(channelId));
         // Il doit être dans les "Close"
         assertEquals(1, testRecord.getCloseChannels().size());
-        CloseChannel archived = testRecord.getCloseChannels().values().stream()
+        ClosedChannel archived = testRecord.getCloseChannels().values().stream()
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Aucun channel archivé trouvé"));
         assertEquals("A Archiver", archived.getTitle());
@@ -152,10 +152,10 @@ public class RecordServiceTest {
         recordService.archiveChannel(testRecord, salonId);
 
         // On teste le filtre par catégorie
-        List<CloseChannel> closeChannels = recordService.getChannelsOfCategoryClose(testRecord.getId(), Category.Menage);
+        List<ClosedChannel> closedChannels = recordService.getChannelsOfCategoryClose(testRecord.getId(), Category.Menage);
 
-        assertEquals(1, closeChannels.size());
-        assertEquals("salon", closeChannels.getFirst().getTitle());
+        assertEquals(1, closedChannels.size());
+        assertEquals("salon", closedChannels.getFirst().getTitle());
     }
 
     @Test

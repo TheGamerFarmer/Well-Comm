@@ -2,16 +2,13 @@ package fr.wellcomm.wellcomm.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.Date;
 
 @Entity
-@Table(name = "message")
-@Getter
-@Setter
+@Table(name = "messages")
+@Data
 @NoArgsConstructor
 public class Message {
     @Id
@@ -25,7 +22,7 @@ public class Message {
     private String authorTitle;
     @ManyToOne
     @JoinColumn(name = "channel_id", nullable = false)
-    @JsonIgnore // Indispensable pour éviter la boucle infinie JSON
+    @JsonIgnore
     private Channel channel;
     private boolean isDeleted;
 

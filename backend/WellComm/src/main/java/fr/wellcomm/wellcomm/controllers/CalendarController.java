@@ -29,7 +29,7 @@ public class CalendarController {
     public record EventDTO(
             Long id,
             String title,
-            String start, // Format ISO String pour FullCalendar
+            String start,
             String end,
             String description,
             String location,
@@ -56,8 +56,8 @@ public class CalendarController {
     }
 
     @GetMapping("/startDate/{timeStart}/endDate/{timeEnd}")
-    @PreAuthorize("#userId.toString() == authentication.name")
-            //"@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).SEE_CALENDAR)")
     public ResponseEntity<List<EventDTO>> getCalendarContent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                              @PathVariable long recordId,
                                                              @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timeStart,
@@ -70,8 +70,8 @@ public class CalendarController {
     }
 
     @PostMapping("/event")
-    @PreAuthorize("#userId.toString() == authentication.name")
-            //"@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
+            "@securityService.hasRecordPermission(T(fr.wellcomm.wellcomm.domain.Permission).EDIT_CALENDAR)")
     public ResponseEntity<EventDTO> createEvent(@PathVariable @SuppressWarnings("unused") Long userId,
                                                 @PathVariable long recordId,
                                                 @RequestBody EventDTO dto) {
@@ -89,8 +89,8 @@ public class CalendarController {
     }
 
     @PutMapping("/event/{eventId}")
-    @PreAuthorize("#userId.toString() == authentication.name")
-            //"@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
+            "@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).EDIT_CALENDAR)")
     public ResponseEntity<Void> updateEvent(@PathVariable @SuppressWarnings("unused")  Long userId,
                                             @PathVariable @SuppressWarnings("unused") String recordId,
                                             @PathVariable long eventId,
@@ -102,8 +102,8 @@ public class CalendarController {
     }
 
     @DeleteMapping("/event/{eventId}")
-    @PreAuthorize("#userId.toString() == authentication.name")
-            //"@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).MODIFY_CALENDAR)")
+    @PreAuthorize("#userId.toString() == authentication.name and" +
+            "@securityService.hasEventPermission(T(fr.wellcomm.wellcomm.domain.Permission).EDIT_CALENDAR)")
     public ResponseEntity<Void> deleteEvent(@PathVariable @SuppressWarnings("unused") Long userId,
                                             @PathVariable @SuppressWarnings("unused") String recordId,
                                             @PathVariable long eventId) {

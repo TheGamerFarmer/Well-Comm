@@ -14,14 +14,24 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "calendar_id")
+    @JsonIgnore
+    private Calendar calendar;
     private String title;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
     private String description;
     private String location;
     private String color;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "calendar_id")
-    @JsonIgnore
-    private Calendar calendar;
+
+    public Event(Calendar calendar, String title, LocalDateTime timeStart, LocalDateTime timeEnd, String description, String location, String color) {
+        this.calendar = calendar;
+        this.title = title;
+        this.timeStart = timeStart;
+        this.timeEnd = timeEnd;
+        this.description = description;
+        this.location = location;
+        this.color = color;
+    }
 }

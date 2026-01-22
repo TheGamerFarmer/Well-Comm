@@ -66,7 +66,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -81,7 +81,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/permissions")
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/permissions")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -105,7 +105,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -134,7 +134,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/autrepermissions/" + assistantName)
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/autrepermissions/" + assistantName)
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -158,7 +158,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -187,7 +187,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/assistants")
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/assistants")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -211,7 +211,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -240,7 +240,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/medecin")
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/medecin")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -264,7 +264,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -293,7 +293,7 @@ public class RecordAccountControllerTest {
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        get("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/medecins")
+                        get("/api/" + userTest.getId() + "/records/" + record.getId() + "/medecins")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -317,7 +317,7 @@ public class RecordAccountControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -344,14 +344,12 @@ public class RecordAccountControllerTest {
         assistant.getRecordAccounts().put(record.getId(), ra);
         accountRepository.save(assistant);
 
-        RecordAccountController.ChangePermissionsRequest request = new RecordAccountController.ChangePermissionsRequest();
-        request.setUserName("assistant");
-        request.setPermissions(List.of(Permission.CLOSE_CHANNEL, Permission.OPEN_CHANNEL));
-
+        RecordAccountController.ChangePermissionsRequest request = new RecordAccountController.ChangePermissionsRequest("assistant",
+                List.of(Permission.CLOSE_CHANNEL, Permission.OPEN_CHANNEL));
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
-                        put("/api/" + userTest.getId() + "/recordsaccount/" + record.getId() + "/changepermissions")
+                        put("/api/" + userTest.getId() + "/records/" + record.getId() + "/changepermissions")
                                 .with(SecurityMockMvcRequestPostProcessors.user(userTest.getId().toString()))
                                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )

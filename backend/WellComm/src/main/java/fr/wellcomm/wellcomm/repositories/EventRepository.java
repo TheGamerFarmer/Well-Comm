@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findByCalendarId(Long calendarId);
     List<Event> findByCalendarIdAndTimeStartBeforeAndTimeEndAfter(Long calendarId, LocalDateTime endView, LocalDateTime startView);
 }

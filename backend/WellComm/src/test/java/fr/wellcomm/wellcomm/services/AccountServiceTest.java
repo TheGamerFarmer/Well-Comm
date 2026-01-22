@@ -30,7 +30,7 @@ public class AccountServiceTest {
         assertNotNull(found);
 
         // 2. Test RecordAccount
-        Record record = recordService.createRecord("Dossier A", user.getId());
+        Record record = recordService.createRecord("Dossier A", user);
         RecordAccount ra = new RecordAccount(user, record, Role.AIDANT);
 
         accountService.addRecordAccount(user, ra);

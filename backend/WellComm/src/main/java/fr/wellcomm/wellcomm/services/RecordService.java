@@ -8,7 +8,6 @@ import fr.wellcomm.wellcomm.repositories.ReportRepository;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class RecordService {
     }
 
     public RecordAccount getRecordAccount(@NotNull Record record, @NotNull Account user) {
-        return recordAccountRepository.findByAccountUserNameAndRecordId(user.getUserName(), record.getId()).orElse(null);
+        return recordAccountRepository.findByAccountIdAndRecordId(user.getId(), record.getId()).orElse(null);
     }
 
     public List<Record> getRecords(long userId) {
@@ -44,7 +43,7 @@ public class RecordService {
         return channelRepository.findByDossierIdAndCategorie(recordId, category);
     }
 
-    public List<CloseChannel> getChannelsOfCategoryClose(long recordId, Category category) {
+    public List<ClosedChannel> getChannelsOfCategoryClose(long recordId, Category category) {
         return channelRepository.findByDossierIdAndCategorieClose(recordId, category);
     }
 
@@ -53,7 +52,7 @@ public class RecordService {
         List<OpenChannel> lastWeekChannels = new ArrayList<>();
         Date oneWeekAgo = Date.from(LocalDateTime.now().minusDays(7).atZone(ZoneId.systemDefault()).toInstant());
         for (OpenChannel channel : channels) {
-            Date lastMessageDate = channelService.lastMessage(channel);
+            Date lastMessageDate = channel.getLastMessage().getDate();
             if (lastMessageDate != null && lastMessageDate.after(oneWeekAgo)) {
                 lastWeekChannels.add(channel);
             }
@@ -61,8 +60,7 @@ public class RecordService {
         return lastWeekChannels;
     }
 
-    @Transactional
-    public Record createRecord(String name, long admin) {
+    public Record createRecord(String name, Account admin) {
         Record record = new Record(name, admin);
 
         record = recordRepository.save(record);
@@ -74,8 +72,7 @@ public class RecordService {
         return record;
     }
 
-    @Transactional
-    public boolean deleteRecord(Long id) {
+    public boolean deleteRecord(long id) {
         Optional<Record> recordOpt = recordRepository.findById(String.valueOf(id));
 
         if (recordOpt.isEmpty()) {
@@ -91,12 +88,12 @@ public class RecordService {
         if (channel == null)
             return;
 
-        CloseChannel closeChannel = new CloseChannel(channel);
+        ClosedChannel closedChannel = new ClosedChannel(channel);
 
-        channel.getMessages().values().forEach(message -> message.setChannel(closeChannel));
+        channel.getMessages().values().forEach(message -> message.setChannel(closedChannel));
 
         record.getOpenChannels().remove(channel.getId());
-        record.getCloseChannels().put(closeChannel.getId(), closeChannel);
+        record.getCloseChannels().put(closedChannel.getId(), closedChannel);
 
         recordRepository.save(record);
     }

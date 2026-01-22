@@ -67,7 +67,7 @@ public class MessageControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);
@@ -104,7 +104,7 @@ public class MessageControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount ra = new RecordAccount(userTest, record, Role.AIDANT);

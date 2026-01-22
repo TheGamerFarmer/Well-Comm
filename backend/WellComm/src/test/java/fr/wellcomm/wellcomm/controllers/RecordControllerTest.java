@@ -100,7 +100,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         // 2. Exécution
@@ -124,7 +124,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
         String newname = "dossier secret";
 
@@ -175,7 +175,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         Date date = new Date();
@@ -210,17 +210,17 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
         List<Message> messages = new ArrayList<>();
 
         Date date = new Date();
-        CloseChannel closeChannel = new CloseChannel();
-        closeChannel.setTitle("test1");
-        closeChannel.setCategory(Category.Menage);
-        closeChannel.setRecord(record);
-        closeChannelRepository.save(closeChannel);
-        CloseChannel closeChan = new CloseChannel();
+        ClosedChannel closedChannel = new ClosedChannel();
+        closedChannel.setTitle("test1");
+        closedChannel.setCategory(Category.Menage);
+        closedChannel.setRecord(record);
+        closeChannelRepository.save(closedChannel);
+        ClosedChannel closeChan = new ClosedChannel();
         closeChan.setTitle("test2");
         closeChan.setCategory(Category.Alimentation);
         closeChan.setRecord(record);
@@ -252,7 +252,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -265,10 +265,7 @@ public class RecordControllerTest {
         userTest.getRecordAccounts().put(record.getId(), recordAccount);
         accountRepository.save(userTest);
 
-        RecordController.CreateFilRequest request = new RecordController.CreateFilRequest();
-        request.setTitle("test1");
-        request.setCategory(Category.Menage);
-        request.setFirstMessage("First message");
+        RecordController.CreateFilRequest request = new RecordController.CreateFilRequest("test1", Category.Menage, "First message");
 
         // 2. Exécution
         MvcResult result = mockMvc.perform(
@@ -286,7 +283,7 @@ public class RecordControllerTest {
                 RecordController.FilResponse.class
         );
 
-        assertEquals("test1", infos.getTitle());
+        assertEquals("test1", infos.title());
     }
 
     @Test
@@ -296,7 +293,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();
@@ -329,7 +326,7 @@ public class RecordControllerTest {
         userTest.setUserName("userTest");
         userTest = accountRepository.save(userTest);
 
-        Record record = new Record("Dossier Secret", userTest.getId());
+        Record record = new Record("Dossier Secret", userTest);
         record = recordRepository.save(record);
 
         RecordAccount recordAccount = new RecordAccount();

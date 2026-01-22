@@ -12,7 +12,7 @@ import {sanitize} from "@/functions/Sanitize";
 type Dossier = {
     id: number;
     name: string;
-    admin: number;
+    adminId: number;
 };
 
 export default function MesAides() {
@@ -82,7 +82,7 @@ export default function MesAides() {
 
         setDossiers((prev) => [
             ...prev,
-            { id: newRecord.id, name: newRecord.name , admin: newRecord.admin },
+            { id: newRecord.id, name: newRecord.name , adminId: newRecord.admin },
         ]);
 
         setName("");
@@ -156,7 +156,7 @@ export default function MesAides() {
                             {dossier.name}
 
                             <div className="ml-auto">
-                                {userId && dossier.admin === userId && (
+                                {userId && dossier.adminId === userId && (
                                 <button type="button" className="text-[#f27474] hover:scale-110 hover:cursor-pointer transition-transform" onClick={(e) => {
                                     e.preventDefault(); // empêche la navigation
                                     e.stopPropagation(); // empêche le click parent
